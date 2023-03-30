@@ -161,4 +161,3 @@ def run_sizer_from_cli(input_path: Path, output_path: Path):
 
 if __name__ == "__main__":
     run_sizer_from_cli()
-
