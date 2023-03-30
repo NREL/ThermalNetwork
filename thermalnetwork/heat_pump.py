@@ -1,5 +1,9 @@
+from thermalnetwork.enums import ComponentType
+
+
 class HeatPump:
     def __init__(self) -> None:
+        self.comp_type = ComponentType.HEATPUMP
         self.cop_h = 2.5
         self.cop_c = 3.5
 

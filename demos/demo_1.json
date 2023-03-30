@@ -1,0 +1,47 @@
+{
+    "version": "0.1",
+    "design": {
+        "method": "AREAPROPORTIONAL"
+    },
+    "network": [
+        {
+            "type": "HEATPUMP",
+            "name": "building 1"
+        },
+        {
+            "type": "HEATPUMP",
+            "name": "building 2"
+        },
+        {
+            "type": "GROUNDHEATEXCHANGER",
+            "name": "ghe 1"
+        }
+    ],
+    "heat_pumps": [
+        {
+            "name": "building 1",
+            "space_loads": [
+                10,
+                20,
+                30,
+                40,
+                50
+            ]
+        },
+        {
+            "name": "building 2",
+            "space_loads": [
+                -30,
+                -20,
+                -10,
+                0,
+                10
+            ]
+        }
+    ],
+    "ground_heat_exchangers": [
+        {
+            "name":"ghe 1"
+        }
+    ]
+}
