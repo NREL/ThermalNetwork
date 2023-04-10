@@ -45,7 +45,9 @@
     ],
     "ground_heat_exchangers": [
         {
-            "name":"ghe 1"
+            "name":"ghe 1",
+            "length": 50,
+            "width": 20
         }
     ]
 }
