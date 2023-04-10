@@ -16,6 +16,7 @@ class Network:
         self.des_method = None
         self.heat_pumps = []
         self.ground_heat_exchangers = []
+        self.network = []
 
     def set_design(self, des_method_str: str):
         """
@@ -64,16 +65,21 @@ class Network:
 
         self.heat_pumps.append(HeatPump(name, cop_c, cop_h))
 
-    def add_ghe_to_network(name: str, index=None):
+    def add_ghe_to_network(self, name: str, index=None):
         """
         Add existing GHE object to network. Optional 'index' argument could be used to set the position of the component.
 
         :param name: name of existing HP component
         :param index: index of position to insert component
         """
-        pass
 
-    def add_hp_to_network(name: str, index=None):
+        name = name.strip().upper()
+
+        for idx, ghe in enumerate(self.ground_heat_exchangers):
+            if ghe.name == name:
+                pass
+
+    def add_hp_to_network(self, name: str, index=None):
         """
         Add exisiting HP object to network. Optional 'index' argument could be used to set the position of the component.
 
