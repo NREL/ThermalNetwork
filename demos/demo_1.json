@@ -1,7 +1,7 @@
 {
     "version": "0.1",
     "design": {
-        "method": "AREAPROPORTIONAL"
+        "method": "UPSTREAM"
     },
     "network": [
         {
@@ -15,6 +15,14 @@
         {
             "type": "GROUNDHEATEXCHANGER",
             "name": "ghe 1"
+        },
+        {
+            "type": "HEATPUMP",
+            "name": "building 3"
+        },
+        {
+            "type": "GROUNDHEATEXCHANGER",
+            "name": "ghe 2"
         }
     ],
     "heat_pumps": [
@@ -41,11 +49,28 @@
             ],
             "cop_c": 3.5,
             "cop_h": 2.5
+        },
+        {
+            "name": "building 3",
+            "space_loads": [
+                -30,
+                -20,
+                -10,
+                0,
+                10
+            ],
+            "cop_c": 3.5,
+            "cop_h": 2.5
         }
     ],
     "ground_heat_exchangers": [
         {
             "name":"ghe 1",
+            "length": 50,
+            "width": 20
+        },
+        {
+            "name":"ghe 2",
             "length": 50,
             "width": 20
         }

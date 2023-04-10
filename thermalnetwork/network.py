@@ -98,7 +98,39 @@ class Network:
         """
         Sizing method for upstream equipment approach.
         """
-        pass
+        print("size_to_upstream")
+        #find all heatpumps between each groundheatexchanger
+        #size to those buildings
+
+        #debugging
+        for i, device in enumerate(self.heat_pumps):
+            print(f"Index {i}: {device}")
+        for i, device in enumerate(self.ground_heat_exchangers):
+            print(f"Index {i}: {device}")
+
+        heatpumps_between_ghe = {}  # A dictionary to store the HEATPUMP devices between each GROUNDHEATEXCHANGER
+
+        # Loop over each device in the network
+        ghe_index = -1  # Initialize the index of the current GROUNDHEATEXCHANGER device
+        for i, device in enumerate(self.network):
+            print(f"Index {i}: {device}")
+            if device["type"] == ComponentType.GROUNDHEATEXCHANGER:
+                # Found a GROUNDHEATEXCHANGER device
+                if ghe_index >= 0:
+                    # There was a previous GROUNDHEATEXCHANGER device, so we can find the HEATPUMP devices in between
+                    heatpumps = [j for j in range(ghe_index + 1, i) if self.network[j]["type"] == ComponentType.HEATPUMP]
+                    heatpumps_between_ghe[ghe_index] = heatpumps
+                
+                # Update the index of the current GROUNDHEATEXCHANGER device
+                ghe_index = i
+            
+        # Check if there was a GROUNDHEATEXCHANGER device at the end of the list
+        if ghe_index >= 0:
+            heatpumps = [j for j in range(ghe_index + 1, len(network)) if self.network[j]["type"] == ComponentType.HEATPUMP]
+            heatpumps_between_ghe[ghe_index] = heatpumps
+
+        print("HEATPUMP devices between each GROUNDHEATEXCHANGER device:")
+        print(heatpumps_between_ghe)
 
     def size_ghe(self):
         """
@@ -110,7 +142,7 @@ class Network:
         """
         High-level sizing call that handles any lower-level calls or iterations.
         """
-
+        print("size")
         if self.des_method == DesignType.AREAPROPORTIONAL:
             self.size_area_proportional()
         elif self.des_method == DesignType.UPSTREAM:
