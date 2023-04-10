@@ -7,6 +7,7 @@ import click
 
 from thermalnetwork import VERSION
 from thermalnetwork.enums import ComponentType, DesignType
+from thermalnetwork.ground_heat_exchanger import GHE
 from thermalnetwork.heat_pump import HeatPump
 
 
@@ -14,7 +15,7 @@ class Network:
     def __init__(self) -> None:
         self.des_method = None
         self.heat_pumps = []
-        self.ghe = []
+        self.ground_heat_exchangers = []
 
     def set_design(self, des_method_str: str):
         """
@@ -31,11 +32,19 @@ class Network:
             msg = "Design method not supported."
             print(msg, file=sys.stderr)
 
-    def set_ground_heat_exchanger(self, ghe):
+    def set_ground_heat_exchanger(self, ghe_data):
         """
         Creates a new ground heat exchanger instance and adds it to the list of all GHE objects
         """
-        pass
+
+        name = str(ghe_data['name']).strip().upper()
+
+        for ghe in self.ground_heat_exchangers:
+            if ghe.name == name:
+                raise ValueError(f"Duplicate ground heat exchanger name \"{ghe.name}\" encountered.")
+
+        print(name)
+        self.ground_heat_exchangers.append(GHE(name))
 
     def set_heat_pump(self, hp_data):
         """
@@ -138,11 +147,11 @@ def run_sizer_from_cli_worker(input_path: Path, output_path: Path):
 
     network.set_design(des_method_str=d_design["method"])
 
-    for ghe in d_ghes:
-        network.set_ground_heat_exchanger(ghe)
+    for ghe_data in d_ghes:
+        network.set_ground_heat_exchanger(ghe_data)
 
-    for hp in d_heat_pumps:
-        network.set_heat_pump(hp)
+    for hp_data in d_heat_pumps:
+        network.set_heat_pump(hp_data)
 
     for component in d_network:
         comp_name = component["name"]
