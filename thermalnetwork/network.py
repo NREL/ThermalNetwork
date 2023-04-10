@@ -45,9 +45,14 @@ class Network:
         :param cop_h: heating coefficient of performance
         """
 
-        name = hp_data['name']
+        name = str(hp_data['name']).strip().upper()
         cop_c = hp_data['cop_c']
         cop_h = hp_data['cop_h']
+
+        for hp in self.heat_pumps:
+            if hp.name == name:
+                raise ValueError(f"Duplicate heat pump name \"{hp.name}\" encountered.")
+
         self.heat_pumps.append(HeatPump(name, cop_c, cop_h))
 
     def add_ghe_to_network(name: str, index=None):
