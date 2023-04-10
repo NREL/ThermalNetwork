@@ -110,7 +110,13 @@ class Network:
         """
         High-level sizing call that handles any lower-level calls or iterations.
         """
-        pass
+
+        if self.des_method == DesignType.AREAPROPORTIONAL:
+            self.size_area_proportional()
+        elif self.des_method == DesignType.UPSTREAM:
+            self.size_to_upstream_equipment()
+        else:
+            raise ValueError("something is broken")
 
     def write_outputs(self, output_path: Path):
         """
@@ -164,8 +170,10 @@ def run_sizer_from_cli_worker(input_path: Path, output_path: Path):
         comp_type_str = component["type"]
         if comp_type_str == ComponentType.GROUNDHEATEXCHANGER.name:
             network.add_ghe_to_network(comp_name)
-        if comp_type_str == ComponentType.HEATPUMP.name:
+        elif comp_type_str == ComponentType.HEATPUMP.name:
             network.add_hp_to_network(comp_name)
+        else:
+            raise ValueError("Unsupported object")
 
     network.size()
     network.write_outputs(output_path)
