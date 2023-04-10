@@ -65,7 +65,7 @@ class Network:
 
         self.heat_pumps.append(HeatPump(name, cop_c, cop_h))
 
-    def add_ghe_to_network(self, name: str, index=None):
+    def add_ghe_to_network_by_name(self, name: str, index=None):
         """
         Add existing GHE object to network. Optional 'index' argument could be used to set the position of the component.
 
@@ -79,13 +79,19 @@ class Network:
             if ghe.name == name:
                 pass
 
-    def add_hp_to_network(self, name: str, index=None):
+    def add_ghe_to_network(self):
+        pass
+
+    def add_hp_to_network_by_name(self, name: str, index=None):
         """
         Add exisiting HP object to network. Optional 'index' argument could be used to set the position of the component.
 
         :param name: name of existing HP component
         :param index: index of position to insert component
         """
+        pass
+
+    def add_hp_to_network(self):
         pass
 
     def size_area_proportional(self):
@@ -120,13 +126,13 @@ class Network:
                     # There was a previous GROUNDHEATEXCHANGER device, so we can find the HEATPUMP devices in between
                     heatpumps = [j for j in range(ghe_index + 1, i) if self.network[j]["type"] == ComponentType.HEATPUMP]
                     heatpumps_between_ghe[ghe_index] = heatpumps
-                
+
                 # Update the index of the current GROUNDHEATEXCHANGER device
                 ghe_index = i
-            
+
         # Check if there was a GROUNDHEATEXCHANGER device at the end of the list
         if ghe_index >= 0:
-            heatpumps = [j for j in range(ghe_index + 1, len(network)) if self.network[j]["type"] == ComponentType.HEATPUMP]
+            heatpumps = [j for j in range(ghe_index + 1, len(self.network)) if self.network[j]["type"] == ComponentType.HEATPUMP]
             heatpumps_between_ghe[ghe_index] = heatpumps
 
         print("HEATPUMP devices between each GROUNDHEATEXCHANGER device:")
@@ -199,11 +205,11 @@ def run_sizer_from_cli_worker(input_path: Path, output_path: Path):
 
     for component in d_network:
         comp_name = component["name"]
-        comp_type_str = component["type"]
+        comp_type_str = str(component["type"]).strip().upper()
         if comp_type_str == ComponentType.GROUNDHEATEXCHANGER.name:
-            network.add_ghe_to_network(comp_name)
+            network.add_ghe_to_network_by_name(comp_name)
         elif comp_type_str == ComponentType.HEATPUMP.name:
-            network.add_hp_to_network(comp_name)
+            network.add_hp_to_network_by_name(comp_name)
         else:
             raise ValueError("Unsupported object")
 
