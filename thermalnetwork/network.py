@@ -3,6 +3,8 @@ import sys
 
 from pathlib import Path
 
+import click
+
 from thermalnetwork import VERSION
 from thermalnetwork.enums import ComponentType, DesignType
 
@@ -141,7 +143,10 @@ def run_sizer_from_cli_worker(input_path: Path, output_path: Path):
     network.write_outputs(output_path)
 
 
-# this will eventually be wrapped with `click` arguments
+@click.command(name="ThermalNetworkCommandLine")
+@click.argument("input-path", type=click.Path(exists=True))
+@click.argument("output-path", type=click.Path(exists=True))
+@click.version_option(VERSION)
 def run_sizer_from_cli(input_path: Path, output_path: Path):
     """
     CLI entrypoint for sizing runner.
