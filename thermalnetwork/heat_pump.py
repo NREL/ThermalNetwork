@@ -2,10 +2,11 @@ from thermalnetwork.enums import ComponentType
 
 
 class HeatPump:
-    def __init__(self) -> None:
+    def __init__(self, name, cop_c: float=3.5, cop_h: float=2.5) -> None:
+        self.name = None
+        self.cop_c = cop_c
+        self.cop_h = cop_h
         self.comp_type = ComponentType.HEATPUMP
-        self.cop_h = 2.5
-        self.cop_c = 3.5
 
     def calc_src_side_load(self, space_load: float) -> float:
         """

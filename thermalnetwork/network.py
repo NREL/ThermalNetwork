@@ -7,6 +7,7 @@ import click
 
 from thermalnetwork import VERSION
 from thermalnetwork.enums import ComponentType, DesignType
+from thermalnetwork.heat_pump import HeatPump
 
 
 class Network:
@@ -30,20 +31,24 @@ class Network:
             msg = "Design method not supported."
             print(msg, file=sys.stderr)
 
-    def set_ground_heat_exchanger(self):
+    def set_ground_heat_exchanger(self, ghe):
         """
         Creates a new ground heat exchanger instance and adds it to the list of all GHE objects
         """
         pass
 
-    def set_heat_pump(self, cop_c: float, cop_h: float):
+    def set_heat_pump(self, hp_data):
         """
         Creates a new heat pump instance and adds it to the list of all HP objects
 
         :param cop_c: cooling coefficient of performance
         :param cop_h: heating coefficient of performance
         """
-        pass
+
+        name = hp_data['name']
+        cop_c = hp_data['cop_c']
+        cop_h = hp_data['cop_h']
+        self.heat_pumps.append(HeatPump(name, cop_c, cop_h))
 
     def add_ghe_to_network(name: str, index=None):
         """
@@ -93,6 +98,9 @@ class Network:
 
         :param output_path: path to write outputs
         """
+
+        # TODO: create output directory if it doesn't exist and we have made it this far.
+
         pass
 
 
