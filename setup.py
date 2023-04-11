@@ -21,6 +21,10 @@ setup(
         'Programming Language :: Python :: 3.11'
     ],
     install_requires=[
+        'click>=8.1.3',
         'ghedesigner>=1.0'
     ],
+    entry_points={
+        'console_scripts': ['thermalnetwork=thermalnetwork.network.run_sizer_from_cli']
+    }
 )
