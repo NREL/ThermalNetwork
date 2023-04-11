@@ -162,6 +162,13 @@ class Network:
         
         print("GROUNDHEATEXCHANGER indices in network:")
         print(ghe_indexes)
+        # slice the self.network by ghe_indexes
+        for i, ghe_index in enumerate(ghe_indexes):
+            if i == 0:  # first GHE
+                devices_before_ghe = self.network[:ghe_index]
+            else:
+                devices_before_ghe = self.network[ghe_indexes[i-1]+1:ghe_index]
+            print(f"Devices before GHE at index {ghe_index}: {devices_before_ghe}")
 
     def size_ghe(self):
         """
