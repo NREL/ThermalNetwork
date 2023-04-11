@@ -25,6 +25,8 @@ class Network:
         :param des_method_str: design method string
         """
 
+        des_method_str = des_method_str.strip().upper()
+
         if des_method_str == DesignType.AREAPROPORTIONAL.name:
             self.des_method = DesignType.AREAPROPORTIONAL
         elif des_method_str == DesignType.UPSTREAM.name:
