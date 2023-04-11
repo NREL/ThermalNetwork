@@ -61,12 +61,13 @@ class Network:
         name = str(hp_data['name']).strip().upper()
         cop_c = hp_data['cop_c']
         cop_h = hp_data['cop_h']
+        space_loads = hp_data['space_loads']
 
         for hp in self.heat_pumps:
             if hp.name == name:
                 raise ValueError(f"Duplicate heat pump name \"{hp.name}\" encountered.")
 
-        self.heat_pumps.append(HeatPump(name, cop_c, cop_h))
+        self.heat_pumps.append(HeatPump(name, cop_c, cop_h, space_loads))
 
     def add_ghe_to_network_by_name(self, name: str):
         """
@@ -153,37 +154,38 @@ class Network:
         for i, device in enumerate(self.ground_heat_exchangers):
             print(f"Index {i}: {device}")
 
-        heatpumps_between_ghe = {}  # A dictionary to store the HEATPUMP devices between each GROUNDHEATEXCHANGER
+        ghe_indexes = []  # This will store the indexes of all GROUNDHEATEXCHANGER devices
 
-        # Loop over each device in the network
-        ghe_index = -1  # Initialize the index of the current GROUNDHEATEXCHANGER device
         for i, device in enumerate(self.network):
-            print(f"Index {i}: {device}")
+            print(f"Network Index {i}: {device}")
             if device.comp_type == ComponentType.GROUNDHEATEXCHANGER:
-                # Found a GROUNDHEATEXCHANGER device
-                if ghe_index >= 0:
-                    # There was a previous GROUNDHEATEXCHANGER device, so we can find the HEATPUMP devices in between
-                    heatpumps = [j for j in range(ghe_index + 1, i) if
-                                 self.network[j].comp_type == ComponentType.HEATPUMP]
-                    heatpumps_between_ghe[ghe_index] = heatpumps
+                ghe_indexes.append(i)
+        
+        print("GROUNDHEATEXCHANGER indices in network:")
+        print(ghe_indexes)
+        # slice the self.network by ghe_indexes
+        for i, ghe_index in enumerate(ghe_indexes):
+            if i == 0:  # first GHE
+                devices_before_ghe = self.network[:ghe_index]
+            else:
+                devices_before_ghe = self.network[ghe_indexes[i-1]+1:ghe_index]
+            print(f"Devices before GHE at index {ghe_index}: {devices_before_ghe}")
+            total_space_loads = 0
+            for device in devices_before_ghe:
+                print(f"device.space_loads: {device.space_loads}")
+                device_load = sum(device.space_loads)
+                print(f"Total load for device: {device_load}") 
+                total_space_loads += device_load
+            print(f"Total space loads for devices before GHE: {total_space_loads}")    
+            # call size_ghe() with total load
+            self.size_ghe(total_space_loads)
 
-                # Update the index of the current GROUNDHEATEXCHANGER device
-                ghe_index = i
-
-        # Check if there was a GROUNDHEATEXCHANGER device at the end of the list
-        if ghe_index >= 0:
-            heatpumps = [j for j in range(ghe_index + 1, len(self.network)) if
-                         self.network[j].comp_type == ComponentType.HEATPUMP]
-            heatpumps_between_ghe[ghe_index] = heatpumps
-
-        print("HEATPUMP devices between each GROUNDHEATEXCHANGER device:")
-        print(heatpumps_between_ghe)
-
-    def size_ghe(self):
+    def size_ghe(self, total_space_loads):
         """
         Wrapper for GHEDesigner for GHE sizing calls.
         """
-        pass
+        print(f"SIZE_GHE with total_space_loads: {total_space_loads}")
+        # make call to GHE Sizer for realz
 
     def size(self):
         """
