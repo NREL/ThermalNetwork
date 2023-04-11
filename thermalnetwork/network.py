@@ -42,12 +42,14 @@ class Network:
         """
 
         name = str(ghe_data['name']).strip().upper()
+        length = ghe_data['length']
+        width = ghe_data['width']
 
         for ghe in self.ground_heat_exchangers:
             if ghe.name == name:
                 raise ValueError(f"Duplicate ground heat exchanger name \"{ghe.name}\" encountered.")
 
-        self.ground_heat_exchangers.append(GHE(name))
+        self.ground_heat_exchangers.append(GHE(name, length, width))
 
     def set_heat_pump(self, hp_data: dict):
         """
@@ -90,7 +92,7 @@ class Network:
         :return: nothing
         """
 
-        new_ghe = GHE(name)
+        new_ghe = GHE(name, 10, 20)
 
         if index is None:
             self.network.append(new_ghe)
@@ -162,7 +164,7 @@ class Network:
                 if ghe_index >= 0:
                     # There was a previous GROUNDHEATEXCHANGER device, so we can find the HEATPUMP devices in between
                     heatpumps = [j for j in range(ghe_index + 1, i) if
-                                 self.network[j]["type"] == ComponentType.HEATPUMP]
+                                 self.network[j].comp_type == ComponentType.HEATPUMP]
                     heatpumps_between_ghe[ghe_index] = heatpumps
 
                 # Update the index of the current GROUNDHEATEXCHANGER device

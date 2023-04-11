@@ -3,6 +3,8 @@ from thermalnetwork.enums import ComponentType
 
 
 class GHE(BaseComponent):
-    def __init__(self, name: str) -> None:
-        super().__init__(ComponentType.GROUNDHEATEXCHANGER)
-        self.name = name.strip().upper()
+    def __init__(self, name: str, length: float, width: float) -> None:
+        super().__init__(name, ComponentType.GROUNDHEATEXCHANGER)
+        self.length = length
+        self.width = width
+        self.area = length * width
