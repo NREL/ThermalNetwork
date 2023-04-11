@@ -61,12 +61,13 @@ class Network:
         name = str(hp_data['name']).strip().upper()
         cop_c = hp_data['cop_c']
         cop_h = hp_data['cop_h']
+        space_loads = hp_data['space_loads']
 
         for hp in self.heat_pumps:
             if hp.name == name:
                 raise ValueError(f"Duplicate heat pump name \"{hp.name}\" encountered.")
 
-        self.heat_pumps.append(HeatPump(name, cop_c, cop_h))
+        self.heat_pumps.append(HeatPump(name, cop_c, cop_h, space_loads))
 
     def add_ghe_to_network_by_name(self, name: str):
         """
@@ -169,12 +170,22 @@ class Network:
             else:
                 devices_before_ghe = self.network[ghe_indexes[i-1]+1:ghe_index]
             print(f"Devices before GHE at index {ghe_index}: {devices_before_ghe}")
+            total_space_loads = 0
+            for device in devices_before_ghe:
+                print(f"device.space_loads: {device.space_loads}")
+                device_load = sum(device.space_loads)
+                print(f"Total load for device: {device_load}") 
+                total_space_loads += device_load
+            print(f"Total space loads for devices before GHE: {total_space_loads}")    
+            # call size_ghe() with total load
+            self.size_ghe(total_space_loads)
 
-    def size_ghe(self):
+    def size_ghe(self, total_space_loads):
         """
         Wrapper for GHEDesigner for GHE sizing calls.
         """
-        pass
+        print(f"SIZE_GHE with total_space_loads: {total_space_loads}")
+        # make call to GHE Sizer for realz
 
     def size(self):
         """
