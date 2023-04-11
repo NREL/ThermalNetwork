@@ -1,6 +1,5 @@
 import json
 import sys
-
 from pathlib import Path
 
 import click
@@ -35,9 +34,11 @@ class Network:
             msg = "Design method not supported."
             print(msg, file=sys.stderr)
 
-    def set_ground_heat_exchanger(self, ghe_data):
+    def set_ground_heat_exchanger(self, ghe_data: dict):
         """
         Creates a new ground heat exchanger instance and adds it to the list of all GHE objects
+
+        :param ghe_data: dictionary of ghe data
         """
 
         name = str(ghe_data['name']).strip().upper()
@@ -46,15 +47,13 @@ class Network:
             if ghe.name == name:
                 raise ValueError(f"Duplicate ground heat exchanger name \"{ghe.name}\" encountered.")
 
-        print(name)
         self.ground_heat_exchangers.append(GHE(name))
 
-    def set_heat_pump(self, hp_data):
+    def set_heat_pump(self, hp_data: dict):
         """
         Creates a new heat pump instance and adds it to the list of all HP objects
 
-        :param cop_c: cooling coefficient of performance
-        :param cop_h: heating coefficient of performance
+        :param hp_data: dictionary of heat pump data
         """
 
         name = str(hp_data['name']).strip().upper()
@@ -67,34 +66,70 @@ class Network:
 
         self.heat_pumps.append(HeatPump(name, cop_c, cop_h))
 
-    def add_ghe_to_network_by_name(self, name: str, index=None):
+    def add_ghe_to_network_by_name(self, name: str):
         """
-        Add existing GHE object to network. Optional 'index' argument could be used to set the position of the component.
+        Add existing GHE object to network.
 
         :param name: name of existing HP component
-        :param index: index of position to insert component
         """
 
         name = name.strip().upper()
 
         for idx, ghe in enumerate(self.ground_heat_exchangers):
             if ghe.name == name:
-                pass
+                self.network.append(ghe)
+                return
 
-    def add_ghe_to_network(self):
-        pass
+        raise ValueError(f"Ground heat exchanger \"{name}\" not found.")
 
-    def add_hp_to_network_by_name(self, name: str, index=None):
+    def add_ghe_to_network(self, name, index=None):
         """
-        Add exisiting HP object to network. Optional 'index' argument could be used to set the position of the component.
+
+        :param name:
+        :param index:
+        :return: nothing
+        """
+
+        new_ghe = GHE(name)
+
+        if index is None:
+            self.network.append(new_ghe)
+        else:
+            self.network.insert(index, new_ghe)
+
+    def add_hp_to_network_by_name(self, name: str):
+        """
+        Add existing HP object to network.
 
         :param name: name of existing HP component
-        :param index: index of position to insert component
         """
-        pass
 
-    def add_hp_to_network(self):
-        pass
+        name = name.strip().upper()
+
+        for idx, hp in enumerate(self.heat_pumps):
+            if hp.name == name:
+                self.network.append(hp)
+                return
+
+        raise ValueError(f"Heat pump \"{name}\" not found.")
+
+    def add_hp_to_network(self, name, cop_c, cop_h, index=None):
+        """
+        Create new HP instance and add it to the network.
+
+        :param name:
+        :param cop_c:
+        :param cop_h:
+        :param index:
+        :return: nothing
+        """
+
+        new_hp = HeatPump(name, cop_c, cop_h)
+
+        if index is None:
+            self.network.append(new_hp)
+        else:
+            self.network.insert(index, new_hp)
 
     def size_area_proportional(self):
         """
@@ -107,10 +142,10 @@ class Network:
         Sizing method for upstream equipment approach.
         """
         print("size_to_upstream")
-        #find all heatpumps between each groundheatexchanger
-        #size to those buildings
+        # find all heatpumps between each groundheatexchanger
+        # size to those buildings
 
-        #debugging
+        # debugging
         for i, device in enumerate(self.heat_pumps):
             print(f"Index {i}: {device}")
         for i, device in enumerate(self.ground_heat_exchangers):
@@ -122,11 +157,12 @@ class Network:
         ghe_index = -1  # Initialize the index of the current GROUNDHEATEXCHANGER device
         for i, device in enumerate(self.network):
             print(f"Index {i}: {device}")
-            if device["type"] == ComponentType.GROUNDHEATEXCHANGER:
+            if device.comp_type == ComponentType.GROUNDHEATEXCHANGER:
                 # Found a GROUNDHEATEXCHANGER device
                 if ghe_index >= 0:
                     # There was a previous GROUNDHEATEXCHANGER device, so we can find the HEATPUMP devices in between
-                    heatpumps = [j for j in range(ghe_index + 1, i) if self.network[j]["type"] == ComponentType.HEATPUMP]
+                    heatpumps = [j for j in range(ghe_index + 1, i) if
+                                 self.network[j]["type"] == ComponentType.HEATPUMP]
                     heatpumps_between_ghe[ghe_index] = heatpumps
 
                 # Update the index of the current GROUNDHEATEXCHANGER device
@@ -134,7 +170,8 @@ class Network:
 
         # Check if there was a GROUNDHEATEXCHANGER device at the end of the list
         if ghe_index >= 0:
-            heatpumps = [j for j in range(ghe_index + 1, len(self.network)) if self.network[j]["type"] == ComponentType.HEATPUMP]
+            heatpumps = [j for j in range(ghe_index + 1, len(self.network)) if
+                         self.network[j]["type"] == ComponentType.HEATPUMP]
             heatpumps_between_ghe[ghe_index] = heatpumps
 
         print("HEATPUMP devices between each GROUNDHEATEXCHANGER device:")
