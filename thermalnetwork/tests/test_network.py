@@ -8,7 +8,7 @@ class TestNetwork(TestCase):
         network = Network()
         network.set_design(des_method_str="AreaProportional")
         network.add_hp_to_network("HP 1", cop_c=4, cop_h=2)
-        network.add_ghe_to_network("GHE 1")
+        network.add_ghe_to_network("GHE 1", 10, 20)
         network.size()
 
         self.assertEquals(len(network.network), 2)

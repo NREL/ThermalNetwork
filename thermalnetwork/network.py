@@ -77,14 +77,14 @@ class Network:
 
         name = name.strip().upper()
 
-        for idx, ghe in enumerate(self.ground_heat_exchangers):
+        for ghe in self.ground_heat_exchangers:
             if ghe.name == name:
                 self.network.append(ghe)
                 return
 
         raise ValueError(f"Ground heat exchanger \"{name}\" not found.")
 
-    def add_ghe_to_network(self, name, index=None):
+    def add_ghe_to_network(self, name, length, width, index=None):
         """
 
         :param name:
@@ -92,7 +92,7 @@ class Network:
         :return: nothing
         """
 
-        new_ghe = GHE(name, 10, 20)
+        new_ghe = GHE(name, length, width)
 
         if index is None:
             self.network.append(new_ghe)
@@ -108,7 +108,7 @@ class Network:
 
         name = name.strip().upper()
 
-        for idx, hp in enumerate(self.heat_pumps):
+        for hp in self.heat_pumps:
             if hp.name == name:
                 self.network.append(hp)
                 return
@@ -173,7 +173,7 @@ class Network:
         # Check if there was a GROUNDHEATEXCHANGER device at the end of the list
         if ghe_index >= 0:
             heatpumps = [j for j in range(ghe_index + 1, len(self.network)) if
-                         self.network[j]["type"] == ComponentType.HEATPUMP]
+                         self.network[j].comp_type == ComponentType.HEATPUMP]
             heatpumps_between_ghe[ghe_index] = heatpumps
 
         print("HEATPUMP devices between each GROUNDHEATEXCHANGER device:")
