@@ -7,5 +7,8 @@ class DesignType(Enum):
 
 
 class ComponentType(Enum):
+    ETS = auto()
+    FAN = auto()
+    GROUNDHEATEXCHANGER = auto()  # TODO: rename to GHE
     HEATPUMP = auto()
-    GROUNDHEATEXCHANGER = auto()
+    PUMP = auto()
