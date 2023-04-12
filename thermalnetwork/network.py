@@ -8,6 +8,7 @@ from jsonschema import ValidationError
 
 from thermalnetwork import VERSION
 from thermalnetwork.energy_transfer_station import ETS
+from thermalnetwork.base_component import BaseComponent
 from thermalnetwork.enums import ComponentType, DesignType
 from thermalnetwork.fan import Fan
 from thermalnetwork.ground_heat_exchanger import GHE
@@ -15,14 +16,13 @@ from thermalnetwork.heat_pump import HeatPump
 from thermalnetwork.pump import Pump
 from thermalnetwork.validate import validate_input_file
 
-AnyCompType = Union[ETS, Fan, GHE, HeatPump, Pump]
 
 
 class Network:
     def __init__(self) -> None:
         self.des_method = None
-        self.components = []  # type: list[AnyCompType]
-        self.network = []  # type: list[AnyCompType]
+        self.components: list[BaseComponent] = []
+        self.network: list[BaseComponent] = []
 
     def set_design(self, des_method_str: str, throw: bool = True) -> int:
         """
@@ -56,7 +56,7 @@ class Network:
                 return 1
         return 0
 
-    def get_component(self, name: str, comp_type: ComponentType) -> Union[None, AnyCompType]:
+    def get_component(self, name: str, comp_type: ComponentType) -> Union[None, BaseComponent]:
         for comp in self.components:
             if comp.name == name and comp.comp_type == comp_type:
                 return comp
@@ -68,13 +68,18 @@ class Network:
         if comp_type_str == ComponentType.ENERGYTRANSFERSTATION.name:
             return self.set_ets(data, throw)
         elif comp_type_str == ComponentType.FAN.name:
-            return self.set_fan(data)
+            return self.set_fan(data, throw)
         elif comp_type_str == ComponentType.GROUNDHEATEXCHANGER.name:
-            return self.set_ground_heat_exchanger(data)
+            return self.set_ground_heat_exchanger(data, throw)
         elif comp_type_str == ComponentType.HEATPUMP.name:
-            return self.set_heat_pump(data)
+            return self.set_heat_pump(data, throw)
         elif comp_type_str == ComponentType.PUMP.name:
-            return self.set_pump(data)
+            return self.set_pump(data, throw)
+        else:
+            if throw:
+                msg = f"Unsupported component type {comp_type_str}."
+                print(msg, file=stderr)
+            return 1
 
     def set_ets(self, data: dict, throw: bool = True) -> int:
         """
@@ -85,14 +90,15 @@ class Network:
         :return:
         """
         name = str(data['name']).strip().upper()
-        if self.check_for_existing_component(name, ComponentType.GROUNDHEATEXCHANGER, throw) != 0:
+        if self.check_for_existing_component(name, ComponentType.ENERGYTRANSFERSTATION, throw) != 0:
             return 1
 
-        hp_name = data["heat_pump"]
-        load_pump_name = data["load_side_pump"]
-        source_pump_name = data["source_side_pump"]
-        fan_name = data["fan"]
-        space_loads = ["space_loads"]
+        props = data["properties"]
+        hp_name = props["heat_pump"]
+        load_pump_name = props["load_side_pump"]
+        source_pump_name = props["source_side_pump"]
+        fan_name = props["fan"]
+        space_loads = props["space_loads"]
 
         new_ets = ETS(name, hp_name, load_pump_name, source_pump_name, fan_name, space_loads)
         self.components.append(new_ets)
@@ -107,9 +113,14 @@ class Network:
         :return:
         """
         name = str(data['name']).strip().upper()
-        if self.check_for_existing_component(name, ComponentType.GROUNDHEATEXCHANGER, throw) != 0:
+        if self.check_for_existing_component(name, ComponentType.FAN, throw) != 0:
             return 1
-        new_fan = Fan(name)
+
+        props = data["properties"]
+        flow = props["design_flow_rate"]
+        head = props["design_head"]
+        motor_effic = props["motor_efficiency"]
+        new_fan = Fan(name, flow, head, motor_effic)
         self.components.append(new_fan)
         return 0
 
@@ -125,8 +136,9 @@ class Network:
         if self.check_for_existing_component(name, ComponentType.GROUNDHEATEXCHANGER, throw) != 0:
             return 1
 
-        length = data['length']
-        width = data['width']
+        props = data["properties"]
+        length = props['length']
+        width = props['width']
         new_ghe = GHE(name, length, width)
         self.components.append(new_ghe)
         return 0
@@ -143,10 +155,10 @@ class Network:
         if self.check_for_existing_component(name, ComponentType.HEATPUMP, throw) != 0:
             return 1
 
-        cop_c = data['cop_c']
-        cop_h = data['cop_h']
-        space_loads = data['space_loads']
-        new_hp = HeatPump(name, cop_c, cop_h, space_loads)
+        props = data["properties"]
+        cop_c = props['cop_c']
+        cop_h = props['cop_h']
+        new_hp = HeatPump(name, cop_c, cop_h)
         self.components.append(new_hp)
         return 0
 
@@ -159,65 +171,42 @@ class Network:
         :return:
         """
         name = str(data['name']).strip().upper()
-        if self.check_for_existing_component(name, ComponentType.HEATPUMP, throw) != 0:
+        if self.check_for_existing_component(name, ComponentType.PUMP, throw) != 0:
             return 1
 
-        new_pump = Pump(name)
+        props = data["properties"]
+        flow = props["design_flow_rate"]
+        head = props["design_head"]
+        motor_effic = props["motor_efficiency"]
+        ineffic_to_fluid = props["motor_inefficiency_to_fluid_stream"]
+        new_pump = Pump(name, flow, head, motor_effic, ineffic_to_fluid)
         self.components.append(new_pump)
-
-    def add_ets_to_network(self, name: str, throw: bool = True) -> int:
-
-        name = name.strip().upper()
-        ets = None
-        for idx, comp in enumerate(self.components):
-            if comp.name == name and comp.comp_type == ComponentType.ENERGYTRANSFERSTATION:
-                ets = comp
-
-        # need to resolve all the hanging ets references before exiting
-        if not ets.references_resolved:
-            pass
-
         return 0
 
-    def add_ghe_to_network(self, name: str, throw: bool = True) -> int:
-        """
-        Add existing GHE object to network.
-
-        :param name: name of existing HP component
-        :param throw:
-        """
-
+    def add_component_to_network(self, name: str, comp_type: ComponentType, throw: bool = True) -> int:
         name = name.strip().upper()
 
         for comp in self.components:
-            if comp.name == name and comp.comp_type == ComponentType.GROUNDHEATEXCHANGER:
+            if comp.name == name and comp.comp_type == comp_type:
                 self.network.append(comp)
                 return 0
 
         if throw:
-            msg = f"Ground heat exchanger \"{name}\" not found."
+            msg = f"{comp_type.name} \"{name}\" not found."
             print(msg, file=stderr)
         return 1
+
+    def add_ets_to_network(self, name: str, throw: bool = True) -> int:
+        return self.add_component_to_network(name, ComponentType.ENERGYTRANSFERSTATION, throw)
+
+    def add_ghe_to_network(self, name: str, throw: bool = True) -> int:
+        return self.add_component_to_network(name, ComponentType.GROUNDHEATEXCHANGER, throw)
 
     def add_hp_to_network(self, name: str, throw: bool = True) -> int:
-        """
-        Add existing HP object to network.
+        return self.add_component_to_network(name, ComponentType.HEATPUMP, throw)
 
-        :param name: name of existing HP component
-        :param throw:
-        """
-
-        name = name.strip().upper()
-
-        for comp in self.components:
-            if comp.name == name and comp.comp_type == ComponentType.HEATPUMP:
-                self.network.append(comp)
-                return 0
-
-        if throw:
-            msg = f"Heat pump \"{name}\" not found."
-            print(msg, file=stderr)
-        return 1
+    def add_pump_to_network(self, name: str, throw: bool = True) -> int:
+        return self.add_component_to_network(name, ComponentType.PUMP, throw)
 
     def size_area_proportional(self):
         """
@@ -319,10 +308,10 @@ def run_sizer_from_cli_worker(input_path: Path, output_path: Path) -> int:
         return 1
 
     # load all input data
-    version = data["version"]  # type: int
-    d_design = data["design"]  # type: dict
-    d_components = data["components"]  # type: List[dict]
-    d_network = data["network"]  # type: List[dict]
+    version: int = data["version"]
+    design_data: dict = data["design"]
+    components_data: list[dict] = data["components"]
+    network_data: list[dict] = data["network"]
 
     if version != VERSION:
         print("Mismatched versions, could be a problem", file=stderr)
@@ -333,20 +322,22 @@ def run_sizer_from_cli_worker(input_path: Path, output_path: Path) -> int:
 
     # begin populating structures in preparation for sizing
     errors = 0
-    errors += network.set_design(des_method_str=d_design["method"], throw=True)
+    errors += network.set_design(des_method_str=design_data["method"], throw=True)
 
-    for comp_data in d_components:
+    for comp_data in components_data:
         errors += network.set_component(comp_data)
 
-    for component in d_network:
+    for component in network_data:
         comp_name = component["name"]
         comp_type_str = str(component["type"]).strip().upper()
-        if comp_type_str == ComponentType.ENERGYTRANSFERSTATION:
+        if comp_type_str == ComponentType.ENERGYTRANSFERSTATION.name:
             errors += network.add_ets_to_network(comp_name)
         elif comp_type_str == ComponentType.GROUNDHEATEXCHANGER.name:
             errors += network.add_ghe_to_network(comp_name)
         elif comp_type_str == ComponentType.HEATPUMP.name:
             errors += network.add_hp_to_network(comp_name)
+        elif comp_type_str == ComponentType.PUMP.name:
+            errors += network.add_pump_to_network(comp_name)
         else:
             msg = f"Unsupported component type, {comp_type_str}"
             print(msg, file=stderr)
