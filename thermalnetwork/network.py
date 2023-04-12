@@ -17,7 +17,6 @@ from thermalnetwork.pump import Pump
 from thermalnetwork.validate import validate_input_file
 
 
-
 class Network:
     def __init__(self) -> None:
         self.des_method = None
