@@ -10,10 +10,10 @@ class ETS(BaseComponent):
         self.source_pump_name: str = str(source_pump_name).strip().upper()
         self.fan_name: str = str(fan_name).strip().upper()
         self.space_loads: list[float] = space_loads
-        self.hp_idx: int = None
-        self.load_pump_idx: int = None
-        self.source_pump_idx: int = None
-        self.fan_idx: int = None
+        self.hp: BaseComponent = None
+        self.load_pump: BaseComponent = None
+        self.src_pump: BaseComponent = None
+        self.fan: BaseComponent = None
 
     def resolve(self, comp_list: list[BaseComponent]) -> None:
         for idx, comp in enumerate(comp_list):
@@ -31,3 +31,8 @@ class ETS(BaseComponent):
         else:
             return 1
 
+    def get_loads(self, comp_list: list[BaseComponent]):
+        fan = comp_list[self.fan_idx]
+        load_pump = comp_list[self.load_pump_idx]
+        src_pump = comp_list[self.source_pump_idx]
+        hp = comp_list[self.hp_idx]

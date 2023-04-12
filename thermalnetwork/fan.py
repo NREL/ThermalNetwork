@@ -8,3 +8,6 @@ class Fan(BaseComponent):
         self.des_flow = des_flow
         self.des_head = des_head
         self.motor_efficiency = motor_efficiency
+
+        def get_loads(self, comp_list: list[BaseComponent]):
+            
