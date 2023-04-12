@@ -1,27 +1,37 @@
 import json
-import sys
 from pathlib import Path
+from sys import exit, stderr
+from typing import Union
 
 import click
+from jsonschema import ValidationError
 
 from thermalnetwork import VERSION
+from thermalnetwork.energy_transfer_station import ETS
 from thermalnetwork.enums import ComponentType, DesignType
+from thermalnetwork.fan import Fan
 from thermalnetwork.ground_heat_exchanger import GHE
 from thermalnetwork.heat_pump import HeatPump
+from thermalnetwork.pump import Pump
+from thermalnetwork.validate import validate_input_file
+
+AnyCompType = Union[ETS, Fan, GHE, HeatPump, Pump]
 
 
 class Network:
     def __init__(self) -> None:
         self.des_method = None
-        self.heat_pumps = []
-        self.ground_heat_exchangers = []
-        self.network = []
+        self.components = []  # type: list[AnyCompType]
+        self.network = []  # type: list[AnyCompType]
 
-    def set_design(self, des_method_str: str):
+    def set_design(self, des_method_str: str, throw: bool = True) -> int:
         """
         Sets up the design method.
 
         :param des_method_str: design method string
+        :param throw: by default, function will raise an exception on error, override to false to not raise exception
+        :returns: zero if successful, nonzero if failure
+        :rtype: int
         """
 
         des_method_str = des_method_str.strip().upper()
@@ -31,108 +41,183 @@ class Network:
         elif des_method_str == DesignType.UPSTREAM.name:
             self.des_method = DesignType.UPSTREAM
         else:
-            msg = "Design method not supported."
-            print(msg, file=sys.stderr)
+            if throw:
+                msg = "Design method not supported."
+                print(msg, file=stderr)
+            return 1
+        return 0
 
-    def set_ground_heat_exchanger(self, ghe_data: dict):
+    def check_for_existing_component(self, name: str, comp_type: ComponentType, throw: bool = True):
+        for comp in self.components:
+            if comp.name == name and comp.comp_type == comp_type:
+                if throw:
+                    msg = f"Duplicate {comp_type.name} name \"{name}\" encountered."
+                    print(msg, file=stderr)
+                return 1
+        return 0
+
+    def get_component(self, name: str, comp_type: ComponentType) -> Union[None, AnyCompType]:
+        for comp in self.components:
+            if comp.name == name and comp.comp_type == comp_type:
+                return comp
+        return None
+
+    def set_component(self, data: dict, throw: bool = True) -> int:
+        comp_type_str = str(data["type"]).strip().upper()
+
+        if comp_type_str == ComponentType.ENERGYTRANSFERSTATION.name:
+            return self.set_ets(data, throw)
+        elif comp_type_str == ComponentType.FAN.name:
+            return self.set_fan(data)
+        elif comp_type_str == ComponentType.GROUNDHEATEXCHANGER.name:
+            return self.set_ground_heat_exchanger(data)
+        elif comp_type_str == ComponentType.HEATPUMP.name:
+            return self.set_heat_pump(data)
+        elif comp_type_str == ComponentType.PUMP.name:
+            return self.set_pump(data)
+
+    def set_ets(self, data: dict, throw: bool = True) -> int:
         """
-        Creates a new ground heat exchanger instance and adds it to the list of all GHE objects
+        Creates a new energy transfer station instance ad adds it to the list of components.
 
-        :param ghe_data: dictionary of ghe data
+        :param data:
+        :param throw:
+        :return:
+        """
+        name = str(data['name']).strip().upper()
+        if self.check_for_existing_component(name, ComponentType.GROUNDHEATEXCHANGER, throw) != 0:
+            return 1
+
+        hp_name = data["heat_pump"]
+        load_pump_name = data["load_side_pump"]
+        source_pump_name = data["source_side_pump"]
+        fan_name = data["fan"]
+        space_loads = ["space_loads"]
+
+        new_ets = ETS(name, hp_name, load_pump_name, source_pump_name, fan_name, space_loads)
+        self.components.append(new_ets)
+        return 0
+
+    def set_fan(self, data: dict, throw: bool = True) -> int:
+        """
+        Creates a new fan instance and adds it to the list of components.
+
+        :param data:
+        :param throw:
+        :return:
+        """
+        name = str(data['name']).strip().upper()
+        if self.check_for_existing_component(name, ComponentType.GROUNDHEATEXCHANGER, throw) != 0:
+            return 1
+        new_fan = Fan(name)
+        self.components.append(new_fan)
+        return 0
+
+    def set_ground_heat_exchanger(self, data: dict, throw: bool = True):
+        """
+        Creates a new ground heat exchanger instance and adds it to the list of components.
+
+        :param data: dictionary of ghe data
+        :param throw:
         """
 
-        name = str(ghe_data['name']).strip().upper()
-        length = ghe_data['length']
-        width = ghe_data['width']
+        name = str(data['name']).strip().upper()
+        if self.check_for_existing_component(name, ComponentType.GROUNDHEATEXCHANGER, throw) != 0:
+            return 1
 
-        for ghe in self.ground_heat_exchangers:
-            if ghe.name == name:
-                raise ValueError(f"Duplicate ground heat exchanger name \"{ghe.name}\" encountered.")
+        length = data['length']
+        width = data['width']
+        new_ghe = GHE(name, length, width)
+        self.components.append(new_ghe)
+        return 0
 
-        self.ground_heat_exchangers.append(GHE(name, length, width))
-
-    def set_heat_pump(self, hp_data: dict):
+    def set_heat_pump(self, data: dict, throw: bool = True) -> int:
         """
-        Creates a new heat pump instance and adds it to the list of all HP objects
+        Creates a new heat pump instance and adds it to the list of components.
 
-        :param hp_data: dictionary of heat pump data
+        :param data: dictionary of heat pump data
+        :param throw:
         """
 
-        name = str(hp_data['name']).strip().upper()
-        cop_c = hp_data['cop_c']
-        cop_h = hp_data['cop_h']
-        space_loads = hp_data['space_loads']
+        name = str(data['name']).strip().upper()
+        if self.check_for_existing_component(name, ComponentType.HEATPUMP, throw) != 0:
+            return 1
 
-        for hp in self.heat_pumps:
-            if hp.name == name:
-                raise ValueError(f"Duplicate heat pump name \"{hp.name}\" encountered.")
+        cop_c = data['cop_c']
+        cop_h = data['cop_h']
+        space_loads = data['space_loads']
+        new_hp = HeatPump(name, cop_c, cop_h, space_loads)
+        self.components.append(new_hp)
+        return 0
 
-        self.heat_pumps.append(HeatPump(name, cop_c, cop_h, space_loads))
+    def set_pump(self, data: dict, throw: bool = True) -> int:
+        """
+        Creates a new pump instance and adds it to the list of components.
 
-    def add_ghe_to_network_by_name(self, name: str):
+        :param data:
+        :param throw:
+        :return:
+        """
+        name = str(data['name']).strip().upper()
+        if self.check_for_existing_component(name, ComponentType.HEATPUMP, throw) != 0:
+            return 1
+
+        new_pump = Pump(name)
+        self.components.append(new_pump)
+
+    def add_ets_to_network(self, name: str, throw: bool = True) -> int:
+
+        name = name.strip().upper()
+        ets = None
+        for idx, comp in enumerate(self.components):
+            if comp.name == name and comp.comp_type == ComponentType.ENERGYTRANSFERSTATION:
+                ets = comp
+
+        # need to resolve all the hanging ets references before exiting
+        if not ets.references_resolved:
+            pass
+
+        return 0
+
+    def add_ghe_to_network(self, name: str, throw: bool = True) -> int:
         """
         Add existing GHE object to network.
 
         :param name: name of existing HP component
+        :param throw:
         """
 
         name = name.strip().upper()
 
-        for ghe in self.ground_heat_exchangers:
-            if ghe.name == name:
-                self.network.append(ghe)
-                return
+        for comp in self.components:
+            if comp.name == name and comp.comp_type == ComponentType.GROUNDHEATEXCHANGER:
+                self.network.append(comp)
+                return 0
 
-        raise ValueError(f"Ground heat exchanger \"{name}\" not found.")
+        if throw:
+            msg = f"Ground heat exchanger \"{name}\" not found."
+            print(msg, file=stderr)
+        return 1
 
-    def add_ghe_to_network(self, name, length, width, index=None):
-        """
-
-        :param name:
-        :param index:
-        :return: nothing
-        """
-
-        new_ghe = GHE(name, length, width)
-
-        if index is None:
-            self.network.append(new_ghe)
-        else:
-            self.network.insert(index, new_ghe)
-
-    def add_hp_to_network_by_name(self, name: str):
+    def add_hp_to_network(self, name: str, throw: bool = True) -> int:
         """
         Add existing HP object to network.
 
         :param name: name of existing HP component
+        :param throw:
         """
 
         name = name.strip().upper()
 
-        for hp in self.heat_pumps:
-            if hp.name == name:
-                self.network.append(hp)
-                return
+        for comp in self.components:
+            if comp.name == name and comp.comp_type == ComponentType.HEATPUMP:
+                self.network.append(comp)
+                return 0
 
-        raise ValueError(f"Heat pump \"{name}\" not found.")
-
-    def add_hp_to_network(self, name, cop_c, cop_h, index=None):
-        """
-        Create new HP instance and add it to the network.
-
-        :param name:
-        :param cop_c:
-        :param cop_h:
-        :param index:
-        :return: nothing
-        """
-
-        new_hp = HeatPump(name, cop_c, cop_h)
-
-        if index is None:
-            self.network.append(new_hp)
-        else:
-            self.network.insert(index, new_hp)
+        if throw:
+            msg = f"Heat pump \"{name}\" not found."
+            print(msg, file=stderr)
+        return 1
 
     def size_area_proportional(self):
         """
@@ -148,11 +233,11 @@ class Network:
         # find all heatpumps between each groundheatexchanger
         # size to those buildings
 
-        # debugging
-        for i, device in enumerate(self.heat_pumps):
-            print(f"Index {i}: {device}")
-        for i, device in enumerate(self.ground_heat_exchangers):
-            print(f"Index {i}: {device}")
+        # # debugging
+        # for i, device in enumerate(self.heat_pumps):
+        #     print(f"Index {i}: {device}")
+        # for i, device in enumerate(self.ground_heat_exchangers):
+        #     print(f"Index {i}: {device}")
 
         ghe_indexes = []  # This will store the indexes of all GROUNDHEATEXCHANGER devices
 
@@ -160,7 +245,7 @@ class Network:
             print(f"Network Index {i}: {device}")
             if device.comp_type == ComponentType.GROUNDHEATEXCHANGER:
                 ghe_indexes.append(i)
-        
+
         print("GROUNDHEATEXCHANGER indices in network:")
         print(ghe_indexes)
         # slice the self.network by ghe_indexes
@@ -168,15 +253,15 @@ class Network:
             if i == 0:  # first GHE
                 devices_before_ghe = self.network[:ghe_index]
             else:
-                devices_before_ghe = self.network[ghe_indexes[i-1]+1:ghe_index]
+                devices_before_ghe = self.network[ghe_indexes[i - 1] + 1:ghe_index]
             print(f"Devices before GHE at index {ghe_index}: {devices_before_ghe}")
             total_space_loads = 0
             for device in devices_before_ghe:
                 print(f"device.space_loads: {device.space_loads}")
                 device_load = sum(device.space_loads)
-                print(f"Total load for device: {device_load}") 
+                print(f"Total load for device: {device_load}")
                 total_space_loads += device_load
-            print(f"Total space loads for devices before GHE: {total_space_loads}")    
+            print(f"Total space loads for devices before GHE: {total_space_loads}")
             # call size_ghe() with total load
             self.size_ghe(total_space_loads)
 
@@ -187,7 +272,7 @@ class Network:
         print(f"SIZE_GHE with total_space_loads: {total_space_loads}")
         # make call to GHE Sizer for realz
 
-    def size(self):
+    def size(self, throw: bool = True):
         """
         High-level sizing call that handles any lower-level calls or iterations.
         """
@@ -197,7 +282,11 @@ class Network:
         elif self.des_method == DesignType.UPSTREAM:
             self.size_to_upstream_equipment()
         else:
-            raise ValueError("something is broken")
+            if throw:
+                msg = f"Unsupported design method {self.des_method}"
+                print(msg, file=stderr)
+            return 1
+        return 0
 
     def write_outputs(self, output_path: Path):
         """
@@ -211,70 +300,97 @@ class Network:
         pass
 
 
-def run_sizer_from_cli_worker(input_path: Path, output_path: Path):
+def run_sizer_from_cli_worker(input_path: Path, output_path: Path) -> int:
     """
-    Sizing worker function. Worker is called by tests, and thus not wrapped by `click`
+    Sizing worker function. Worker is called by tests, and thus not wrapped by `click`.
 
     :param input_path: path to input file
     :param output_path: path to write outputs
     """
 
     # load input file
-    with open(input_path) as f:
-        d = json.load(f)
+    if not input_path.exists():
+        print(f"No input file found at {input_path}, aborting.", file=stderr)
+        return 1
+
+    data = json.loads(input_path.read_text())
+
+    if validate_input_file(input_path) != 0:
+        return 1
 
     # load all input data
-    version = d["version"]  # type: int
-    d_design = d["design"]  # type: dict
-    d_network = d["network"]  # type: list
-    d_heat_pumps = d["heat_pumps"]  # type: list
-    d_ghes = d["ground_heat_exchangers"]  # type: list
+    version = data["version"]  # type: int
+    d_design = data["design"]  # type: dict
+    d_components = data["components"]  # type: List[dict]
+    d_network = data["network"]  # type: List[dict]
 
     if version != VERSION:
-        print("Mismatched versions, could be a problem", file=sys.stderr)
+        print("Mismatched versions, could be a problem", file=stderr)
+        return 1
 
     # instantiate a new Network object
     network = Network()
 
     # begin populating structures in preparation for sizing
+    errors = 0
+    errors += network.set_design(des_method_str=d_design["method"], throw=True)
 
-    network.set_design(des_method_str=d_design["method"])
-
-    for ghe_data in d_ghes:
-        network.set_ground_heat_exchanger(ghe_data)
-
-    for hp_data in d_heat_pumps:
-        network.set_heat_pump(hp_data)
+    for comp_data in d_components:
+        errors += network.set_component(comp_data)
 
     for component in d_network:
         comp_name = component["name"]
         comp_type_str = str(component["type"]).strip().upper()
-        if comp_type_str == ComponentType.GROUNDHEATEXCHANGER.name:
-            network.add_ghe_to_network_by_name(comp_name)
+        if comp_type_str == ComponentType.ENERGYTRANSFERSTATION:
+            errors += network.add_ets_to_network(comp_name)
+        elif comp_type_str == ComponentType.GROUNDHEATEXCHANGER.name:
+            errors += network.add_ghe_to_network(comp_name)
         elif comp_type_str == ComponentType.HEATPUMP.name:
-            network.add_hp_to_network_by_name(comp_name)
+            errors += network.add_hp_to_network(comp_name)
         else:
-            raise ValueError("Unsupported object")
+            msg = f"Unsupported component type, {comp_type_str}"
+            print(msg, file=stderr)
+            errors += 1
+
+    if errors != 0:
+        return 1
 
     network.size()
     network.write_outputs(output_path)
 
+    return 0
+
 
 @click.command(name="ThermalNetworkCommandLine")
 @click.argument("input-path", type=click.Path(exists=True))
-@click.argument("output-path", type=click.Path(exists=True))
+@click.argument("output-path", type=click.Path(exists=True), required=False)
 @click.version_option(VERSION)
-def run_sizer_from_cli(input_path: Path, output_path: Path):
+@click.option(
+    "--validate",
+    default=False,
+    is_flag=True,
+    show_default=False,
+    help="Validate input and exit."
+)
+def run_sizer_from_cli(input_path, output_path, validate):
     """
     CLI entrypoint for sizing runner.
 
     :param input_path: path to input file
     :param output_path: path to write outputs
+    :param validate: flag for input schema validation
     """
 
     input_path = Path(input_path).resolve()
 
-    # will set up JSON schemas to validate inputs here before doing anything
+    if validate:
+        try:
+            validate_input_file(input_path)
+            print("Valid input file.")
+            return 0
+        except ValidationError:
+            print("Schema validation error. See previous error message(s) for details.", file=stderr)
+            return 1
 
     # calling the worker function here
     output_path = Path(output_path).resolve()
@@ -282,4 +398,4 @@ def run_sizer_from_cli(input_path: Path, output_path: Path):
 
 
 if __name__ == "__main__":
-    run_sizer_from_cli()
+    exit(run_sizer_from_cli())
