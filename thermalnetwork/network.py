@@ -1,7 +1,6 @@
 import json
 from pathlib import Path
 from sys import exit, stderr
-from typing import Union
 
 import click
 from jsonschema import ValidationError
@@ -54,12 +53,6 @@ class Network:
                     print(msg, file=stderr)
                 return 1
         return 0
-
-    def get_component(self, name: str, comp_type: ComponentType) -> Union[None, BaseComponent]:
-        for comp in self.components:
-            if comp.name == name and comp.comp_type == comp_type:
-                return comp
-        return None
 
     def set_component(self, data: dict, throw: bool = True) -> int:
         comp_type_str = str(data["type"]).strip().upper()
@@ -185,9 +178,12 @@ class Network:
     def add_component_to_network(self, name: str, comp_type: ComponentType, throw: bool = True) -> int:
         name = name.strip().upper()
 
-        for comp in self.components:
+        for idx, comp in enumerate(self.components):
             if comp.name == name and comp.comp_type == comp_type:
-                self.network.append(comp)
+                if comp.resolve(self.components) != 0:
+                    return 1
+                self.components[idx] = comp
+                self.network.append(idx)
                 return 0
 
         if throw:
