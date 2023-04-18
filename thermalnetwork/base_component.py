@@ -1,10 +1,16 @@
-from thermalnetwork.enums import ComponentType
 from typing import Optional
+
+from thermalnetwork.enums import ComponentType
+
 
 class BaseComponent:
     def __init__(self, name: str, comp_type: ComponentType):
-        self.name = name.strip().upper()
-        self.comp_type = comp_type
+        self.name: str = name.strip().upper()
+        self.comp_type: ComponentType = comp_type
+        self.network_loads: list[float] = None
 
-    def resolve(self, comp_list: Optional[list]):
-        return 0
+    def get_loads(self, num_loads: Optional[int] = None):
+        pass
+
+    def set_network_loads(self, num_loads: Optional[int] = None):
+        pass

@@ -3,10 +3,11 @@ from thermalnetwork.enums import ComponentType
 
 
 class HeatPump(BaseComponent):
-    def __init__(self, name: str, cop_c: float = 3.5, cop_h: float = 2.5) -> None:
-        super().__init__(name, ComponentType.HEATPUMP)
-        self.cop_c = cop_c
-        self.cop_h = cop_h
+    def __init__(self, data: dict) -> None:
+        super().__init__(data['name'], ComponentType.HEATPUMP)
+        props = data['properties']
+        self.cop_c = props['cop_c']
+        self.cop_h = props['cop_h']
 
     def calc_src_side_load(self, space_load: float) -> float:
         """
@@ -23,3 +24,6 @@ class HeatPump(BaseComponent):
         else:
             # cooling load
             return space_load * (1 + 1 / self.cop_c)
+
+    def set_loads(self, loads: list[float]):
+        return [self.calc_src_side_load(x) for x in loads]

@@ -1,38 +1,28 @@
+from operator import add, sub
+
 from thermalnetwork.base_component import BaseComponent
 from thermalnetwork.enums import ComponentType
+from thermalnetwork.heat_pump import HeatPump
+from thermalnetwork.fan import Fan
+from thermalnetwork.pump import Pump
 
 
 class ETS(BaseComponent):
-    def __init__(self, name, hp_name, load_pump_name, source_pump_name, fan_name, space_loads):
-        super().__init__(name, ComponentType.ENERGYTRANSFERSTATION)
-        self.hp_name: str = str(hp_name).strip().upper()
-        self.load_pump_name: str = str(load_pump_name).strip().upper()
-        self.source_pump_name: str = str(source_pump_name).strip().upper()
-        self.fan_name: str = str(fan_name).strip().upper()
-        self.space_loads: list[float] = space_loads
-        self.hp: BaseComponent = None
-        self.load_pump: BaseComponent = None
-        self.src_pump: BaseComponent = None
-        self.fan: BaseComponent = None
+    def __init__(self, data: dict):
+        super().__init__(data['name'], ComponentType.ENERGYTRANSFERSTATION)
+        props: dict = data['properties']
+        self.hp = HeatPump(props['heat_pump'])
+        self.load_pump = Pump(props['load_side_pump'])
+        self.src_pump = Pump(props['source_side_pump'])
+        self.fan = Fan(props['fan'])
+        self.space_loads: list[float] = props['space_loads']
 
-    def resolve(self, comp_list: list[BaseComponent]) -> None:
-        for idx, comp in enumerate(comp_list):
-            if comp.name == self.hp_name and comp.comp_type == ComponentType.HEATPUMP:
-                self.hp_idx = idx
-            if comp.name == self.load_pump_name and comp.comp_type == ComponentType.PUMP:
-                self.load_pump_idx = idx
-            if comp.name == self.source_pump_name and comp.comp_type == ComponentType.PUMP:
-                self.source_pump_idx = idx
-            if comp.name == self.fan_name and comp.comp_type == ComponentType.FAN:
-                self.fan_idx = idx
+    def get_loads(self):
+        num_loads = len(self.space_loads)
+        hp_loads = list(map(sub, self.space_loads, self.fan.get_loads(num_loads)))
+        hp_loads = list(map(sub, hp_loads, self.load_pump.get_loads(num_loads)))
+        network_loads = list(map(add, hp_loads, self.src_pump.get_loads(num_loads)))
+        return network_loads
 
-        if all([x != None for x in [self.hp_idx, self.load_pump_idx, self.source_pump_idx, self.fan_idx]]):
-            return 0
-        else:
-            return 1
-
-    def get_loads(self, comp_list: list[BaseComponent]):
-        fan = comp_list[self.fan_idx]
-        load_pump = comp_list[self.load_pump_idx]
-        src_pump = comp_list[self.source_pump_idx]
-        hp = comp_list[self.hp_idx]
+    def set_network_loads(self):
+        self.network_loads = self.get_loads()
