@@ -6,8 +6,8 @@ import click
 from jsonschema import ValidationError
 
 from thermalnetwork import VERSION
-from thermalnetwork.energy_transfer_station import ETS
 from thermalnetwork.base_component import BaseComponent
+from thermalnetwork.energy_transfer_station import ETS
 from thermalnetwork.enums import ComponentType, DesignType
 from thermalnetwork.ground_heat_exchanger import GHE
 from thermalnetwork.heat_pump import HeatPump

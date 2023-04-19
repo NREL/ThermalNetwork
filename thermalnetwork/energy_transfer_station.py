@@ -2,8 +2,8 @@ from operator import add, sub
 
 from thermalnetwork.base_component import BaseComponent
 from thermalnetwork.enums import ComponentType
-from thermalnetwork.heat_pump import HeatPump
 from thermalnetwork.fan import Fan
+from thermalnetwork.heat_pump import HeatPump
 from thermalnetwork.pump import Pump
 
 
