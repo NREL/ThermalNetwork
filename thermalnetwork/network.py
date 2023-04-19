@@ -128,21 +128,62 @@ class Network:
         """
         Sizing method for area proportional approach.
         """
-        pass
+        print("size_area_proportional")
+        # find all objects between each groundheatexchanger
+        #  sum loads
+        # find all GHE and their sizes
+        #  divide loads by GHE sizes
+        ghe_indexes = []  # This will store the indexes of all GROUNDHEATEXCHANGER devices
+        other_indexes = [] # This will store the indexes of all other devices
+
+        for i, device in enumerate(self.network):
+            print(f"Network Index {i}: {device}")
+            if device.comp_type == ComponentType.GROUNDHEATEXCHANGER:
+                ghe_indexes.append(i)
+            else:
+                other_indexes.append(i)    
+
+        print("GROUNDHEATEXCHANGER indices in network:")
+        print(ghe_indexes)
+        print("Other equip indices in network:")
+        print(other_indexes)
+
+        total_ghe_area = 0
+        for i in ghe_indexes:
+            ghe_area = self.network[i].area
+            print(f"{self.network[i]}.area: {ghe_area}")
+            total_ghe_area += ghe_area
+        print(f"total_ghe_area: {total_ghe_area}")
+
+        total_space_loads = 0
+        for i in other_indexes:
+            #ETS .get_loads() doesnt take num_loads arg
+            device = self.network[i]
+            if device.comp_type != ComponentType.ENERGYTRANSFERSTATION:
+                print(f"{device.comp_type}.get_loads: {device.get_loads(1)}")
+                device_load = sum(device.get_loads(1))
+            else:
+                print(f"{device.comp_type}.get_loads: {device.get_loads()}")
+                device_load = sum(device.get_loads())
+            print(f"Total load for {device.comp_type}: {device_load}")
+            total_space_loads += device_load
+        print(f"Total space loads for devices before GHE: {total_space_loads}")
+        
+        load_per_area = total_space_loads / total_ghe_area
+        print(f"Load per Area: {load_per_area}")
+
+        #loop over GHEs and size per area
+        for i in ghe_indexes:
+            ghe_area = self.network[i].area
+            self.size_ghe(load_per_area * ghe_area)
 
     def size_to_upstream_equipment(self):
         """
         Sizing method for upstream equipment approach.
         """
         print("size_to_upstream")
-        # find all ETS between each groundheatexchanger
+        # find all objects between each groundheatexchanger
         # size to those buildings
-
-        # # debugging
-        # for i, device in enumerate(self.heat_pumps):
-        #     print(f"Index {i}: {device}")
-        # for i, device in enumerate(self.ground_heat_exchangers):
-        #     print(f"Index {i}: {device}")
 
         ghe_indexes = []  # This will store the indexes of all GROUNDHEATEXCHANGER devices
 
