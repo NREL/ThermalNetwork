@@ -10,7 +10,6 @@ from thermalnetwork.base_component import BaseComponent
 from thermalnetwork.energy_transfer_station import ETS
 from thermalnetwork.enums import ComponentType, DesignType
 from thermalnetwork.ground_heat_exchanger import GHE
-from thermalnetwork.heat_pump import HeatPump
 from thermalnetwork.pump import Pump
 from thermalnetwork.validate import validate_input_file
 
@@ -67,7 +66,8 @@ class Network:
                 return comp
 
     def add_ets_to_network(self, name: str):
-        ets_data = self.get_component(name, ComponentType.ENERGYTRANSFERSTATION)
+        name_uc = name.strip().upper()
+        ets_data = self.get_component(name_uc, ComponentType.ENERGYTRANSFERSTATION)
 
         props = ets_data['properties']
 
@@ -93,19 +93,15 @@ class Network:
         return 0
 
     def add_ghe_to_network(self, name: str):
-        ghe_data = self.get_component(name, ComponentType.GROUNDHEATEXCHANGER)
+        name_uc = name.strip().upper()
+        ghe_data = self.get_component(name_uc, ComponentType.GROUNDHEATEXCHANGER)
         ghe = GHE(ghe_data)
         self.network.append(ghe)
         return 0
 
-    def add_hp_to_network(self, name: str):
-        hp_data = self.get_component(name, ComponentType.HEATPUMP)
-        hp = HeatPump(hp_data)
-        self.network.append(hp)
-        return 0
-
     def add_pump_to_network(self, name: str):
-        pump_data = self.get_component(name, ComponentType.PUMP)
+        name_uc = name.strip().upper()
+        pump_data = self.get_component(name_uc, ComponentType.PUMP)
         pump = Pump(pump_data)
         self.network.append(pump)
         return 0
@@ -252,8 +248,6 @@ def run_sizer_from_cli_worker(input_path: Path, output_path: Path) -> int:
             errors += network.add_ets_to_network(comp_name)
         elif comp_type_str == ComponentType.GROUNDHEATEXCHANGER.name:
             errors += network.add_ghe_to_network(comp_name)
-        elif comp_type_str == ComponentType.HEATPUMP.name:
-            errors += network.add_hp_to_network(comp_name)
         elif comp_type_str == ComponentType.PUMP.name:
             errors += network.add_pump_to_network(comp_name)
         else:
