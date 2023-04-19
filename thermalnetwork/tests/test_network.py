@@ -78,6 +78,7 @@ class TestNetwork(TestCase):
         network.add_pump_to_network("Primary Pump")
         network.add_ets_to_network("ETS 1")
         network.add_ghe_to_network("GHE 1")
+        network.set_component_network_loads()
         # network.size()
         self.assertEquals(len(network.network), 3)
 
@@ -88,5 +89,6 @@ class TestNetwork(TestCase):
         network.add_pump_to_network("Primary Pump")
         network.add_ets_to_network("ETS 1")
         network.add_ghe_to_network("GHE 1")
+        network.set_component_network_loads()
         # network.size()
         self.assertEquals(len(network.network), 3)
