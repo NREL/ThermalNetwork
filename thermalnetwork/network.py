@@ -135,7 +135,7 @@ class Network:
         Sizing method for upstream equipment approach.
         """
         print("size_to_upstream")
-        # find all heatpumps between each groundheatexchanger
+        # find all ETS between each groundheatexchanger
         # size to those buildings
 
         # # debugging
@@ -162,10 +162,16 @@ class Network:
             print(f"Devices before GHE at index {ghe_index}: {devices_before_ghe}")
             total_space_loads = 0
             for device in devices_before_ghe:
-                print(f"device.space_loads: {device.space_loads}")
-                device_load = sum(device.space_loads)
-                print(f"Total load for device: {device_load}")
+                #ETS .get_loads() doesnt take num_loads arg
+                if device.comp_type != ComponentType.ENERGYTRANSFERSTATION:
+                    print(f"{device.comp_type}.get_loads: {device.get_loads(1)}")
+                    device_load = sum(device.get_loads(1))
+                else:
+                    print(f"{device.comp_type}.get_loads: {device.get_loads()}")
+                    device_load = sum(device.get_loads())
+                print(f"Total load for {device.comp_type}: {device_load}")
                 total_space_loads += device_load
+                
             print(f"Total space loads for devices before GHE: {total_space_loads}")
             # call size_ghe() with total load
             self.size_ghe(total_space_loads)

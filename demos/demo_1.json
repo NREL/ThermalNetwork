@@ -19,6 +19,14 @@
     {
       "name": "ghe 1",
       "type": "GROUNDHEATEXCHANGER"
+    },
+    {
+      "name": "ets 3",
+      "type": "ENERGYTRANSFERSTATION"
+    },
+    {
+      "name": "ghe 2",
+      "type": "GROUNDHEATEXCHANGER"
     }
   ],
   "components": [
@@ -82,6 +90,23 @@
           -3000,
           -4000,
           -5000
+        ]
+      }
+    },
+    {
+      "name": "ets 3",
+      "type": "ENERGYTRANSFERSTATION",
+      "properties": {
+        "heat_pump": "small wahp",
+        "load_side_pump": "ets pump",
+        "source_side_pump": "ets pump",
+        "fan": "simple fan",
+        "space_loads": [
+          100,
+          200,
+          300,
+          400,
+          500
         ]
       }
     },
