@@ -175,7 +175,8 @@ class Network:
         #loop over GHEs and size per area
         for i in ghe_indexes:
             ghe_area = self.network[i].area
-            self.size_ghe(load_per_area * ghe_area)
+            #self.size_ghe(load_per_area * ghe_area)
+            self.network[i].get_ghe_size(load_per_area * ghe_area)
 
     def size_to_upstream_equipment(self):
         """
