@@ -175,8 +175,7 @@ class Network:
         #loop over GHEs and size per area
         for i in ghe_indexes:
             ghe_area = self.network[i].area
-            #self.size_ghe(load_per_area * ghe_area)
-            self.network[i].get_ghe_size(load_per_area * ghe_area)
+            self.network[i].ghe_size(load_per_area * ghe_area)
 
     def size_to_upstream_equipment(self):
         """
@@ -215,15 +214,8 @@ class Network:
                 total_space_loads += device_load
                 
             print(f"Total space loads for devices before GHE: {total_space_loads}")
-            # call size_ghe() with total load
-            self.size_ghe(total_space_loads)
-
-    def size_ghe(self, total_space_loads):
-        """
-        Wrapper for GHEDesigner for GHE sizing calls.
-        """
-        print(f"SIZE_GHE with total_space_loads: {total_space_loads}")
-        # make call to GHE Sizer for realz
+            # call ghe_size() with total load
+            self.network[ghe_index].ghe_size(total_space_loads)
 
     def size(self, throw: bool = True):
         """

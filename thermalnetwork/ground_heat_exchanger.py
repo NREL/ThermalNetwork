@@ -3,7 +3,8 @@ from thermalnetwork.enums import ComponentType
 from ghedesigner.manager import GHEManager
 import os
 from pathlib import Path
-from typing import List 
+from typing import List
+import shutil 
 
 class GHE(BaseComponent):
     def __init__(self, data: dict) -> None:
@@ -13,8 +14,8 @@ class GHE(BaseComponent):
         self.width = props['width']
         self.area = self.length * self.width
 
-    def get_ghe_size(self, total_space_loads) -> float:
-        print(f"GET_GHE_SIZE with total_space_loads: {total_space_loads}")
+    def ghe_size(self, total_space_loads) -> float:
+        print(f"GHE_SIZE with total_space_loads: {total_space_loads}")
         ghe = GHEManager()
         ghe.set_single_u_tube_pipe(
             inner_diameter=0.0216, outer_diameter=0.02667, shank_spacing=0.0323,
@@ -34,8 +35,14 @@ class GHE(BaseComponent):
         current_file_directory = Path(os.path.dirname(os.path.abspath(__file__)))
         output_file_directory = current_file_directory / self.name
 
-        # Create the subdirectory if it doesn't already exist
-        output_file_directory.mkdir(parents=True, exist_ok=True)
+        # Check if the directory exists and delete it if so
+        if output_file_directory.is_dir():
+            print(f"deleting directory: {output_file_directory}")
+            shutil.rmtree(output_file_directory)
+
+        # Create the subdirectory
+        print(f"creating directory: {output_file_directory}")
+        output_file_directory.mkdir(parents=True)
 
         ghe.write_output_files(output_file_directory, "")
         u_tube_height = ghe.results.output_dict['ghe_system']['active_borehole_length']['value']
