@@ -10,29 +10,15 @@ import json
 class GHE(BaseComponent):
     def __init__(self, data: dict) -> None:
         super().__init__(data['name'], ComponentType.GROUNDHEATEXCHANGER)
-        props = data['properties']
-        self.length = props['length']
-        self.width = props['width']
-        self.area = self.length * self.width
         design_file = data['design_file']
         with open(design_file) as f:
             self.json_data = json.load(f)
+        # compute Area
+        self.area = self.json_data['geometric_constraints']['length'] * self.json_data['geometric_constraints']['width']
 
     def ghe_size(self, total_space_loads) -> float:
         print(f"GHE_SIZE with total_space_loads: {total_space_loads}")
         ghe = GHEManager()
-        #ghe.set_single_u_tube_pipe(
-        #    inner_diameter=0.0216, outer_diameter=0.02667, shank_spacing=0.0323,
-        #    roughness=1.0e-6, conductivity=0.4, rho_cp=1542000.0)
-        #ghe.set_soil(conductivity=2.0, rho_cp=2343493.0, undisturbed_temp=18.3)
-        #ghe.set_grout(conductivity=1.0, rho_cp=3901000.0)
-        #ghe.set_fluid()
-        #ghe.set_borehole(height=96.0, buried_depth=2.0, diameter=0.150)
-        #ghe.set_simulation_parameters(num_months=240, max_eft=35, min_eft=5, max_height=135, min_height=60)
-        #ghe.set_ground_loads_from_hourly_list(self.get_atlanta_loads())
-        #ghe.set_geometry_constraints_rectangle(length=85.0, width=36.5, b_min=3.0, b_max=10.0)
-        #ghe.set_design(flow_rate=0.2, flow_type_str="borehole")
-
         ghe.set_single_u_tube_pipe(
             inner_diameter=self.json_data['pipe']['inner_diameter'],
             outer_diameter=self.json_data['pipe']['outer_diameter'],
