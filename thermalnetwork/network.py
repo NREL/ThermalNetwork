@@ -163,7 +163,7 @@ class Network:
                 print(f"{device.comp_type}.get_loads: {device.get_loads(1)}")
                 device_load = sum(device.get_loads(1))
             else:
-                print(f"{device.comp_type}.get_loads: {device.get_loads()}")
+                print(f"{device.comp_type}.get_loads len: {len(device.get_loads())}")
                 device_load = sum(device.get_loads())
             print(f"Total load for {device.comp_type}: {device_load}")
             total_space_loads += device_load
@@ -208,7 +208,7 @@ class Network:
                     print(f"{device.comp_type}.get_loads: {device.get_loads(1)}")
                     device_load = sum(device.get_loads(1))
                 else:
-                    print(f"{device.comp_type}.get_loads: {device.get_loads()}")
+                    print(f"{device.comp_type}.get_loads len: {len(device.get_loads())}")
                     device_load = sum(device.get_loads())
                 print(f"Total load for {device.comp_type}: {device_load}")
                 total_space_loads += device_load

@@ -5,7 +5,7 @@ from thermalnetwork.enums import ComponentType
 from thermalnetwork.fan import Fan
 from thermalnetwork.heat_pump import HeatPump
 from thermalnetwork.pump import Pump
-
+import pandas as pd
 
 class ETS(BaseComponent):
     def __init__(self, data: dict):
@@ -15,7 +15,9 @@ class ETS(BaseComponent):
         self.load_pump = Pump(props['load_side_pump'])
         self.src_pump = Pump(props['source_side_pump'])
         self.fan = Fan(props['fan'])
-        self.space_loads: list[float] = props['space_loads']
+        space_loads_file = props['space_loads_file']
+        df = pd.read_csv(space_loads_file)
+        self.space_loads = df['TotalSensibleLoad']
 
     def get_loads(self):
         num_loads = len(self.space_loads)

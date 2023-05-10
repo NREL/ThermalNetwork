@@ -67,13 +67,7 @@
         "load_side_pump": "ets pump",
         "source_side_pump": "ets pump",
         "fan": "simple fan",
-        "space_loads": [
-          1000,
-          2000,
-          3000,
-          4000,
-          5000
-        ]
+        "space_loads_file": "C:/Projects/ThermalNetwork/demos/building_loads.csv"
       }
     },
     {
@@ -84,13 +78,7 @@
         "load_side_pump": "ets pump",
         "source_side_pump": "ets pump",
         "fan": "simple fan",
-        "space_loads": [
-          -1000,
-          -2000,
-          -3000,
-          -4000,
-          -5000
-        ]
+        "space_loads_file": "C:/Projects/ThermalNetwork/demos/building_loads.csv"
       }
     },
     {
@@ -101,13 +89,7 @@
         "load_side_pump": "ets pump",
         "source_side_pump": "ets pump",
         "fan": "simple fan",
-        "space_loads": [
-          100,
-          200,
-          300,
-          400,
-          500
-        ]
+        "space_loads_file": "C:/Projects/ThermalNetwork/demos/building_loads.csv"
       }
     },
     {
@@ -121,12 +103,12 @@
     {
       "name": "ghe 1",
       "type": "GROUNDHEATEXCHANGER",
-      "design_file": "C:/Projects/GHEDesigner/demos/find_design_rectangle_single_u_tube.json"
+      "design_file": "C:/Projects/ThermalNetwork/demos/find_design_rectangle_single_u_tube.json"
     },
     {
       "name": "ghe 2",
       "type": "GROUNDHEATEXCHANGER",
-      "design_file": "C:/Projects/GHEDesigner/demos/find_design_rectangle_single_u_tube.json"
+      "design_file": "C:/Projects/ThermalNetwork/demos/find_design_rectangle_single_u_tube.json"
     }
   ]
 }
