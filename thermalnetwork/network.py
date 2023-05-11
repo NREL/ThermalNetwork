@@ -124,7 +124,7 @@ class Network:
             elif comp.comp_type == ComponentType.PUMP:
                 comp.set_network_loads(len_loads[0])
 
-    def size_area_proportional(self):
+    def size_area_proportional(self, output_path: Path):
         """
         Sizing method for area proportional approach.
         """
@@ -175,9 +175,9 @@ class Network:
         #loop over GHEs and size per area
         for i in ghe_indexes:
             ghe_area = self.network[i].area
-            self.network[i].ghe_size(load_per_area * ghe_area)
+            self.network[i].ghe_size(load_per_area * ghe_area, output_path)
 
-    def size_to_upstream_equipment(self):
+    def size_to_upstream_equipment(self, output_path: Path):
         """
         Sizing method for upstream equipment approach.
         """
@@ -215,17 +215,17 @@ class Network:
                 
             print(f"Total space loads for devices before GHE: {total_space_loads}")
             # call ghe_size() with total load
-            self.network[ghe_index].ghe_size(total_space_loads)
+            self.network[ghe_index].ghe_size(total_space_loads, output_path)
 
-    def size(self, throw: bool = True):
+    def size(self, output_path: Path, throw: bool = True):
         """
         High-level sizing call that handles any lower-level calls or iterations.
         """
         print("size")
         if self.des_method == DesignType.AREAPROPORTIONAL:
-            self.size_area_proportional()
+            self.size_area_proportional(output_path)
         elif self.des_method == DesignType.UPSTREAM:
-            self.size_to_upstream_equipment()
+            self.size_to_upstream_equipment(output_path)
         else:
             if throw:
                 msg = f"Unsupported design method {self.des_method}"
@@ -240,7 +240,7 @@ class Network:
         :param output_path: path to write outputs
         """
 
-        # TODO: create output directory if it doesn't exist and we have made it this far.
+        # This is being done in the GHE sizer call.  Should those dirs get moved somewhere else?
 
         pass
 
@@ -299,15 +299,15 @@ def run_sizer_from_cli_worker(input_path: Path, output_path: Path) -> int:
         return 1
 
     network.set_component_network_loads()
-    network.size()
-    network.write_outputs(output_path)
+    network.size(output_path)
+    #network.write_outputs(output_path)
 
     return 0
 
 
 @click.command(name="ThermalNetworkCommandLine")
 @click.argument("input-path", type=click.Path(exists=True))
-@click.argument("output-path", type=click.Path(exists=True), required=False)
+@click.argument("output-path", type=click.Path(exists=False))
 @click.version_option(VERSION)
 @click.option(
     "--validate",
@@ -324,9 +324,8 @@ def run_sizer_from_cli(input_path, output_path, validate):
     :param output_path: path to write outputs
     :param validate: flag for input schema validation
     """
-
     input_path = Path(input_path).resolve()
-
+    print(f"Input path: {input_path.resolve()}") 
     if validate:
         try:
             validate_input_file(input_path)
@@ -335,9 +334,17 @@ def run_sizer_from_cli(input_path, output_path, validate):
         except ValidationError:
             print("Schema validation error. See previous error message(s) for details.", file=stderr)
             return 1
-
     # calling the worker function here
-    output_path = Path(output_path).resolve()
+    output_path = Path(output_path)
+    print(f"Output path: {output_path.resolve()}") 
+    if not output_path.exists():
+        print("Output path does not exist.")  # Add this line
+        try:
+            output_path.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            print(f"Failed to create directory: {e}")
+    
+    output_path = output_path.resolve()
     return run_sizer_from_cli_worker(input_path, output_path)
 
 

@@ -16,7 +16,7 @@ class GHE(BaseComponent):
         # compute Area
         self.area = self.json_data['geometric_constraints']['length'] * self.json_data['geometric_constraints']['width']
 
-    def ghe_size(self, total_space_loads) -> float:
+    def ghe_size(self, total_space_loads, output_path: Path) -> float:
         print(f"GHE_SIZE with total_space_loads: {total_space_loads}")
         ghe = GHEManager()
         ghe.set_single_u_tube_pipe(
@@ -58,8 +58,9 @@ class GHE(BaseComponent):
         ghe.prepare_results("Project Name", "Notes", "Author", "Iteration Name")
 
         # Construct the path to the new subdirectory
-        current_file_directory = Path(os.path.dirname(os.path.abspath(__file__)))
-        output_file_directory = current_file_directory / self.name
+        #current_file_directory = Path(os.path.dirname(os.path.abspath(__file__)))
+        #output_file_directory = current_file_directory / self.name
+        output_file_directory = output_path / self.name
 
         # Check if the directory exists and delete it if so
         if output_file_directory.is_dir():
