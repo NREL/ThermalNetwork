@@ -20,6 +20,76 @@ class Network:
         self.components_data: list[dict] = []
         self.network: list[BaseComponent] = []
 
+    def find_startloop_feature_id(features):
+        """
+        Finds the feature ID of a feature with the 'startLoop' property set to 'true' in a list of features.
+
+        :param features: List of features to search for the start loop feature.
+        :return: The feature ID of the start loop feature, or None if not found.
+        """
+        for feature in features:
+            if feature['properties'].get('start_loop') == 'true':
+                start_feature_id = feature['properties'].get('buildingId') or feature['properties'].get('DSId')
+                return start_feature_id
+        return None
+
+    def get_connected_features(geojson_data):
+        """
+        Retrieves a list of connected features from a GeoJSON data object.
+
+        :param geojson_data: GeoJSON data object containing features.
+        :return: List of connected features with additional information.
+        """
+        features = geojson_data['features']
+        connectors = [feature for feature in features if feature['properties']['type'] == 'ThermalConnector']
+        connected_features = []
+
+        #get the id of the building or ds from the thermaljunction that has start_loop: true
+        startloop_feature_id = find_startloop_feature_id(features)
+        
+        # Start with the first connector
+        start_feature_id = connectors[0]['properties']['startFeatureId']
+        connected_features.append(start_feature_id)
+
+        while True:
+            next_feature_id = None
+            for connector in connectors:
+                if connector['properties']['startFeatureId'] == connected_features[-1]:
+                    next_feature_id = connector['properties']['endFeatureId']
+                    break
+
+            if next_feature_id:
+                connected_features.append(next_feature_id)
+                if next_feature_id == start_feature_id:
+                    break
+            else:
+                break
+
+        # Filter and return the building and district system features
+        connected_objects = []
+        for feature in features:
+            feature_id = feature['properties']['id']
+            if feature_id in connected_features and feature['properties']['type'] in ['Building', 'District System']:
+                connected_objects.append({
+                    'id': feature_id,
+                    'type': feature['properties']['type'],
+                    'name': feature['properties'].get('name', ''),
+                    'start_loop': 'true' if feature_id == startloop_feature_id else None
+                })
+
+        return connected_objects
+
+    def reorder_connected_features(features):
+        """
+        Reorders a list of connected features so that the feature with 'startloop' set to 'true' is at the beginning.
+
+        :param features: List of connected features.
+        :return: Reordered list of connected features.
+        """
+        while features[0].get('start_loop') != 'true':
+            features.append(features.pop(0))
+        return features    
+
     def set_design(self, des_method_str: str, throw: bool = True) -> int:
         """
         Sets up the design method.
