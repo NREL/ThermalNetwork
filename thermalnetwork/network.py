@@ -20,7 +20,7 @@ class Network:
         self.components_data: list[dict] = []
         self.network: list[BaseComponent] = []
 
-    def find_startloop_feature_id(features):
+    def find_startloop_feature_id(self, features):
         """
         Finds the feature ID of a feature with the 'startLoop' property set to 'true' in a list of features.
 
@@ -33,7 +33,7 @@ class Network:
                 return start_feature_id
         return None
 
-    def get_connected_features(geojson_data):
+    def get_connected_features(self, geojson_data):
         """
         Retrieves a list of connected features from a GeoJSON data object.
 
@@ -45,7 +45,7 @@ class Network:
         connected_features = []
 
         #get the id of the building or ds from the thermaljunction that has start_loop: true
-        startloop_feature_id = find_startloop_feature_id(features)
+        startloop_feature_id = self.find_startloop_feature_id(features)
         
         # Start with the first connector
         start_feature_id = connectors[0]['properties']['startFeatureId']
@@ -79,7 +79,7 @@ class Network:
 
         return connected_objects
 
-    def reorder_connected_features(features):
+    def reorder_connected_features(self, features):
         """
         Reorders a list of connected features so that the feature with 'startloop' set to 'true' is at the beginning.
 
@@ -314,37 +314,58 @@ class Network:
 
         pass
 
-
-def run_sizer_from_cli_worker(input_path: Path, output_path: Path) -> int:
+def run_sizer_from_cli_worker(geojson_file_path: Path, scenario_directory_path: Path, output_directory_path: Path) -> int:
     """
     Sizing worker function. Worker is called by tests, and thus not wrapped by `click`.
 
-    :param input_path: path to input file
-    :param output_path: path to write outputs
+    :param geojson_file_path: path to GeoJSON file
+    :param scenario_directory_path: path to scenario directory
+    :param output_directory_path: path to output directory
     """
 
-    # load input file
-    if not input_path.exists():
-        print(f"No input file found at {input_path}, aborting.", file=stderr)
+    # load geojson_file file
+    if not geojson_file_path.exists():
+        print(f"No input file found at {geojson_file_path}, aborting.", file=stderr)
         return 1
 
-    data = json.loads(input_path.read_text())
+    geojson_data = json.loads(geojson_file_path.read_text())
+    #print(f"geojson_data: {geojson_data}")
 
-    if validate_input_file(input_path) != 0:
+    # load system_parameters file from the scenario directory path
+    system_parameters_path = scenario_directory_path.joinpath("ghe_dir", "system_parameter.json")
+
+    # Check if the file exists
+    if not system_parameters_path.exists():
+        print(f"No system_parameter.json file found at {system_parameters_path}, aborting.", file=stderr)
         return 1
+
+    system_parameters_data = json.loads(system_parameters_path.read_text())
+    #print(f"system_parameters_data: {system_parameters_data}") 
 
     # load all input data
-    version: int = data["version"]
-    design_data: dict = data["design"]
-    component_data: list[dict] = data["components"]
-    network_data: list[dict] = data["network"]
-
+    version: int = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]["version"]
     if version != VERSION:
         print("Mismatched versions, could be a problem", file=stderr)
         return 1
 
+    design_data: dict = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]["design"]
+
     # instantiate a new Network object
     network = Network()
+
+    #get network list from geojson
+    connected_features = network.get_connected_features(geojson_data)
+    print("Features in district loop:")
+    for feature in connected_features:
+        print(feature)
+
+    print("Features in loop order:")
+    reordered_features = network.reorder_connected_features(connected_features)
+    print(reordered_features)
+    #network_data: list[dict] = data["network"]
+
+    return
+    component_data: list[dict] = data["components"]
 
     # begin populating structures in preparation for sizing
     errors = 0
@@ -376,8 +397,9 @@ def run_sizer_from_cli_worker(input_path: Path, output_path: Path) -> int:
 
 
 @click.command(name="ThermalNetworkCommandLine")
-@click.argument("input-path", type=click.Path(exists=True))
-@click.argument("output-path", type=click.Path(exists=False))
+@click.option("-f", "--geojson_file", type=click.Path(exists=True), metavar="GEOJSON_FILE", help="Path to GeoJSON file")
+@click.option("-s", "--scenario_directory", type=click.Path(exists=True), metavar="SCENARIO_DIRECTORY", help="Path to scenario directory")
+@click.option("-o", "--output_directory", type=click.Path(), metavar="OUTPUT_DIRECTORY", help="Path to output directory")
 @click.version_option(VERSION)
 @click.option(
     "--validate",
@@ -386,36 +408,46 @@ def run_sizer_from_cli_worker(input_path: Path, output_path: Path) -> int:
     show_default=False,
     help="Validate input and exit."
 )
-def run_sizer_from_cli(input_path, output_path, validate):
+def run_sizer_from_cli(geojson_file, scenario_directory, output_directory, validate):
     """
     CLI entrypoint for sizing runner.
 
-    :param input_path: path to input file
-    :param output_path: path to write outputs
+    :param geojson_file: path to GeoJSON file
+    :param scenario_directory: path to scenario directory
+    :param output_directory: path to output directory
     :param validate: flag for input schema validation
     """
-    input_path = Path(input_path).resolve()
-    print(f"Input path: {input_path.resolve()}") 
-    if validate:
-        try:
-            validate_input_file(input_path)
-            print("Valid input file.")
-            return 0
-        except ValidationError:
-            print("Schema validation error. See previous error message(s) for details.", file=stderr)
-            return 1
+
+    print("GeoJSON file:", geojson_file)
+    print("Scenario directory:", scenario_directory)
+    print("Output directory:", output_directory)
+    
+    geojson_file_path = Path(geojson_file).resolve()
+    print(f"geojson_file path: {geojson_file_path}") 
+    #if validate:
+    #    try:
+    #        validate_input_file(input_path)
+    #        print("Valid input file.")
+    #        return 0
+    #    except ValidationError:
+    #        print("Schema validation error. See previous error message(s) for details.", file=stderr)
+    #        return 1
     # calling the worker function here
-    output_path = Path(output_path)
-    print(f"Output path: {output_path.resolve()}") 
-    if not output_path.exists():
-        print("Output path does not exist.")  # Add this line
+
+    scenario_directory_path = Path(scenario_directory).resolve()
+    print(f"scenario_directory path: {scenario_directory_path}") 
+
+    output_directory_path = Path(output_directory)
+    print(f"Output path: {output_directory_path}") 
+    if not output_directory_path.exists():
+        print("Output path does not exist. attempting to create")  # Add this line
         try:
-            output_path.mkdir(parents=True, exist_ok=True)
+            output_directory_path.mkdir(parents=True, exist_ok=True)
         except Exception as e:
             print(f"Failed to create directory: {e}")
     
-    output_path = output_path.resolve()
-    return run_sizer_from_cli_worker(input_path, output_path)
+    output_directory_path = output_directory_path.resolve()
+    return run_sizer_from_cli_worker(geojson_file_path, scenario_directory_path, output_directory_path)
 
 
 if __name__ == "__main__":

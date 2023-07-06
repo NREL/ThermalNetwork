@@ -42,6 +42,9 @@
     "fifth_generation": {
       "ghe_parameters": {
         "version": "1.0",
+        "design": {
+          "method": "AREAPROPORTIONAL"
+        },
         "ghe_dir": "tests/system_parameters/data",
         "fluid": {
           "fluid_name": "Water",
