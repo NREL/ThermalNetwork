@@ -90,6 +90,27 @@ class Network:
             features.append(features.pop(0))
         return features    
 
+    def convert_features(self, json_data):
+        converted_features = []
+
+        # Add pump as the first element
+        pump = {'name': 'primary pump', 'type': 'PUMP'}
+        converted_features.append(pump)
+
+        # Convert the features
+        for feature in json_data:
+            feature_type = feature['type']
+            if feature_type == 'Building':
+                feature_type = 'ENERGYTRANSFERSTATION'
+            elif feature_type == 'District System':
+                feature_type = 'GROUNDHEATEXCHANGER'
+            converted_features.append({
+                'name': feature['name'],
+                'type': feature_type
+            })
+        
+        return converted_features
+
     def set_design(self, des_method_str: str, throw: bool = True) -> int:
         """
         Sets up the design method.
@@ -362,6 +383,11 @@ def run_sizer_from_cli_worker(geojson_file_path: Path, scenario_directory_path: 
     print("Features in loop order:")
     reordered_features = network.reorder_connected_features(connected_features)
     print(reordered_features)
+
+    #convert geojson type "Building","District System" to "ENERGYTRANSFERSTATION","GROUNDHEATEXCHANGER"
+    network_data = network.convert_features(reordered_features)
+    print("Network list:")
+    print(network_data)
     #network_data: list[dict] = data["network"]
 
     return
