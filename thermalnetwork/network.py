@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from sys import exit, stderr
+from pprint import pprint
 
 import click
 from jsonschema import ValidationError
@@ -19,6 +20,9 @@ class Network:
         self.des_method = None
         self.components_data: list[dict] = []
         self.network: list[BaseComponent] = []
+        self.ghe_parameters: dict = {}
+        self.geojson_data: dict = {}
+        self.scenario_directory_path: Path = Path()
 
     def find_startloop_feature_id(self, features):
         """
@@ -74,6 +78,7 @@ class Network:
                     'id': feature_id,
                     'type': feature['properties']['type'],
                     'name': feature['properties'].get('name', ''),
+                    'properties': {k: v for k, v in feature['properties'].items() if k not in [':type', ':name']},
                     'start_loop': 'true' if feature_id == startloop_feature_id else None
                 })
 
@@ -90,23 +95,78 @@ class Network:
             features.append(features.pop(0))
         return features    
 
+    def find_matching_ghe_id(self, feature_id):
+        for ghe in self.ghe_parameters['ghe_specific_params']:
+            if ghe['ghe_id'] == feature_id:
+                return ghe
+        return None  # if no match found, return None
+
+
     def convert_features(self, json_data):
         converted_features = []
 
         # Add pump as the first element
-        pump = {'name': 'primary pump', 'type': 'PUMP'}
-        converted_features.append(pump)
+        obj = {'id': '0',
+                'name': 'primary pump',
+                'type': 'PUMP',
+                "properties": {
+                    "design_flow_rate": 0.01,
+                    "design_head": 150000,
+                    "motor_efficiency": 0.9,
+                    "motor_inefficiency_to_fluid_stream": 1.0
+                }
+        }
+        converted_features.append(obj)
 
-        # Convert the features
+        # Convert the features from geojson list
         for feature in json_data:
             feature_type = feature['type']
             if feature_type == 'Building':
                 feature_type = 'ENERGYTRANSFERSTATION'
+                #add building directory ID to scenario path; look for dir named '_export_modelica_loads' for the building_loads.csv
+                new_path = self.scenario_directory_path / feature['properties']['id']
+                for directory in new_path.iterdir():
+                    if directory.is_dir() and "_export_modelica_loads" in directory.name:
+                        new_path = new_path / directory.name / 'building_loads.csv'
+                        print(f"building_loads.csv path: {new_path}\n")
+                        break
+                if not Path.is_file(new_path):
+                    print("BUILDING_LOADS.CSV NOT FOUND! {new_path}", file=stderr)
+                    return 1
+                properties = {
+                    "heat_pump": "small wahp",
+                    "load_side_pump": "ets pump",
+                    "source_side_pump": "ets pump",
+                    "fan": "simple fan",
+                    "space_loads_file": new_path
+                }
             elif feature_type == 'District System':
                 feature_type = 'GROUNDHEATEXCHANGER'
+                #get ghe parameters for 'ghe_specific_params' key of system_parameters.json
+                matching_ghe = self.find_matching_ghe_id(feature['id'])
+                #matching_ghe.pop('ground_loads', None)
+                #print(f"matching_ghe: {matching_ghe}\n")
+                length = matching_ghe['ghe_geometric_params']['length_of_ghe']
+                width = matching_ghe['ghe_geometric_params']['width_of_ghe']
+                geometric_constraints = self.ghe_parameters['geometric_constraints']
+                geometric_constraints['length'] = length
+                geometric_constraints['width'] = width
+                properties = {
+                              'fuild': self.ghe_parameters['fluid'],
+                              'grout': self.ghe_parameters['grout'],
+                              'soil': self.ghe_parameters['soil'],
+                              'pipe': self.ghe_parameters['pipe'],
+                              'borehole': matching_ghe['borehole'],
+                              'simulation': self.ghe_parameters['simulation'],
+                              'geometric_constraints': geometric_constraints,
+                              'design': self.ghe_parameters['design'],
+                              'loads': {'ground_loads': matching_ghe['ground_loads']}
+                              }
             converted_features.append({
+                'id': feature['id'],
                 'name': feature['name'],
-                'type': feature_type
+                'type': feature_type,
+                'properties': properties
             })
         
         return converted_features
@@ -144,6 +204,47 @@ class Network:
         return 0
 
     def set_components(self, comp_data_list: list[dict], throw: bool = True):
+        
+        # Add ets pump
+        obj = {'id': '',
+                'name': 'ets pump',
+                'type': 'PUMP',
+                "properties": {
+                    "design_flow_rate": 0.0005,
+                    "design_head": 100000,
+                    "motor_efficiency": 0.9,
+                    "motor_inefficiency_to_fluid_stream": 1.0
+                }
+        }
+        obj["name"] = str(obj["name"]).strip().upper()
+        self.components_data.append(obj)
+
+        # Add fan
+        obj = {'id': '',
+                "name": "simple fan",
+                "type": "FAN",
+                "properties": {
+                    "design_flow_rate": 0.25,
+                    "design_head": 150,
+                    "motor_efficiency": 0.6
+                }
+        }
+        obj["name"] = str(obj["name"]).strip().upper()
+        self.components_data.append(obj)
+
+        # Add WAHP
+        obj = {'id': '',
+                "name": "small wahp",
+                "type": "HEATPUMP",
+                "properties": {
+                    "cop_c": 3.5,
+                    "cop_h": 2.5
+                }
+        }
+        obj["name"] = str(obj["name"]).strip().upper()
+        self.components_data.append(obj)
+
+
         for comp in comp_data_list:
             if self.check_for_existing_component(comp['name'], comp['type'], throw) != 0:
                 return 1
@@ -153,13 +254,13 @@ class Network:
 
     def get_component(self, name: str, comp_type: ComponentType):
         for comp in self.components_data:
+            #print(f"comp: {comp}\n")
             if comp['name'] == name and comp_type.name == comp['type']:
                 return comp
 
     def add_ets_to_network(self, name: str):
         name_uc = name.strip().upper()
         ets_data = self.get_component(name_uc, ComponentType.ENERGYTRANSFERSTATION)
-
         props = ets_data['properties']
 
         hp_name = str(props['heat_pump']).strip().upper()
@@ -186,6 +287,7 @@ class Network:
     def add_ghe_to_network(self, name: str):
         name_uc = name.strip().upper()
         ghe_data = self.get_component(name_uc, ComponentType.GROUNDHEATEXCHANGER)
+        #print(f"ghe_data: {ghe_data}\n")
         ghe = GHE(ghe_data)
         self.network.append(ghe)
         return 0
@@ -370,33 +472,32 @@ def run_sizer_from_cli_worker(geojson_file_path: Path, scenario_directory_path: 
         return 1
 
     design_data: dict = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]["design"]
-
+    print(f"design_data: {design_data}\n")
     # instantiate a new Network object
     network = Network()
+    network.geojson_data = geojson_data
+    network.ghe_parameters = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]
+    network.scenario_directory_path = scenario_directory_path
 
     #get network list from geojson
     connected_features = network.get_connected_features(geojson_data)
-    print("Features in district loop:")
-    for feature in connected_features:
-        print(feature)
+    print(f"Features in district loop: {connected_features}\n")
 
-    print("Features in loop order:")
     reordered_features = network.reorder_connected_features(connected_features)
-    print(reordered_features)
+    print(f"Features in loop order: {reordered_features}\n")
 
-    #convert geojson type "Building","District System" to "ENERGYTRANSFERSTATION","GROUNDHEATEXCHANGER"
-    network_data = network.convert_features(reordered_features)
-    print("Network list:")
-    print(network_data)
+    #convert geojson type "Building","District System" to "ENERGYTRANSFERSTATION","GROUNDHEATEXCHANGER" and add properties
+    network_data: list[dict] = network.convert_features(reordered_features)
+    #print(f"Network data: {network_data}\n")
     #network_data: list[dict] = data["network"]
-
-    return
-    component_data: list[dict] = data["components"]
+    #component_data: list[dict] = data["components"]
 
     # begin populating structures in preparation for sizing
     errors = 0
     errors += network.set_design(des_method_str=design_data["method"], throw=True)
-    errors += network.set_components(component_data, throw=True)
+    errors += network.set_components(network_data, throw=True)
+    #print(f"components_data: {network.components_data}\n")
+    #pprint(network.components_data)
 
     for component in network_data:
         comp_name = str(component["name"]).strip().upper()
@@ -416,7 +517,7 @@ def run_sizer_from_cli_worker(geojson_file_path: Path, scenario_directory_path: 
         return 1
 
     network.set_component_network_loads()
-    network.size(output_path)
+    network.size(output_directory_path)
     #network.write_outputs(output_path)
 
     return 0
@@ -449,7 +550,7 @@ def run_sizer_from_cli(geojson_file, scenario_directory, output_directory, valid
     print("Output directory:", output_directory)
     
     geojson_file_path = Path(geojson_file).resolve()
-    print(f"geojson_file path: {geojson_file_path}") 
+    print(f"geojson_file path: {geojson_file_path}\n") 
     #if validate:
     #    try:
     #        validate_input_file(input_path)
@@ -461,10 +562,10 @@ def run_sizer_from_cli(geojson_file, scenario_directory, output_directory, valid
     # calling the worker function here
 
     scenario_directory_path = Path(scenario_directory).resolve()
-    print(f"scenario_directory path: {scenario_directory_path}") 
+    print(f"scenario_directory path: {scenario_directory_path}\n") 
 
     output_directory_path = Path(output_directory)
-    print(f"Output path: {output_directory_path}") 
+    print(f"Output path: {output_directory_path}\n") 
     if not output_directory_path.exists():
         print("Output path does not exist. attempting to create")  # Add this line
         try:

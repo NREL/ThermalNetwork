@@ -10,9 +10,10 @@ import json
 class GHE(BaseComponent):
     def __init__(self, data: dict) -> None:
         super().__init__(data['name'], ComponentType.GROUNDHEATEXCHANGER)
-        design_file = data['design_file']
-        with open(design_file) as f:
-            self.json_data = json.load(f)
+        #design_file = data['design_file']
+        self.json_data = data['properties']
+        #with open(design_file) as f:
+        #    self.json_data = json.load(f)
         # compute Area
         self.area = self.json_data['geometric_constraints']['length'] * self.json_data['geometric_constraints']['width']
 
