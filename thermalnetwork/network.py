@@ -117,6 +117,7 @@ class Network:
         # Convert the features from geojson list
         for feature in json_data:
             feature_type = feature['type']
+            district_type = feature['district_system_type']
             if feature_type == 'Building':
                 feature_type = 'ENERGYTRANSFERSTATION'
                 # add building directory ID to scenario path; look for dir named '_export_modelica_loads' for the building_loads.csv
@@ -136,7 +137,7 @@ class Network:
                     "fan": "simple fan",
                     "space_loads_file": new_path
                 }
-            elif feature_type == 'District System':
+            elif feature_type == 'District System' and district_type == "Ground Heat Exchanger":
                 feature_type = 'GROUNDHEATEXCHANGER'
                 # get ghe parameters for 'ghe_specific_params' key of system_parameters.json
                 matching_ghe = self.find_matching_ghe_id(feature['id'])
