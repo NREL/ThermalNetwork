@@ -5,7 +5,6 @@ from thermalnetwork.ground_heat_exchanger import GHE
 
 class TestGHE(TestCase):
     def test_calc_src_side_load(self):
-
         data = {
             "name": "GHE",
             "type": "GROUNDHEATEXCHANGER",

@@ -1,11 +1,13 @@
 from operator import add, sub
 
+import pandas as pd
+
 from thermalnetwork.base_component import BaseComponent
 from thermalnetwork.enums import ComponentType
 from thermalnetwork.fan import Fan
 from thermalnetwork.heat_pump import HeatPump
 from thermalnetwork.pump import Pump
-import pandas as pd
+
 
 class ETS(BaseComponent):
     def __init__(self, data: dict):
