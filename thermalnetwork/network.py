@@ -76,7 +76,8 @@ class Network:
                     'type': feature['properties']['type'],
                     'name': feature['properties'].get('name', ''),
                     'properties': {k: v for k, v in feature['properties'].items() if k not in [':type', ':name']},
-                    'start_loop': 'true' if feature_id == startloop_feature_id else None
+                    'start_loop': 'true' if feature_id == startloop_feature_id else None,
+                    'district_system_type': feature['properties'].get('district_system_type', '')
                 })
 
         return connected_objects
