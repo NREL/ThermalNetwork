@@ -527,21 +527,20 @@ def run_sizer_from_cli_worker(geojson_file_path: Path, scenario_directory_path: 
 @click.option("-o", "--output_directory", type=click.Path(), metavar="OUTPUT_DIRECTORY",
               help="Path to output directory")
 @click.version_option(VERSION)
-@click.option(
-    "--validate",
-    default=False,
-    is_flag=True,
-    show_default=False,
-    help="Validate input and exit."
-)
-def run_sizer_from_cli(geojson_file, scenario_directory, output_directory, validate):
+# @click.option(
+#     "--validate",
+#     default=False,
+#     is_flag=True,
+#     show_default=False,
+#     help="Validate input and exit."
+# )
+def run_sizer_from_cli(geojson_file, scenario_directory, output_directory):
     """
     CLI entrypoint for sizing runner.
 
     :param geojson_file: path to GeoJSON file
     :param scenario_directory: path to scenario directory
-    :param output_directory: path to output directory
-    :param validate: flag for input schema validation
+    :param output_directory: path to output directory    :param validate: flag for input schema validation
     """
 
     print("GeoJSON file:", geojson_file)
