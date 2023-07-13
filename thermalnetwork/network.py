@@ -75,6 +75,7 @@ class Network:
                     'id': feature_id,
                     'type': feature['properties']['type'],
                     'name': feature['properties'].get('name', ''),
+                    'district_system_type': feature['properties'].get('district_system_type', ''),
                     'properties': {k: v for k, v in feature['properties'].items() if k not in [':type', ':name']},
                     'start_loop': 'true' if feature_id == startloop_feature_id else None
                 })
@@ -136,7 +137,7 @@ class Network:
                     "fan": "simple fan",
                     "space_loads_file": new_path
                 }
-            elif feature_type == 'District System':
+            elif feature_type == 'District System' and feature['district_system_type'] == 'Ground Heat Exchanger':
                 feature_type = 'GROUNDHEATEXCHANGER'
                 # get ghe parameters for 'ghe_specific_params' key of system_parameters.json
                 matching_ghe = self.find_matching_ghe_id(feature['id'])

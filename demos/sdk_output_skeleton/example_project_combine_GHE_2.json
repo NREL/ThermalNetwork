@@ -244,7 +244,8 @@
         "type": "District System",
         "footprint_area": 45601,
         "footprint_perimeter": 873,
-        "floor_area": 45601
+        "floor_area": 45601,
+        "district_system_type": "Ground Heat Exchanger"
       }
     },
     {
@@ -256,7 +257,8 @@
         "type": "District System",
         "footprint_area": 32651,
         "footprint_perimeter": 735,
-        "floor_area": 32651
+        "floor_area": 32651,
+        "district_system_type": "Ground Heat Exchanger"
       }
     },
     {
