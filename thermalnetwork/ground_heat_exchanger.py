@@ -1,18 +1,21 @@
-from thermalnetwork.base_component import BaseComponent
-from thermalnetwork.enums import ComponentType
-from ghedesigner.manager import GHEManager
 import os
+import shutil
 from pathlib import Path
 from typing import List
-import shutil
-import json 
+
+from ghedesigner.manager import GHEManager
+
+from thermalnetwork.base_component import BaseComponent
+from thermalnetwork.enums import ComponentType
+
 
 class GHE(BaseComponent):
     def __init__(self, data: dict) -> None:
         super().__init__(data['name'], ComponentType.GROUNDHEATEXCHANGER)
-        design_file = data['design_file']
-        with open(design_file) as f:
-            self.json_data = json.load(f)
+        # design_file = data['design_file']
+        self.json_data = data['properties']
+        # with open(design_file) as f:
+        #    self.json_data = json.load(f)
         # compute Area
         self.area = self.json_data['geometric_constraints']['length'] * self.json_data['geometric_constraints']['width']
 
@@ -35,7 +38,8 @@ class GHE(BaseComponent):
             rho_cp=self.json_data['grout']['rho_cp'])
         ghe.set_fluid()
         ghe.set_borehole(
-            height=self.json_data['geometric_constraints']['max_height'],  # Assuming max height is the height of the borehole
+            height=self.json_data['geometric_constraints']['max_height'],
+            # Assuming max height is the height of the borehole
             buried_depth=self.json_data['borehole']['buried_depth'],
             diameter=self.json_data['borehole']['diameter'])
         ghe.set_simulation_parameters(
@@ -58,8 +62,8 @@ class GHE(BaseComponent):
         ghe.prepare_results("Project Name", "Notes", "Author", "Iteration Name")
 
         # Construct the path to the new subdirectory
-        #current_file_directory = Path(os.path.dirname(os.path.abspath(__file__)))
-        #output_file_directory = current_file_directory / self.name
+        # current_file_directory = Path(os.path.dirname(os.path.abspath(__file__)))
+        # output_file_directory = current_file_directory / self.name
         output_file_directory = output_path / self.name
 
         # Check if the directory exists and delete it if so
@@ -73,7 +77,7 @@ class GHE(BaseComponent):
 
         ghe.write_output_files(output_file_directory, "")
         u_tube_height = ghe.results.output_dict['ghe_system']['active_borehole_length']['value']
-        selected_coordinates = ghe.results.borehole_location_data_rows  # includes a header row
+        # selected_coordinates = ghe.results.borehole_location_data_rows  # includes a header row
         return u_tube_height
 
     def get_atlanta_loads(self) -> List[float]:
