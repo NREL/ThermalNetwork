@@ -29,9 +29,10 @@ setup(
     ],
     install_requires=[
         'click>=8.1.6',
-        'ghedesigner>=1.1'
+        'ghedesigner>=1.1',
+        'pandas>=2.0.3'
     ],
     entry_points={
-        'console_scripts': ['thermalnetwork=thermalnetwork.network.run_sizer_from_cli']
+        'console_scripts': ['thermalnetwork=thermalnetwork.network:run_sizer_from_cli']
     }
 )
