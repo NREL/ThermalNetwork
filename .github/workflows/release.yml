@@ -29,5 +29,5 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
-          password: ${{ secrets.PIPYPW }}
+          password: ${{ secrets.PYPIPW }}
           repository_url: https://upload.pypi.org/legacy/
