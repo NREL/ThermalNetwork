@@ -520,10 +520,12 @@ def run_sizer_from_cli_worker(system_parameter_path: Path, scenario_directory_pa
 
 
 @click.command(name="ThermalNetworkCommandLine")
-@click.option("-y", "--sys_param_file", type=click.Path(exists=True), metavar="SYS_PARAM_PATH", help="Path to System Parameter file")
+@click.option("-y", "--system_parameter_path", type=click.Path(exists=True), metavar="SYS_PARAM_PATH",
+              help="Path to System Parameter file")
 @click.option("-s", "--scenario_directory", type=click.Path(exists=True), metavar="SCENARIO_DIRECTORY",
               help="Path to scenario directory")
-@click.option("-f", "--geojson_file", type=click.Path(exists=True), metavar="GEOJSON_FILE", help="Path to GeoJSON file")
+@click.option("-f", "--geojson_file", type=click.Path(exists=True), metavar="GEOJSON_FILE",
+              help="Path to GeoJSON file")
 @click.option("-o", "--output_directory", type=click.Path(), metavar="OUTPUT_DIRECTORY",
               help="Path to output directory")
 @click.version_option(VERSION)
@@ -539,8 +541,9 @@ def run_sizer_from_cli(system_parameter_file, scenario_directory, geojson_file, 
     CLI entrypoint for sizing runner.
 
     :param system_parameter_file: path to system parameter file
+    :param scenario_directory: path to scenario directory
     :param geojson_file: path to GeoJSON file
-    :param output_directory: path to output directory    :param validate: flag for input schema validation
+    :param output_directory: path to output directory
     """
 
     print("System Parameter File:", system_parameter_file)
