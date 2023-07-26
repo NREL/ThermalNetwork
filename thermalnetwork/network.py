@@ -82,7 +82,8 @@ class Network:
 
         return connected_objects
 
-    def reorder_connected_features(self, features):
+    @staticmethod
+    def reorder_connected_features(features):
         """
         Reorders a list of connected features so that the feature with 'startloop' set to 'true' is at the beginning.
 
@@ -120,7 +121,8 @@ class Network:
             feature_type = feature['type']
             if feature_type == 'Building':
                 feature_type = 'ENERGYTRANSFERSTATION'
-                # add building directory ID to scenario path; look for dir named '_export_modelica_loads' for the building_loads.csv
+                # add building directory ID to scenario path; look for dir named
+                # '_export_modelica_loads' for the building_loads.csv
                 new_path = self.scenario_directory_path / feature['properties']['id']
                 for directory in new_path.iterdir():
                     if directory.is_dir() and "_export_modelica_loads" in directory.name:
@@ -173,7 +175,8 @@ class Network:
         Sets up the design method.
 
         :param des_method_str: design method string
-        :param throw: by default, function will raise an exception on error, override to false to not raise exception
+        :param throw: by default, function will raise an exception on error.
+                      override to "False" to not raise exception
         :returns: zero if successful, nonzero if failure
         :rtype: int
         """
@@ -465,7 +468,6 @@ def run_sizer_from_cli_worker(system_parameter_path: Path, scenario_directory_pa
     version: int = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]["version"]
     if version != VERSION:
         print("Mismatched versions, could be a problem", file=stderr)
-        return 1
 
     design_data: dict = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]["design"]
     print(f"design_data: {design_data}\n")
@@ -482,7 +484,8 @@ def run_sizer_from_cli_worker(system_parameter_path: Path, scenario_directory_pa
     reordered_features = network.reorder_connected_features(connected_features)
     print(f"Features in loop order: {reordered_features}\n")
 
-    # convert geojson type "Building","District System" to "ENERGYTRANSFERSTATION","GROUNDHEATEXCHANGER" and add properties
+    # convert geojson type "Building","District System" to "ENERGYTRANSFERSTATION",
+    # "GROUNDHEATEXCHANGER" and add properties
     network_data: list[dict] = network.convert_features(reordered_features)
     # print(f"Network data: {network_data}\n")
     # network_data: list[dict] = data["network"]
@@ -520,22 +523,15 @@ def run_sizer_from_cli_worker(system_parameter_path: Path, scenario_directory_pa
 
 
 @click.command(name="ThermalNetworkCommandLine")
-@click.option("-y", "--system_parameter_path", type=click.Path(exists=True), metavar="SYS_PARAM_PATH",
+@click.option("-y", "--system-parameter-file", type=click.Path(exists=True),
               help="Path to System Parameter file")
-@click.option("-s", "--scenario_directory", type=click.Path(exists=True), metavar="SCENARIO_DIRECTORY",
+@click.option("-s", "--scenario-directory", type=click.Path(exists=True),
               help="Path to scenario directory")
-@click.option("-f", "--geojson_file", type=click.Path(exists=True), metavar="GEOJSON_FILE",
+@click.option("-f", "--geojson-file", type=click.Path(exists=True),
               help="Path to GeoJSON file")
-@click.option("-o", "--output_directory", type=click.Path(), metavar="OUTPUT_DIRECTORY",
+@click.option("-o", "--output-directory", type=click.Path(),
               help="Path to output directory")
 @click.version_option(VERSION)
-# @click.option(
-#     "--validate",
-#     default=False,
-#     is_flag=True,
-#     show_default=False,
-#     help="Validate input and exit."
-# )
 def run_sizer_from_cli(system_parameter_file, scenario_directory, geojson_file, output_directory):
     """
     CLI entrypoint for sizing runner.
@@ -580,7 +576,8 @@ def run_sizer_from_cli(system_parameter_file, scenario_directory, geojson_file, 
             print(f"Failed to create directory: {e}")
 
     output_directory_path = output_directory_path.resolve()
-    return run_sizer_from_cli_worker(system_parameter_path, scenario_directory_path, geojson_file_path, output_directory_path)
+    return run_sizer_from_cli_worker(system_parameter_path, scenario_directory_path,
+                                     geojson_file_path, output_directory_path)
 
 
 if __name__ == "__main__":
