@@ -434,12 +434,13 @@ class Network:
         pass
 
 
-def run_sizer_from_cli_worker(geojson_file_path: Path, scenario_directory_path: Path,
+def run_sizer_from_cli_worker(system_parameter_path: Path, scenario_directory_path: Path, geojson_file_path: Path,
                               output_directory_path: Path) -> int:
     """
     Sizing worker function. Worker is called by tests, and thus not wrapped by `click`.
 
     :param geojson_file_path: path to GeoJSON file
+    :param system_parameter_path: path to System Parameter File
     :param scenario_directory_path: path to scenario directory
     :param output_directory_path: path to output directory
     """
@@ -452,15 +453,13 @@ def run_sizer_from_cli_worker(geojson_file_path: Path, scenario_directory_path: 
     geojson_data = json.loads(geojson_file_path.read_text())
     # print(f"geojson_data: {geojson_data}")
 
-    # load system_parameters file from the scenario directory path
-    system_parameters_path = scenario_directory_path.joinpath("ghe_dir", "system_parameter.json")
 
     # Check if the file exists
-    if not system_parameters_path.exists():
-        print(f"No system_parameter.json file found at {system_parameters_path}, aborting.", file=stderr)
+    if not system_parameter_path.exists():
+        print(f"No system_parameter.json file found at {system_parameter_path}, aborting.", file=stderr)
         return 1
 
-    system_parameters_data = json.loads(system_parameters_path.read_text())
+    system_parameters_data = json.loads(system_parameter_path.read_text())
     # print(f"system_parameters_data: {system_parameters_data}")
 
     # load all input data
@@ -522,9 +521,10 @@ def run_sizer_from_cli_worker(geojson_file_path: Path, scenario_directory_path: 
 
 
 @click.command(name="ThermalNetworkCommandLine")
-@click.option("-f", "--geojson_file", type=click.Path(exists=True), metavar="GEOJSON_FILE", help="Path to GeoJSON file")
+@click.option("-y", "--sys_param_file", type=click.Path(exists=True), metavar="SYS_PARAM_PATH", help="Path to System Parameter file")
 @click.option("-s", "--scenario_directory", type=click.Path(exists=True), metavar="SCENARIO_DIRECTORY",
               help="Path to scenario directory")
+@click.option("-f", "--geojson_file", type=click.Path(exists=True), metavar="GEOJSON_FILE", help="Path to GeoJSON file")
 @click.option("-o", "--output_directory", type=click.Path(), metavar="OUTPUT_DIRECTORY",
               help="Path to output directory")
 @click.version_option(VERSION)
@@ -535,21 +535,20 @@ def run_sizer_from_cli_worker(geojson_file_path: Path, scenario_directory_path: 
 #     show_default=False,
 #     help="Validate input and exit."
 # )
-def run_sizer_from_cli(geojson_file, scenario_directory, output_directory):
+def run_sizer_from_cli(system_parameter_file, scenario_directory, geojson_file, output_directory):
     """
     CLI entrypoint for sizing runner.
 
+    :param system_parameter_file: path to system parameter file
     :param geojson_file: path to GeoJSON file
-    :param scenario_directory: path to scenario directory
     :param output_directory: path to output directory    :param validate: flag for input schema validation
     """
 
-    print("GeoJSON file:", geojson_file)
+    print("System Parameter File:", system_parameter_file)
     print("Scenario directory:", scenario_directory)
+    print("GeoJSON file:", geojson_file)
     print("Output directory:", output_directory)
 
-    geojson_file_path = Path(geojson_file).resolve()
-    print(f"geojson_file path: {geojson_file_path}\n")
     # if validate:
     #    try:
     #        validate_input_file(input_path)
@@ -560,8 +559,14 @@ def run_sizer_from_cli(geojson_file, scenario_directory, output_directory):
     #        return 1
     # calling the worker function here
 
+    system_parameter_path = Path(system_parameter_file).resolve()
+    print(f"scenario_directory path: {system_parameter_path}\n")
+
     scenario_directory_path = Path(scenario_directory).resolve()
     print(f"scenario_directory path: {scenario_directory_path}\n")
+
+    geojson_file_path = Path(geojson_file).resolve()
+    print(f"geojson_file path: {geojson_file_path}\n")
 
     output_directory_path = Path(output_directory)
     print(f"Output path: {output_directory_path}\n")
@@ -573,7 +578,7 @@ def run_sizer_from_cli(geojson_file, scenario_directory, output_directory):
             print(f"Failed to create directory: {e}")
 
     output_directory_path = output_directory_path.resolve()
-    return run_sizer_from_cli_worker(geojson_file_path, scenario_directory_path, output_directory_path)
+    return run_sizer_from_cli_worker(system_parameter_path, scenario_directory_path, geojson_file_path, output_directory_path)
 
 
 if __name__ == "__main__":
