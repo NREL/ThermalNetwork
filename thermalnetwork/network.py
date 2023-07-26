@@ -453,7 +453,6 @@ def run_sizer_from_cli_worker(system_parameter_path: Path, scenario_directory_pa
     geojson_data = json.loads(geojson_file_path.read_text())
     # print(f"geojson_data: {geojson_data}")
 
-
     # Check if the file exists
     if not system_parameter_path.exists():
         print(f"No system_parameter.json file found at {system_parameter_path}, aborting.", file=stderr)
