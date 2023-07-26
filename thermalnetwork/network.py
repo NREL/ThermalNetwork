@@ -467,7 +467,7 @@ def run_sizer_from_cli_worker(system_parameter_path: Path, scenario_directory_pa
     # load all input data
     version: int = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]["version"]
     if version != VERSION:
-        print("Mismatched versions, could be a problem", file=stderr)
+        print("Mismatched ThermalNetwork versions. Could be a problem.", file=stderr)
 
     design_data: dict = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]["design"]
     print(f"design_data: {design_data}\n")
