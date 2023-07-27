@@ -41,7 +41,7 @@
   "district_system": {
     "fifth_generation": {
       "ghe_parameters": {
-        "version": "1.0",
+        "version": "0.2.1",
         "ghe_dir": "tests/system_parameters/data",
         "fluid": {
           "fluid_name": "Water",
