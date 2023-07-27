@@ -536,7 +536,7 @@ def run_sizer_from_cli(system_parameter_file, scenario_directory, geojson_file, 
     """
     CLI entrypoint for sizing runner.
 
-    :param system_parameter_file: path to system parameter file
+     system_parameter_file: path to system parameter file
     :param scenario_directory: path to scenario directory
     :param geojson_file: path to GeoJSON file
     :param output_directory: path to output directory
@@ -558,7 +558,7 @@ def run_sizer_from_cli(system_parameter_file, scenario_directory, geojson_file, 
     # calling the worker function here
 
     system_parameter_path = Path(system_parameter_file).resolve()
-    print(f"scenario_directory path: {system_parameter_path}\n")
+    print(f"system_parameter path: {system_parameter_path}\n")
 
     scenario_directory_path = Path(scenario_directory).resolve()
     print(f"scenario_directory path: {scenario_directory_path}\n")
