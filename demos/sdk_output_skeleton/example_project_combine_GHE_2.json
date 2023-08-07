@@ -323,7 +323,7 @@
         "id": "8c6064ee-f9b7-440b-95cd-e2a163fd39a5",
         "type": "ThermalJunction",
         "buildingId": "10",
-        "start_loop": "true"
+        "is_ghe_start_loop": true
       }
     },
     {

@@ -23,13 +23,13 @@ class Network:
 
     def find_startloop_feature_id(self, features):
         """
-        Finds the feature ID of a feature with the 'startLoop' property set to 'true' in a list of features.
+        Finds the feature ID of a feature with the 'is_ghe_start_loop' property set to True in a list of features.
 
         :param features: List of features to search for the start loop feature.
         :return: The feature ID of the start loop feature, or None if not found.
         """
         for feature in features:
-            if feature['properties'].get('start_loop') == 'true':
+            if feature['properties'].get('is_ghe_start_loop'):
                 start_feature_id = feature['properties'].get('buildingId') or feature['properties'].get('DSId')
                 return start_feature_id
         return None
@@ -45,7 +45,7 @@ class Network:
         connectors = [feature for feature in features if feature['properties']['type'] == 'ThermalConnector']
         connected_features = []
 
-        # get the id of the building or ds from the thermaljunction that has start_loop: true
+        # get the id of the building or ds from the thermaljunction that has is_ghe_start_loop: True
         startloop_feature_id = self.find_startloop_feature_id(features)
 
         # Start with the first connector
@@ -77,7 +77,7 @@ class Network:
                     'name': feature['properties'].get('name', ''),
                     'district_system_type': feature['properties'].get('district_system_type', ''),
                     'properties': {k: v for k, v in feature['properties'].items() if k not in [':type', ':name']},
-                    'start_loop': 'true' if feature_id == startloop_feature_id else None
+                    'is_ghe_start_loop': True if feature_id == startloop_feature_id else None
                 })
 
         return connected_objects
@@ -85,21 +85,21 @@ class Network:
     @staticmethod
     def reorder_connected_features(features):
         """
-        Reorders a list of connected features so that the feature with 'startloop' set to 'true' is at the beginning.
+        Reorders a list of connected features so that the feature with 'is_ghe_start_loop' set to True is at the beginning.
 
         :param features: List of connected features.
         :return: Reordered list of connected features.
-        :raises ValueError: If no feature with 'startloop' set to 'true' is found.
+        :raises ValueError: If no feature with 'is_ghe_start_loop' set to True is found.
         """
         start_loop_index = None
 
         for i, feature in enumerate(features):
-            if feature.get('start_loop') == 'true':
+            if feature.get('is_ghe_start_loop'):
                 start_loop_index = i
                 break
 
         if start_loop_index is None:
-            raise ValueError("No feature with 'startloop' set to 'true' was found in the list.")
+            raise ValueError("No feature with 'is_ghe_start_loop' set to True was found in the list.")
 
         # Reorder the features list to start with the feature having 'startloop' set to 'true'
         reordered_features = features[start_loop_index:] + features[:start_loop_index]
