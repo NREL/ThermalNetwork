@@ -106,7 +106,6 @@ class Network:
 
         return reordered_features
 
-
     def find_matching_ghe_id(self, feature_id):
         for ghe in self.ghe_parameters['ghe_specific_params']:
             if ghe['ghe_id'] == feature_id:
