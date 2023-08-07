@@ -53,3 +53,4 @@ class TestNetwork(BaseCase):
             os.mkdir(output_path)
 
         run_sizer_from_cli_worker(system_parameter_path, scenario_directory_path, geojson_file_path, output_path)
+        
