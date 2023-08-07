@@ -89,10 +89,23 @@ class Network:
 
         :param features: List of connected features.
         :return: Reordered list of connected features.
+        :raises ValueError: If no feature with 'startloop' set to 'true' is found.
         """
-        while features[0].get('start_loop') != 'true':
-            features.append(features.pop(0))
-        return features
+        start_loop_index = None
+
+        for i, feature in enumerate(features):
+            if feature.get('start_loop') == 'true':
+                start_loop_index = i
+                break
+
+        if start_loop_index is None:
+            raise ValueError("No feature with 'startloop' set to 'true' was found in the list.")
+
+        # Reorder the features list to start with the feature having 'startloop' set to 'true'
+        reordered_features = features[start_loop_index:] + features[:start_loop_index]
+
+        return reordered_features
+
 
     def find_matching_ghe_id(self, feature_id):
         for ghe in self.ghe_parameters['ghe_specific_params']:
