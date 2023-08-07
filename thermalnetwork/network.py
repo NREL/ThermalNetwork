@@ -156,7 +156,7 @@ class Network:
                 # get ghe parameters for 'ghe_specific_params' key of system_parameters.json
                 matching_ghe = self.find_matching_ghe_id(feature['id'])
                 # matching_ghe.pop('ground_loads', None)
-                # print(f"matching_ghe: {matching_ghe}\n")
+                print(f"matching_ghe: {matching_ghe}\n")
                 length = matching_ghe['ghe_geometric_params']['length_of_ghe']
                 width = matching_ghe['ghe_geometric_params']['width_of_ghe']
                 geometric_constraints = self.ghe_parameters['geometric_constraints']
