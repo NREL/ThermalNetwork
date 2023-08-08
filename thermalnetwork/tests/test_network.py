@@ -52,7 +52,7 @@ class TestNetwork(BaseCase):
         if not output_path.exists():
             os.mkdir(output_path)
 
-        run_sizer_from_cli_worker(system_parameter_path, scenario_directory_path, geojson_file_path, output_path)    
+        run_sizer_from_cli_worker(system_parameter_path, scenario_directory_path, geojson_file_path, output_path)
 
     def test_network_two_ghe_from_UO(self):
         geojson_file_path = self.demos_path / 'sdk_output_skeleton_2' / 'example_project_with_ghe.json'
