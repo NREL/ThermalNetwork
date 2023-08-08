@@ -25,6 +25,7 @@ class ETS(BaseComponent):
         num_loads = len(self.space_loads)
         hp_loads = list(map(sub, self.space_loads, self.fan.get_loads(num_loads)))
         hp_loads = list(map(sub, hp_loads, self.load_pump.get_loads(num_loads)))
+        hp_loads = list(map(sub, hp_loads, self.hp.get_loads(num_loads)))
         network_loads = list(map(add, hp_loads, self.src_pump.get_loads(num_loads)))
         return network_loads
 

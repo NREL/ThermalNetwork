@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from sys import exit, stderr
+import numpy as np
 
 import click
 
@@ -358,28 +359,35 @@ class Network:
             print(f"{self.network[i]}.area: {ghe_area}")
             total_ghe_area += ghe_area
         print(f"total_ghe_area: {total_ghe_area}")
+        
+        # Initialize an array to store the summed loads for each hour of the year
+        total_network_loads = [0] * 8760
 
-        total_space_loads = 0
         for i in other_indexes:
             # ETS .get_loads() doesnt take num_loads arg
             device = self.network[i]
             if device.comp_type != ComponentType.ENERGYTRANSFERSTATION:
                 print(f"{device.comp_type}.get_loads: {device.get_loads(1)}")
-                device_load = sum(device.get_loads(1))
+                device_load = device.get_loads(1)
+                # Add the scalar load to the total space loads for each hour of the year
+                #total_network_loads = [total_network_loads[j] + device_load[0] for j in range(8760)]
+                total_network_loads = np.array(total_network_loads) + device_load[0]
             else:
                 print(f"{device.comp_type}.get_loads len: {len(device.get_loads())}")
-                device_load = sum(device.get_loads())
-            print(f"Total load for {device.comp_type}: {device_load}")
-            total_space_loads += device_load
-        print(f"Total space loads for devices before GHE: {total_space_loads}")
+                device_loads = device.get_loads()
+                # Add the array of loads for each hour to the total space loads array
+                #total_network_loads = [total_network_loads[j] + device_loads[j] for j in range(8760)]
+                total_network_loads = np.array(total_network_loads) + np.array(device_loads)
+   
+        print(f"Total network loads for devices: {sum(total_network_loads)}")
 
-        load_per_area = total_space_loads / total_ghe_area
-        print(f"Load per Area: {load_per_area}")
+        network_load_per_area = np.array(total_network_loads) / total_ghe_area
 
         # loop over GHEs and size per area
         for i in ghe_indexes:
             ghe_area = self.network[i].area
-            self.network[i].ghe_size(load_per_area * ghe_area, output_path)
+            self.network[i].json_data['loads']['ground_loads'] = np.array(network_load_per_area)*ghe_area
+            self.network[i].ghe_size(sum(network_load_per_area) * ghe_area, output_path)
 
     def size_to_upstream_equipment(self, output_path: Path):
         """
@@ -396,9 +404,6 @@ class Network:
             if device.comp_type == ComponentType.GROUNDHEATEXCHANGER:
                 ghe_indexes.append(i)
 
-        # Initialize an array to store the summed loads for each hour of the year
-        total_space_loads = [0] * 8760
-
         print("GROUNDHEATEXCHANGER indices in network:")
         print(ghe_indexes)
         # slice the self.network by ghe_indexes
@@ -408,25 +413,29 @@ class Network:
             else:
                 devices_before_ghe = self.network[ghe_indexes[i - 1] + 1:ghe_index]
             print(f"Devices before GHE at index {ghe_index}: {devices_before_ghe}")
-
+        
+            # Initialize an array to store the summed network loads for each hour of the year
+            network_loads = [0] * 8760
             for device in devices_before_ghe:
                 # ETS .get_loads() doesnt take num_loads arg
                 if device.comp_type != ComponentType.ENERGYTRANSFERSTATION:
                     print(f"{device.comp_type}.get_loads: {device.get_loads(1)}")
                     device_load = device.get_loads(1)
                     # Add the scalar load to the total space loads for each hour of the year
-                    total_space_loads = [total_space_loads[j] + device_load[0] for j in range(8760)]
+                    #network_loads = [network_loads[j] + device_load[0] for j in range(8760)]
+                    network_loads = np.array(network_loads) + device_load[0]
 
                 else:
                     print(f"{device.comp_type}.get_loads len: {len(device.get_loads())}")
                     device_loads = device.get_loads()
                     # Add the array of loads for each hour to the total space loads array
-                    total_space_loads = [total_space_loads[j] + device_loads[j] for j in range(8760)]
+                    #network_loads = [network_loads[j] + device_loads[j] for j in range(8760)]
+                    network_loads = np.array(network_loads) + np.array(device_loads)
 
-            print(f"Total space loads for devices before GHE: {sum(total_space_loads)}")
-            self.network[ghe_index].json_data['loads']['ground_loads'] = total_space_loads
+            print(f"Total network loads for devices before GHE: {sum(network_loads)}")
+            self.network[ghe_index].json_data['loads']['ground_loads'] = network_loads
             # call ghe_size() with total load
-            self.network[ghe_index].ghe_size(sum(total_space_loads), output_path)
+            self.network[ghe_index].ghe_size(sum(network_loads), output_path)
 
     def size(self, output_path: Path, throw: bool = True):
         """

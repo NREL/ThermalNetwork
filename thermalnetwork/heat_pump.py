@@ -25,5 +25,5 @@ class HeatPump(BaseComponent):
             # cooling load
             return space_load * (1 + 1 / self.cop_c)
 
-    def set_loads(self, loads: list[float]):
+    def get_loads(self, loads: list[float]):
         return [self.calc_src_side_load(x) for x in loads]
