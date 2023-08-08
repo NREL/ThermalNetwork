@@ -87,7 +87,7 @@
           {
             "ghe_id": "0b575a8f-97d1-47e6-b329-7ef7566d26f2",
             "ghe_geometric_params": {
-              "length_of_ghe": 200,
+              "length_of_ghe": 100,
               "width_of_ghe": 100
             },
             "borehole": {
@@ -99,7 +99,7 @@
           {
             "ghe_id": "15a25e2f-c425-46e9-8036-b1d0d09127e2",
             "ghe_geometric_params": {
-              "length_of_ghe": 200,
+              "length_of_ghe": 100,
               "width_of_ghe": 100
             },
             "borehole": {
