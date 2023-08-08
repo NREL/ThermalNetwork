@@ -74,7 +74,6 @@ class GHE(BaseComponent):
         output_file_directory.mkdir(parents=True)
 
         df = pd.DataFrame(self.json_data['loads']['ground_loads'])
-        print(f"df: {df}")
         file_name = output_file_directory / 'ground_loads.csv'
         print(f"saving loads to: {file_name}")
         df.to_csv(file_name, index=False)
