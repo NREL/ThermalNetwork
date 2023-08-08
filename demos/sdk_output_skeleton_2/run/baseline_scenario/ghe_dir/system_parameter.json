@@ -176,8 +176,8 @@
           {
             "ghe_id": "dd69549c-ecfc-4245-96dc-5b6127f34f46",
             "ghe_geometric_params": {
-              "length_of_ghe": 300,
-              "width_of_ghe": 300
+              "length_of_ghe": 400,
+              "width_of_ghe": 400
             },
             "borehole": {
               "buried_depth": 2.0,
@@ -190,8 +190,8 @@
           {
             "ghe_id": "47fd01d3-3d72-46c0-85f2-a12854783764",
             "ghe_geometric_params": {
-              "length_of_ghe": 300,
-              "width_of_ghe": 300
+              "length_of_ghe": 400,
+              "width_of_ghe": 400
             },
             "borehole": {
               "buried_depth": 2.0,
