@@ -1,5 +1,6 @@
 import os
 import shutil
+import pandas as pd
 from pathlib import Path
 from typing import List
 
@@ -58,9 +59,6 @@ class GHE(BaseComponent):
             flow_rate=self.json_data['design']['flow_rate'],
             flow_type_str=self.json_data['design']['flow_type'])
 
-        ghe.find_design()
-        ghe.prepare_results("Project Name", "Notes", "Author", "Iteration Name")
-
         # Construct the path to the new subdirectory
         # current_file_directory = Path(os.path.dirname(os.path.abspath(__file__)))
         # output_file_directory = current_file_directory / self.name
@@ -74,6 +72,15 @@ class GHE(BaseComponent):
         # Create the subdirectory
         print(f"creating directory: {output_file_directory}")
         output_file_directory.mkdir(parents=True)
+
+        df = pd.DataFrame(self.json_data['loads']['ground_loads'])
+        print(f"df: {df}")
+        file_name = output_file_directory / 'ground_loads.csv'
+        print(f"saving loads to: {file_name}")
+        df.to_csv(file_name, index=False)
+
+        ghe.find_design()
+        ghe.prepare_results("Project Name", "Notes", "Author", "Iteration Name")
 
         ghe.write_output_files(output_file_directory, "")
         u_tube_height = ghe.results.output_dict['ghe_system']['active_borehole_length']['value']
