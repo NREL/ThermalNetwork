@@ -396,6 +396,9 @@ class Network:
             if device.comp_type == ComponentType.GROUNDHEATEXCHANGER:
                 ghe_indexes.append(i)
 
+        # Initialize an array to store the summed loads for each hour of the year
+        total_space_loads = [0] * 8760
+
         print("GROUNDHEATEXCHANGER indices in network:")
         print(ghe_indexes)
         # slice the self.network by ghe_indexes
@@ -405,21 +408,25 @@ class Network:
             else:
                 devices_before_ghe = self.network[ghe_indexes[i - 1] + 1:ghe_index]
             print(f"Devices before GHE at index {ghe_index}: {devices_before_ghe}")
-            total_space_loads = 0
+
             for device in devices_before_ghe:
                 # ETS .get_loads() doesnt take num_loads arg
                 if device.comp_type != ComponentType.ENERGYTRANSFERSTATION:
                     print(f"{device.comp_type}.get_loads: {device.get_loads(1)}")
-                    device_load = sum(device.get_loads(1))
+                    device_load = device.get_loads(1)
+                    # Add the scalar load to the total space loads for each hour of the year
+                    total_space_loads = [total_space_loads[j] + device_load[0] for j in range(8760)]
+
                 else:
                     print(f"{device.comp_type}.get_loads len: {len(device.get_loads())}")
-                    device_load = sum(device.get_loads())
-                print(f"Total load for {device.comp_type}: {device_load}")
-                total_space_loads += device_load
+                    device_loads = device.get_loads()
+                    # Add the array of loads for each hour to the total space loads array
+                    total_space_loads = [total_space_loads[j] + device_loads[j] for j in range(8760)]
 
-            print(f"Total space loads for devices before GHE: {total_space_loads}")
+            print(f"Total space loads for devices before GHE: {sum(total_space_loads)}")
+            self.network[ghe_index].json_data['loads']['ground_loads'] = total_space_loads
             # call ghe_size() with total load
-            self.network[ghe_index].ghe_size(total_space_loads, output_path)
+            self.network[ghe_index].ghe_size(sum(total_space_loads), output_path)
 
     def size(self, output_path: Path, throw: bool = True):
         """
