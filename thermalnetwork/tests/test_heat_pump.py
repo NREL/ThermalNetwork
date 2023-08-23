@@ -15,6 +15,6 @@ class TestHeatPump(TestCase):
         }
 
         hp = HeatPump(data)
-        self.assertEquals(hp.name, "WSHP")
-        self.assertAlmostEquals(hp.calc_src_side_load(1), 0.60, delta=0.01)
-        self.assertAlmostEquals(hp.calc_src_side_load(-1), -1.28, delta=0.01)
+        self.assertEqual(hp.name, "WSHP")
+        self.assertAlmostEqual(hp.calc_src_side_load(1), 0.60, delta=0.01)
+        self.assertAlmostEqual(hp.calc_src_side_load(-1), -1.28, delta=0.01)

@@ -1,9 +1,9 @@
 import json
 from pathlib import Path
 from sys import exit, stderr
-import numpy as np
 
 import click
+import numpy as np
 
 from thermalnetwork import VERSION
 from thermalnetwork.base_component import BaseComponent
@@ -86,7 +86,8 @@ class Network:
     @staticmethod
     def reorder_connected_features(features):
         """
-        Reorders a list of connected features so that the feature with 'is_ghe_start_loop' set to True is at the beginning.
+        Reorders a list of connected features so that the feature with
+        'is_ghe_start_loop' set to True is at the beginning.
 
         :param features: List of connected features.
         :return: Reordered list of connected features.
@@ -164,7 +165,7 @@ class Network:
                 geometric_constraints['length'] = length
                 geometric_constraints['width'] = width
                 properties = {
-                    'fuild': self.ghe_parameters['fluid'],
+                    'fluid': self.ghe_parameters['fluid'],
                     'grout': self.ghe_parameters['grout'],
                     'soil': self.ghe_parameters['soil'],
                     'pipe': self.ghe_parameters['pipe'],
