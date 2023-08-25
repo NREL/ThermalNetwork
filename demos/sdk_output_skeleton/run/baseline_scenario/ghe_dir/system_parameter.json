@@ -1,19 +1,18 @@
 {
-  "weather": "../../data_shared/USA_CA_San.Francisco.Intl.AP.724940_TMY3.mos",
   "buildings": [
     {
-      "geojson_id": "0",
+      "geojson_id": "2",
       "load_model": "time_series",
       "load_model_parameters": {
         "time_series": {
-          "filepath": "To be populated",
+          "filepath": "C:\\Users\\tcharan\\Desktop\\NRELWork\\Gitrepos\\geojson-modelica-translator\\tests\\management\\data\\sdk_project_scraps\\run\\baseline_scenario\\2\\016_export_modelica_loads\\modelica.mos",
           "delta_temp_air_cooling": 10,
           "delta_temp_air_heating": 18,
           "has_liquid_cooling": true,
           "has_liquid_heating": true,
           "has_electric_cooling": false,
           "has_electric_heating": false,
-          "max_electrical_load": 0,
+          "max_electrical_load": 823879000,
           "temp_chw_return": 12,
           "temp_chw_supply": 7,
           "temp_hw_return": 35,
@@ -22,27 +21,75 @@
           "temp_setpoint_heating": 20
         }
       },
-      "ets_model": "Fifth Gen Heat Pump",
-      "fifth_gen_ets_parameters": {
-        "supply_water_temperature_building": 15,
-        "chilled_water_supply_temp": 5,
-        "hot_water_supply_temp": 50,
-        "cop_heat_pump_heating": 2.5,
-        "cop_heat_pump_cooling": 3.5,
-        "pump_flow_rate": 0.01,
-        "pump_design_head": 150000,
-        "ets_pump_flow_rate": 0.0005,
-        "ets_pump_head": 10000,
-        "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+      "ets_model": "Indirect Heating and Cooling",
+      "ets_indirect_parameters": {
+        "heat_flow_nominal": 8000,
+        "heat_exchanger_efficiency": 0.8,
+        "nominal_mass_flow_district": 1.887,
+        "nominal_mass_flow_building": 0.0,
+        "valve_pressure_drop": 6000,
+        "heat_exchanger_secondary_pressure_drop": 500,
+        "heat_exchanger_primary_pressure_drop": 500,
+        "cooling_supply_water_temperature_building": 7,
+        "heating_supply_water_temperature_building": 50,
+        "delta_temp_chw_building": 5,
+        "delta_temp_chw_district": 8,
+        "delta_temp_hw_building": 15,
+        "delta_temp_hw_district": 20,
+        "cooling_controller_y_max": 1,
+        "cooling_controller_y_min": 0,
+        "heating_controller_y_max": 1,
+        "heating_controller_y_min": 0
+      }
+    },
+    {
+      "geojson_id": "5",
+      "load_model": "time_series",
+      "load_model_parameters": {
+        "time_series": {
+          "filepath": "C:\\Users\\tcharan\\Desktop\\NRELWork\\Gitrepos\\geojson-modelica-translator\\tests\\management\\data\\sdk_project_scraps\\run\\baseline_scenario\\5\\016_export_modelica_loads\\modelica.mos",
+          "delta_temp_air_cooling": 10,
+          "delta_temp_air_heating": 18,
+          "has_liquid_cooling": true,
+          "has_liquid_heating": true,
+          "has_electric_cooling": false,
+          "has_electric_heating": false,
+          "max_electrical_load": 45830800,
+          "temp_chw_return": 12,
+          "temp_chw_supply": 7,
+          "temp_hw_return": 35,
+          "temp_hw_supply": 40,
+          "temp_setpoint_cooling": 24,
+          "temp_setpoint_heating": 20
+        }
+      },
+      "ets_model": "Indirect Heating and Cooling",
+      "ets_indirect_parameters": {
+        "heat_flow_nominal": 8000,
+        "heat_exchanger_efficiency": 0.8,
+        "nominal_mass_flow_district": 1.887,
+        "nominal_mass_flow_building": 0.629,
+        "valve_pressure_drop": 6000,
+        "heat_exchanger_secondary_pressure_drop": 500,
+        "heat_exchanger_primary_pressure_drop": 500,
+        "cooling_supply_water_temperature_building": 7,
+        "heating_supply_water_temperature_building": 50,
+        "delta_temp_chw_building": 5,
+        "delta_temp_chw_district": 8,
+        "delta_temp_hw_building": 15,
+        "delta_temp_hw_district": 20,
+        "cooling_controller_y_max": 1,
+        "cooling_controller_y_min": 0,
+        "heating_controller_y_max": 1,
+        "heating_controller_y_min": 0
       }
     }
   ],
   "district_system": {
     "fifth_generation": {
       "ghe_parameters": {
-        "version": "0.2.1",
-        "ghe_dir": "tests/system_parameters/data",
+        "version": "1.0",
+        "ghe_dir": "tests\\management\\data\\sdk_project_scraps\\run\\baseline_scenario\\ghe_dir",
         "fluid": {
           "fluid_name": "Water",
           "concentration_percent": 0.0,
@@ -70,7 +117,7 @@
           "num_months": 240
         },
         "geometric_constraints": {
-          "b_min": 2.0,
+          "b_min": 3.0,
           "b_max": 10.0,
           "max_height": 135.0,
           "min_height": 60.0,
@@ -85,31 +132,34 @@
         },
         "ghe_specific_params": [
           {
-            "ghe_id": "0b575a8f-97d1-47e6-b329-7ef7566d26f2",
+            "ghe_id": "dd69549c-ecfc-4245-96dc-5b6127f34f46",
             "ghe_geometric_params": {
-              "length_of_ghe": 100,
-              "width_of_ghe": 100
+              "length_of_ghe": 427.09084385292005,
+              "width_of_ghe": 300.40915614707995
             },
             "borehole": {
               "buried_depth": 2.0,
-              "diameter": 0.15
-            },
-            "ground_loads": []
+              "diameter": 0.15,
+              "length_of_boreholes": 1.0,
+              "number_of_boreholes": 5
+            }
           },
           {
-            "ghe_id": "15a25e2f-c425-46e9-8036-b1d0d09127e2",
+            "ghe_id": "47fd01d3-3d72-46c0-85f2-a12854783764",
             "ghe_geometric_params": {
-              "length_of_ghe": 100,
-              "width_of_ghe": 100
+              "length_of_ghe": 411.7146746166177,
+              "width_of_ghe": 254.28532538338231
             },
             "borehole": {
               "buried_depth": 2.0,
-              "diameter": 0.15
-            },
-            "ground_loads": []
+              "diameter": 0.15,
+              "length_of_boreholes": 1.0,
+              "number_of_boreholes": 5
+            }
           }
         ]
       }
     }
-  }
+  },
+  "weather": "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.mos"
 }
