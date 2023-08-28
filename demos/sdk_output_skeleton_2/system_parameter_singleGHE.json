@@ -1,18 +1,18 @@
 {
   "buildings": [
     {
-      "geojson_id": "8",
+      "geojson_id": "2",
       "load_model": "time_series",
       "load_model_parameters": {
         "time_series": {
-          "filepath": "C:\\Users\\tcharan\\Desktop\\urbanopt-cli\\trial_ghe\\run\\baseline_scenario\\8\\021_export_modelica_loads\\modelica.mos",
+          "filepath": "C:\\Users\\tcharan\\Desktop\\NRELWork\\Gitrepos\\geojson-modelica-translator\\tests\\management\\data\\sdk_project_scraps\\run\\baseline_scenario\\2\\016_export_modelica_loads\\modelica.mos",
           "delta_temp_air_cooling": 10,
           "delta_temp_air_heating": 18,
           "has_liquid_cooling": true,
           "has_liquid_heating": true,
           "has_electric_cooling": false,
           "has_electric_heating": false,
-          "max_electrical_load": 7864980000,
+          "max_electrical_load": 823879000,
           "temp_chw_return": 12,
           "temp_chw_supply": 7,
           "temp_hw_return": 35,
@@ -25,8 +25,8 @@
       "ets_indirect_parameters": {
         "heat_flow_nominal": 8000,
         "heat_exchanger_efficiency": 0.8,
-        "nominal_mass_flow_district": 343.398,
-        "nominal_mass_flow_building": 41.982,
+        "nominal_mass_flow_district": 1.887,
+        "nominal_mass_flow_building": 0.0,
         "valve_pressure_drop": 6000,
         "heat_exchanger_secondary_pressure_drop": 500,
         "heat_exchanger_primary_pressure_drop": 500,
@@ -43,18 +43,18 @@
       }
     },
     {
-      "geojson_id": "9",
+      "geojson_id": "5",
       "load_model": "time_series",
       "load_model_parameters": {
         "time_series": {
-          "filepath": "C:\\Users\\tcharan\\Desktop\\urbanopt-cli\\trial_ghe\\run\\baseline_scenario\\9\\021_export_modelica_loads\\modelica.mos",
+          "filepath": "C:\\Users\\tcharan\\Desktop\\NRELWork\\Gitrepos\\geojson-modelica-translator\\tests\\management\\data\\sdk_project_scraps\\run\\baseline_scenario\\5\\016_export_modelica_loads\\modelica.mos",
           "delta_temp_air_cooling": 10,
           "delta_temp_air_heating": 18,
           "has_liquid_cooling": true,
           "has_liquid_heating": true,
           "has_electric_cooling": false,
           "has_electric_heating": false,
-          "max_electrical_load": 4968750000,
+          "max_electrical_load": 45830800,
           "temp_chw_return": 12,
           "temp_chw_supply": 7,
           "temp_hw_return": 35,
@@ -67,50 +67,8 @@
       "ets_indirect_parameters": {
         "heat_flow_nominal": 8000,
         "heat_exchanger_efficiency": 0.8,
-        "nominal_mass_flow_district": 343.398,
-        "nominal_mass_flow_building": 7.384,
-        "valve_pressure_drop": 6000,
-        "heat_exchanger_secondary_pressure_drop": 500,
-        "heat_exchanger_primary_pressure_drop": 500,
-        "cooling_supply_water_temperature_building": 7,
-        "heating_supply_water_temperature_building": 50,
-        "delta_temp_chw_building": 5,
-        "delta_temp_chw_district": 8,
-        "delta_temp_hw_building": 15,
-        "delta_temp_hw_district": 20,
-        "cooling_controller_y_max": 1,
-        "cooling_controller_y_min": 0,
-        "heating_controller_y_max": 1,
-        "heating_controller_y_min": 0
-      }
-    },
-    {
-      "geojson_id": "10",
-      "load_model": "time_series",
-      "load_model_parameters": {
-        "time_series": {
-          "filepath": "C:\\Users\\tcharan\\Desktop\\urbanopt-cli\\trial_ghe\\run\\baseline_scenario\\10\\021_export_modelica_loads\\modelica.mos",
-          "delta_temp_air_cooling": 10,
-          "delta_temp_air_heating": 18,
-          "has_liquid_cooling": true,
-          "has_liquid_heating": true,
-          "has_electric_cooling": false,
-          "has_electric_heating": false,
-          "max_electrical_load": 21532400000,
-          "temp_chw_return": 12,
-          "temp_chw_supply": 7,
-          "temp_hw_return": 35,
-          "temp_hw_supply": 40,
-          "temp_setpoint_cooling": 24,
-          "temp_setpoint_heating": 20
-        }
-      },
-      "ets_model": "Indirect Heating and Cooling",
-      "ets_indirect_parameters": {
-        "heat_flow_nominal": 8000,
-        "heat_exchanger_efficiency": 0.8,
-        "nominal_mass_flow_district": 343.398,
-        "nominal_mass_flow_building": 65.1,
+        "nominal_mass_flow_district": 1.887,
+        "nominal_mass_flow_building": 0.629,
         "valve_pressure_drop": 6000,
         "heat_exchanger_secondary_pressure_drop": 500,
         "heat_exchanger_primary_pressure_drop": 500,
@@ -131,7 +89,7 @@
     "fifth_generation": {
       "ghe_parameters": {
         "version": "1.0",
-        "ghe_dir": "trial_ghe\\run\\baseline_scenario\\ghe_dir",
+        "ghe_dir": "tests\\management\\data\\sdk_project_scraps\\run\\baseline_scenario\\ghe_dir",
         "fluid": {
           "fluid_name": "Water",
           "concentration_percent": 0.0,
@@ -174,32 +132,17 @@
         },
         "ghe_specific_params": [
           {
-            "ghe_id": "dd69549c-ecfc-4245-96dc-5b6127f34f46",
+            "ghe_id": "8c369df2-18e9-439a-8c25-875851c5aaf0",
             "ghe_geometric_params": {
-              "length_of_ghe": 400,
-              "width_of_ghe": 400
+              "length_of_ghe": 232.52683597088145,
+              "width_of_ghe": 157.97316402911855
             },
             "borehole": {
               "buried_depth": 2.0,
               "diameter": 0.15,
               "length_of_boreholes": 1.0,
               "number_of_boreholes": 5
-            },
-            "ground_loads": []
-          },
-          {
-            "ghe_id": "47fd01d3-3d72-46c0-85f2-a12854783764",
-            "ghe_geometric_params": {
-              "length_of_ghe": 400,
-              "width_of_ghe": 400
-            },
-            "borehole": {
-              "buried_depth": 2.0,
-              "diameter": 0.15,
-              "length_of_boreholes": 1.0,
-              "number_of_boreholes": 5
-            },
-            "ground_loads": []
+            }
           }
         ]
       }
