@@ -494,8 +494,8 @@ def run_sizer_from_cli_worker(system_parameter_path: Path, scenario_directory_pa
     if version != VERSION:
         print("Mismatched ThermalNetwork versions. Could be a problem.", file=stderr)
 
-    design_data: dict = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]["design"]
-    print(f"design_data: {design_data}\n")
+    ghe_design_data: dict = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]["design"]
+    print(f"ghe_design_data: {ghe_design_data}\n")
     # instantiate a new Network object
     network = Network()
     network.geojson_data = geojson_data
@@ -518,7 +518,7 @@ def run_sizer_from_cli_worker(system_parameter_path: Path, scenario_directory_pa
 
     # begin populating structures in preparation for sizing
     errors = 0
-    errors += network.set_design(des_method_str=design_data["method"], throw=True)
+    errors += network.set_design(des_method_str=ghe_design_data["method"], throw=True)
     errors += network.set_components(network_data, throw=True)
     # print(f"components_data: {network.components_data}\n")
     # pprint(network.components_data)
