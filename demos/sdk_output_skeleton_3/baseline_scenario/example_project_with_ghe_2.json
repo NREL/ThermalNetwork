@@ -1,0 +1,950 @@
+{
+    "type": "FeatureCollection",
+    "project": {
+        "id": "7c33a001-bccb-413e-ac87-67558b5d4b07",
+        "name": "New Project",
+        "surface_elevation": null,
+        "import_surrounding_buildings_as_shading": null,
+        "weather_filename": "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
+        "tariff_filename": null,
+        "climate_zone": "6A",
+        "cec_climate_zone": null,
+        "begin_date": "2017-01-01T07:00:00.000Z",
+        "end_date": "2017-12-31T07:00:00.000Z",
+        "timesteps_per_hour": 1,
+        "default_template": "90.1-2013",
+        "only_lv_customers": null,
+        "underground_cables_ratio": null,
+        "max_number_of_lv_nodes_per_building": null,
+        "siteColor": "#fcec83",
+        "buildingColor": "#117733",
+        "districtSystemColor": "#0072B2",
+        "thJunctionColor": "#af002c",
+        "thConnectorColor": "#f42156",
+        "eJunctionColor": "#11c4c4",
+        "eConnectorColor": "#03f1e8",
+        "emissions": true,
+        "electricity_emissions_future_subregion": "NYSTc",
+        "electricity_emissions_hourly_historical_subregion": "New York",
+        "electricity_emissions_annual_historical_subregion": "NYCW",
+        "electricity_emissions_future_year": "2030",
+        "electricity_emissions_hourly_historical_year": "2019",
+        "electricity_emissions_annual_historical_year": "2019"
+    },
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "53340c2c-ab20-40db-aba1-11ac607c52a7",
+                "name": "Site Origin",
+                "type": "Site Origin",
+                "begin_date": "2017-01-01T07:00:00.000Z",
+                "end_date": "2017-12-31T07:00:00.000Z",
+                "cec_climate_zone": null,
+                "climate_zone": "6A",
+                "default_template": "90.1-2013",
+                "import_surrounding_buildings_as_shading": null,
+                "surface_elevation": null,
+                "tariff_filename": null,
+                "timesteps_per_hour": 1,
+                "weather_filename": "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
+                "only_lv_customers": null,
+                "underground_cables_ratio": null,
+                "max_number_of_lv_nodes_per_building": null
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -78.84948467732347,
+                    42.81677154451123
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "1",
+                "name": "Mixed_use 1",
+                "type": "Building",
+                "building_type": "Mixed use",
+                "floor_area": 752184,
+                "footprint_area": 188046,
+                "number_of_stories": 4,
+                "mixed_type_1": "Office",
+                "mixed_type_1_percentage": 50,
+                "mixed_type_2": "Food service",
+                "mixed_type_2_percentage": 50,
+                "mixed_type_3": "Strip shopping mall",
+                "mixed_type_3_percentage": 0,
+                "mixed_type_4": "Lodging",
+                "mixed_type_4_percentage": 0
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.84650338745196,
+                            42.81331301863236
+                        ],
+                        [
+                            -78.84652443964629,
+                            42.81463974371101
+                        ],
+                        [
+                            -78.84680142363833,
+                            42.815293654042534
+                        ],
+                        [
+                            -78.84744455124724,
+                            42.81514110006128
+                        ],
+                        [
+                            -78.84728610028628,
+                            42.81478165791734
+                        ],
+                        [
+                            -78.84786797764677,
+                            42.814643631760134
+                        ],
+                        [
+                            -78.84721106637106,
+                            42.813153418927016
+                        ],
+                        [
+                            -78.84650338745196,
+                            42.81331301863236
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "2",
+                "name": "Restaurant 1",
+                "type": "Building",
+                "building_type": "Food service",
+                "floor_area": 22313,
+                "footprint_area": 22313,
+                "number_of_stories": 1,
+                "ev_charging": true,
+                "ev_charging_behavior": "Business as Usual",
+                "ev_percent": 100,
+                "ev_curtailment_frac": 0.5,
+                "ev_use_model_occupancy": true
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.8500120420453,
+                            42.81812185529549
+                        ],
+                        [
+                            -78.85038975191084,
+                            42.81803226424341
+                        ],
+                        [
+                            -78.850630729414,
+                            42.81857888627522
+                        ],
+                        [
+                            -78.85025301954843,
+                            42.81866847653532
+                        ],
+                        [
+                            -78.8500120420453,
+                            42.81812185529549
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "3",
+                "name": "Restaurant 10",
+                "type": "Building",
+                "building_type": "Food service",
+                "floor_area": 125631,
+                "footprint_area": 41877,
+                "number_of_stories": 3,
+                "ev_charging": true,
+                "ev_charging_station_type": "Typical Public"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.84962224800356,
+                            42.81329273502644
+                        ],
+                        [
+                            -78.84929833482822,
+                            42.81337083838241
+                        ],
+                        [
+                            -78.84983265832118,
+                            42.814563298664666
+                        ],
+                        [
+                            -78.85015657149653,
+                            42.81448519681467
+                        ],
+                        [
+                            -78.84962224800356,
+                            42.81329273502644
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "4",
+                "name": "Restaurant 12",
+                "type": "Building",
+                "building_type": "Food service",
+                "floor_area": 31623,
+                "footprint_area": 10541,
+                "number_of_stories": 3,
+                "ev_charging": true,
+                "ev_charging_station_type": "Typical Public"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.84907318596754,
+                            42.81342719667407
+                        ],
+                        [
+                            -78.84862090048105,
+                            42.81353625345659
+                        ],
+                        [
+                            -78.84871721918239,
+                            42.813751210926796
+                        ],
+                        [
+                            -78.84916950466888,
+                            42.81364215452331
+                        ],
+                        [
+                            -78.84907318596754,
+                            42.81342719667407
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "5",
+                "name": "District Office 1",
+                "type": "Building",
+                "building_type": "Office",
+                "system_type": "VAV district chilled water with district hot water reheat",
+                "floor_area": 8804,
+                "footprint_area": 8804,
+                "number_of_stories": 1,
+                "ev_charging": true,
+                "ev_charging_station_type": "Typical Work"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.84809175426629,
+                            42.81367038997507
+                        ],
+                        [
+                            -78.84848670778973,
+                            42.81357515750889
+                        ],
+                        [
+                            -78.84857883872144,
+                            42.81378076888831
+                        ],
+                        [
+                            -78.84818388519801,
+                            42.81387600103781
+                        ],
+                        [
+                            -78.84809175426629,
+                            42.81367038997507
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "6",
+                "name": "District Office 2",
+                "type": "Building",
+                "building_type": "Office",
+                "system_type": "VAV district chilled water with district hot water reheat",
+                "floor_area": 10689,
+                "footprint_area": 10689,
+                "number_of_stories": 1,
+                "ev_charging": true
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.84846106738529,
+                            42.814495803077364
+                        ],
+                        [
+                            -78.8486903952376,
+                            42.81444050756261
+                        ],
+                        [
+                            -78.8484977578349,
+                            42.81401059666683
+                        ],
+                        [
+                            -78.84826842998261,
+                            42.81406589256599
+                        ],
+                        [
+                            -78.84846106738529,
+                            42.814495803077364
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "7",
+                "name": "Office 1",
+                "type": "Building",
+                "building_type": "Office",
+                "system_type": "VAV district chilled water with district hot water reheat",
+                "number_of_stories": 6,
+                "detailed_model_filename": "7.osm"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.84733878006863,
+                            42.816466983030836
+                        ],
+                        [
+                            -78.84854275129324,
+                            42.81617669028003
+                        ],
+                        [
+                            -78.848356395545,
+                            42.81576080994094
+                        ],
+                        [
+                            -78.84715242432038,
+                            42.81605110464406
+                        ],
+                        [
+                            -78.84733878006863,
+                            42.816466983030836
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "8",
+                "name": "Hospital 1",
+                "type": "Building",
+                "building_type": "Outpatient health care",
+                "system_type": "VAV district chilled water with district hot water reheat",
+                "number_of_stories": 10,
+                "detailed_model_filename": "8.osm"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.84973966335251,
+                            42.8154441454509
+                        ],
+                        [
+                            -78.85049562542395,
+                            42.81525669280299
+                        ],
+                        [
+                            -78.85078257620685,
+                            42.81588131780643
+                        ],
+                        [
+                            -78.8505086568277,
+                            42.81594736368234
+                        ],
+                        [
+                            -78.85041233812638,
+                            42.815732413845666
+                        ],
+                        [
+                            -78.84991755499783,
+                            42.81585689105046
+                        ],
+                        [
+                            -78.84973966335251,
+                            42.8154441454509
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "9",
+                "name": "Hospital 2",
+                "type": "Building",
+                "building_type": "Inpatient health care",
+                "number_of_stories": 3,
+                "detailed_model_filename": "9.osm"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.85083627755732,
+                            42.81600678613279
+                        ],
+                        [
+                            -78.85056039001891,
+                            42.816076133580566
+                        ],
+                        [
+                            -78.85072568130569,
+                            42.816450649528036
+                        ],
+                        [
+                            -78.84940134236577,
+                            42.81677160705479
+                        ],
+                        [
+                            -78.84958014898304,
+                            42.81716858994267
+                        ],
+                        [
+                            -78.8507262115271,
+                            42.816890840117026
+                        ],
+                        [
+                            -78.8508565789851,
+                            42.81719595796099
+                        ],
+                        [
+                            -78.85132137101688,
+                            42.81708331517635
+                        ],
+                        [
+                            -78.85083627755732,
+                            42.81600678613279
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "10",
+                "name": "Mixed use 2",
+                "type": "Building",
+                "building_type": "Mixed use",
+                "floor_area": 1278384,
+                "footprint_area": 159798,
+                "number_of_stories": 8,
+                "mixed_type_1": "Strip shopping mall",
+                "mixed_type_1_percentage": 25,
+                "mixed_type_2": "Food service",
+                "mixed_type_2_percentage": 25,
+                "mixed_type_3": "Office",
+                "mixed_type_3_percentage": 15,
+                "mixed_type_4": "Lodging",
+                "mixed_type_4_percentage": 35
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.85115264550463,
+                            42.81786093060211
+                        ],
+                        [
+                            -78.85163483958878,
+                            42.81774467026972
+                        ],
+                        [
+                            -78.85246596719499,
+                            42.819583261120755
+                        ],
+                        [
+                            -78.85082390085432,
+                            42.819979162017745
+                        ],
+                        [
+                            -78.85060552295334,
+                            42.81947573727234
+                        ],
+                        [
+                            -78.85174564783776,
+                            42.81920483484765
+                        ],
+                        [
+                            -78.85115264550463,
+                            42.81786093060211
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "11",
+                "name": "Restaurant 13",
+                "type": "Building",
+                "building_type": "Food service",
+                "floor_area": 32511,
+                "footprint_area": 10837,
+                "number_of_stories": 3
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.84961163640645,
+                            42.81460851835703
+                        ],
+                        [
+                            -78.84914661048371,
+                            42.81472064501696
+                        ],
+                        [
+                            -78.84905029178236,
+                            42.81450569091638
+                        ],
+                        [
+                            -78.84951531770513,
+                            42.81439356386673
+                        ],
+                        [
+                            -78.84961163640645,
+                            42.81460851835703
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "12",
+                "name": "Mall 1",
+                "type": "Building",
+                "building_type": "Strip shopping mall",
+                "floor_area": 374409,
+                "footprint_area": 124803,
+                "number_of_stories": 3
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.84768338040897,
+                            42.817161656757065
+                        ],
+                        [
+                            -78.8482630702579,
+                            42.8170218879136
+                        ],
+                        [
+                            -78.84915297130291,
+                            42.81900776764229
+                        ],
+                        [
+                            -78.84857328145401,
+                            42.81914753199706
+                        ],
+                        [
+                            -78.84768338040897,
+                            42.817161656757065
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "13",
+                "name": "Hotel 1",
+                "type": "Building",
+                "building_type": "Lodging",
+                "floor_area": 316160,
+                "footprint_area": 31616,
+                "number_of_stories": 10
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.8494955083645,
+                            42.819748790984335
+                        ],
+                        [
+                            -78.84891089471263,
+                            42.81989327725856
+                        ],
+                        [
+                            -78.8491389243777,
+                            42.82038967009544
+                        ],
+                        [
+                            -78.84972353802956,
+                            42.82024518498119
+                        ],
+                        [
+                            -78.8494955083645,
+                            42.819748790984335
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "eace1290-86fc-48fb-adb4-7f606883d170",
+                "geometryType": "Rectangle",
+                "name": "New District System_1",
+                "type": "Ground Heat Exchanger",
+                "footprint_area": 33311,
+                "footprint_perimeter": 735,
+                "floor_area": 33311
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.85251346510472,
+                            42.8163677174183
+                        ],
+                        [
+                            -78.85223950315087,
+                            42.81583790918185
+                        ],
+                        [
+                            -78.85167774278108,
+                            42.81599421323321
+                        ],
+                        [
+                            -78.85195170473489,
+                            42.816524020130544
+                        ],
+                        [
+                            -78.85251346510472,
+                            42.8163677174183
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "32497483-d8d2-4016-bd0d-9277db34a542",
+                "geometryType": "Rectangle",
+                "name": "New District System_2",
+                "type": "Ground Heat Exchanger",
+                "footprint_area": 34501,
+                "footprint_perimeter": 746,
+                "floor_area": 34501
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.84942216381322,
+                            42.81611395845701
+                        ],
+                        [
+                            -78.84915021157671,
+                            42.81558359120393
+                        ],
+                        [
+                            -78.84856777683012,
+                            42.81574429063983
+                        ],
+                        [
+                            -78.84883972906664,
+                            42.81627465651468
+                        ],
+                        [
+                            -78.84942216381322,
+                            42.81611395845701
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "ed4fc84c-6a04-421b-b033-e686f59b6670",
+                "type": "ThermalJunction",
+                "DSId": "eace1290-86fc-48fb-adb4-7f606883d170"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -78.85183257355226,
+                    42.81629363642741
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "a197175c-c0fd-4679-8d04-7ec7e1a7e6d5",
+                "type": "ThermalJunction",
+                "buildingId": "9"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -78.85105430627083,
+                    42.8164906421044
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "type": "ThermalConnector",
+                "id": "462b2c64-d3ca-404e-996b-d0dd9917a2cc",
+                "startJunctionId": "ed4fc84c-6a04-421b-b033-e686f59b6670",
+                "endJunctionId": "a197175c-c0fd-4679-8d04-7ec7e1a7e6d5",
+                "startFeatureId": "eace1290-86fc-48fb-adb4-7f606883d170",
+                "endFeatureId": "9",
+                "total_length": 220
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        -78.85183257355226,
+                        42.81629363642741
+                    ],
+                    [
+                        -78.85105430627083,
+                        42.8164906421044
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "252b5adc-4964-4e34-b38f-b4c9c4a710b1",
+                "type": "ThermalJunction",
+                "buildingId": "9"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -78.8495492598045,
+                    42.816735758901075
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "d3f1cd82-0825-4231-8d7d-3806468eb0a6",
+                "type": "ThermalJunction",
+                "DSId": "32497483-d8d2-4016-bd0d-9277db34a542"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -78.84925223319735,
+                    42.81616084361485
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "type": "ThermalConnector",
+                "id": "fad2a63e-8b3f-4013-8b09-e033e959a541",
+                "startJunctionId": "252b5adc-4964-4e34-b38f-b4c9c4a710b1",
+                "endJunctionId": "d3f1cd82-0825-4231-8d7d-3806468eb0a6",
+                "startFeatureId": "9",
+                "endFeatureId": "32497483-d8d2-4016-bd0d-9277db34a542",
+                "total_length": 224
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        -78.8495492598045,
+                        42.816735758901075
+                    ],
+                    [
+                        -78.84925223319735,
+                        42.81616084361485
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "651cf200-9733-4063-a82d-64eb03db08f1",
+                "type": "ThermalJunction",
+                "DSId": "32497483-d8d2-4016-bd0d-9277db34a542"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -78.8492610987442,
+                    42.81579984635421
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "69d1a952-0f11-4586-9207-5aa9eda9da14",
+                "type": "ThermalJunction",
+                "buildingId": "8"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -78.84984799285633,
+                    42.81569549274864
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "type": "ThermalConnector",
+                "id": "f400917a-7a9e-4336-8c07-f80a59fb0b1a",
+                "startJunctionId": "651cf200-9733-4063-a82d-64eb03db08f1",
+                "endJunctionId": "69d1a952-0f11-4586-9207-5aa9eda9da14",
+                "startFeatureId": "32497483-d8d2-4016-bd0d-9277db34a542",
+                "endFeatureId": "8",
+                "total_length": 162
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        -78.8492610987442,
+                        42.81579984635421
+                    ],
+                    [
+                        -78.84984799285633,
+                        42.81569549274864
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "fba82b96-4e17-41f6-9770-6c70a90c2c56",
+                "type": "ThermalJunction",
+                "buildingId": "8"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -78.85063804820314,
+                    42.815566714801605
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "ebf27628-88a9-4ef3-a7cf-d9cde3504f68",
+                "type": "ThermalJunction",
+                "DSId": "eace1290-86fc-48fb-adb4-7f606883d170"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -78.85167774278109,
+                    42.81599421323321
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "type": "ThermalConnector",
+                "id": "3110fa90-e942-429a-bbdb-7a0cf19685a5",
+                "startJunctionId": "fba82b96-4e17-41f6-9770-6c70a90c2c56",
+                "endJunctionId": "ebf27628-88a9-4ef3-a7cf-d9cde3504f68",
+                "startFeatureId": "8",
+                "endFeatureId": "eace1290-86fc-48fb-adb4-7f606883d170",
+                "total_length": 319
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        -78.85063804820314,
+                        42.815566714801605
+                    ],
+                    [
+                        -78.85167774278109,
+                        42.81599421323321
+                    ]
+                ]
+            }
+        }
+    ],
+    "mappers": [],
+    "scenarios": [
+        {
+            "feature_mappings": [],
+            "id": "72301739-c6c3-4dd7-bf1a-f37c8eff40db",
+            "name": "New Scenario"
+        }
+    ]
+}
