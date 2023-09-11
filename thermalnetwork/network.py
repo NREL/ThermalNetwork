@@ -173,7 +173,7 @@ class Network:
                     'simulation': self.ghe_parameters['simulation'],
                     'geometric_constraints': geometric_constraints,
                     'design': self.ghe_parameters['design'],
-                    'loads': {'ground_loads': matching_ghe['ground_loads']}
+                    'loads': {'ground_loads': []}
                 }
             converted_features.append({
                 'id': feature['id'],

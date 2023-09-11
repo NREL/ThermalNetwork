@@ -704,7 +704,7 @@
                 "id": "d18cf419-a301-4e1e-9694-613cff741e70",
                 "type": "ThermalJunction",
                 "DSId": "dd69549c-ecfc-4245-96dc-5b6127f34f46",
-                "start_loop": "true"
+                "is_ghe_start_loop": "true"
             },
             "geometry": {
                 "type": "Point",
