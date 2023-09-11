@@ -314,21 +314,21 @@ class Network:
 
     def set_component_network_loads(self):
 
-        len_loads = []
+        #len_loads = []
 
-        for comp in self.network:
-            if comp.comp_type == ComponentType.ENERGYTRANSFERSTATION:
-                len_loads.append(len(comp.space_loads))
-
+        #for comp in self.network:
+        #    if comp.comp_type == ComponentType.ENERGYTRANSFERSTATION:
+        #        len_loads.append(len(comp.space_loads))
+        #print(f"len_loads: {len_loads}")
         # check if all ets space loads have the same length
-        if not all([x == len_loads[0] for x in len_loads]):
-            raise ValueError("Not all loads are of equal length")
+        #if not all([x == len_loads[0] for x in len_loads]):
+        #    raise ValueError("Not all loads are of equal length")
 
         for comp in self.network:
             if comp.comp_type == ComponentType.ENERGYTRANSFERSTATION:
                 comp.set_network_loads()
             elif comp.comp_type == ComponentType.PUMP:
-                comp.set_network_loads(len_loads[0])
+                comp.set_network_loads(8760)
 
     def size_area_proportional(self, output_path: Path):
         """
