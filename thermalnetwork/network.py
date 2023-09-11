@@ -314,14 +314,14 @@ class Network:
 
     def set_component_network_loads(self):
 
-        #len_loads = []
+        # len_loads = []
 
-        #for comp in self.network:
+        # for comp in self.network:
         #    if comp.comp_type == ComponentType.ENERGYTRANSFERSTATION:
         #        len_loads.append(len(comp.space_loads))
-        #print(f"len_loads: {len_loads}")
+        # print(f"len_loads: {len_loads}")
         # check if all ets space loads have the same length
-        #if not all([x == len_loads[0] for x in len_loads]):
+        # if not all([x == len_loads[0] for x in len_loads]):
         #    raise ValueError("Not all loads are of equal length")
 
         for comp in self.network:
