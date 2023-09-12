@@ -20,13 +20,6 @@ class ETS(BaseComponent):
         self.space_loads_file = props['space_loads_file']
         df = pd.read_csv(self.space_loads_file)
         self.space_loads = df['TotalSensibleLoad']
-        # check size of space loads
-        print(f"length of spaceloads: {len(self.space_loads)}")
-        if len(self.space_loads) != 8760:
-            df['Date Time'] = pd.to_datetime(df['Date Time'])
-            df.set_index('Date Time', inplace=True)
-            df = df.resample('H').interpolate(method='linear')
-            self.space_loads = df['TotalSensibleLoad']
 
     def get_loads(self):
         num_loads = len(self.space_loads)

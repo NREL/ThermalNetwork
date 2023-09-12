@@ -4,6 +4,7 @@ from sys import exit, stderr
 
 import click
 import numpy as np
+import pandas as pd
 
 from thermalnetwork import VERSION
 from thermalnetwork.base_component import BaseComponent
@@ -274,8 +275,9 @@ class Network:
     def add_ets_to_network(self, name: str):
         name_uc = name.strip().upper()
         ets_data = self.get_component(name_uc, ComponentType.ENERGYTRANSFERSTATION)
+        print(f"ets_data: {ets_data}")
         props = ets_data['properties']
-
+        print(f"props: {props}")
         hp_name = str(props['heat_pump']).strip().upper()
         hp_data = self.get_component(hp_name, ComponentType.HEATPUMP)
         props['heat_pump'] = hp_data
@@ -293,7 +295,27 @@ class Network:
         props['fan'] = fan_data
 
         ets_data['properties'] = props
+        print(f"final ets_data: {ets_data}")
         ets = ETS(ets_data)
+        print('made ETS')
+        # check size of space loads
+        print(f"length of spaceloads: {len(ets.space_loads)}\n")
+        print(f"space_loads_file: {props['space_loads_file']}\n")
+        if len(ets.space_loads) != 8760:
+            df = pd.read_csv(props['space_loads_file'])
+            df['Date Time'] = pd.to_datetime(df['Date Time'])
+            df.set_index('Date Time', inplace=True)
+            # Find the last date in the DataFrame and add one day so interpolation will get the last day
+            new_date = df.index[-1] + pd.Timedelta(days=1)
+            # add duplicate entry at end of dataframe
+            new_data = pd.DataFrame(df.iloc[-1].values.reshape(1, -1), index=[new_date], columns=df.columns)
+            df = pd.concat([df, new_data])
+            # interpolate data to hourly
+            df = df.resample('H').interpolate(method='linear')
+            # keep only8760
+            df = df.iloc[:8760]
+            ets.space_loads = df['TotalSensibleLoad']
+            print(f"NEW length of spaceloads: {len(ets.space_loads)}\n")
         self.network.append(ets)
         return 0
 
