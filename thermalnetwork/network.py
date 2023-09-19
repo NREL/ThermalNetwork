@@ -124,7 +124,7 @@ class Network:
                'type': 'PUMP',
                "properties": {
                    "design_flow_rate": 0.01,
-                   "design_head": 150000,
+                   "design_head": 0,
                    "motor_efficiency": 0.9,
                    "motor_inefficiency_to_fluid_stream": 1.0
                }
@@ -226,7 +226,7 @@ class Network:
                'type': 'PUMP',
                "properties": {
                    "design_flow_rate": 0.0005,
-                   "design_head": 100000,
+                   "design_head": 0,
                    "motor_efficiency": 0.9,
                    "motor_inefficiency_to_fluid_stream": 1.0
                }
@@ -240,7 +240,7 @@ class Network:
                "type": "FAN",
                "properties": {
                    "design_flow_rate": 0.25,
-                   "design_head": 150,
+                   "design_head": 0,
                    "motor_efficiency": 0.6
                }
                }
@@ -252,8 +252,8 @@ class Network:
                "name": "small wahp",
                "type": "HEATPUMP",
                "properties": {
-                   "cop_c": 3.5,
-                   "cop_h": 2.5
+                   "cop_c": 3.0,
+                   "cop_h": 3.0
                }
                }
         obj["name"] = str(obj["name"]).strip().upper()

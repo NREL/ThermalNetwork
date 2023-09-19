@@ -131,3 +131,7 @@ dmypy.json
 .idea/
 .vscode/
 thermalnetwork/tests/test_outputs
+
+output/
+tmp/
+lbt*
