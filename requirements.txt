@@ -1,8 +1,8 @@
 # library dependencies
 click>=8.1.7
-ghedesigner>=1.1
+ghedesigner>=1.3
 pandas>=2.0.3
-numpy>=1.25.1
+numpy>=1.24.2
 
 # testing dependencies
 flake8>=6.1.0

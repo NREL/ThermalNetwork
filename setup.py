@@ -29,7 +29,7 @@ setup(
     ],
     install_requires=[
         'click>=8.1.6',
-        'ghedesigner>=1.1',
+        'ghedesigner>=1.2',
         'pandas>=2.0.3'
     ],
     entry_points={
