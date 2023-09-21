@@ -18,6 +18,7 @@ class GHE(BaseComponent):
         # with open(design_file) as f:
         #    self.json_data = json.load(f)
         # compute Area
+        self.id = data['id']
         self.area = self.json_data['geometric_constraints']['length'] * self.json_data['geometric_constraints']['width']
 
     def ghe_size(self, total_space_loads, output_path: Path) -> float:
@@ -62,7 +63,7 @@ class GHE(BaseComponent):
         # Construct the path to the new subdirectory
         # current_file_directory = Path(os.path.dirname(os.path.abspath(__file__)))
         # output_file_directory = current_file_directory / self.name
-        output_file_directory = output_path / self.name
+        output_file_directory = output_path / self.id
 
         # Check if the directory exists and delete it if so
         if output_file_directory.is_dir():

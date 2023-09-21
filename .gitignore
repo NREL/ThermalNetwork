@@ -135,3 +135,10 @@ thermalnetwork/tests/test_outputs
 output/
 tmp/
 lbt*
+
+BoreFieldData.csv
+Gfunction.csv
+ground_loads.csv
+Loadings.csv
+SimulationSummary.*
+TimeDependentValues.csv
