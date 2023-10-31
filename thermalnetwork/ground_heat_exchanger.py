@@ -1,7 +1,6 @@
 import os
 import shutil
 from pathlib import Path
-from typing import List
 
 import pandas as pd
 from ghedesigner.manager import GHEManager
@@ -90,7 +89,7 @@ class GHE(BaseComponent):
         # selected_coordinates = ghe.results.borehole_location_data_rows  # includes a header row
         return u_tube_height
 
-    def get_atlanta_loads(self) -> List[float]:
+    def get_atlanta_loads(self) -> list[float]:
         # read in the csv file and convert the loads to a list of length 8760
         current_file_directory = Path(os.path.dirname(os.path.abspath(__file__)))
         glhe_json_data = current_file_directory / "Atlanta_loads/Atlanta_Office_Building_Loads.csv"
