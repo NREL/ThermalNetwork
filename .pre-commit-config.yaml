@@ -24,16 +24,18 @@ repos:
     # hooks:
       # - id: check-useless-excludes # Ensure the exclude syntax is correct
       # - id: check-hooks-apply # Fails if a hook doesn't apply to any file
+  # Run the Ruff linter
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    # Ruff version.
     rev: v0.1.3
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
         types_or: [python, pyi, jupyter]
-  - repo: https://github.com/psf/black
-    rev: 23.10.1
+  # Run the Ruff formatter
+  # https://docs.astral.sh/ruff/integrations/#pre-commit
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.3
     hooks:
-    - id: black-jupyter
+      - id: ruff-format
 default_language_version:
   python: python3.11
