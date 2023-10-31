@@ -10,8 +10,8 @@ build-backend = "setuptools.build_meta"
 name = "ThermalNetwork"
 dynamic = [
     "readme",
+    "version",
     ]
-version = "0.2.3"
 authors = [
   { name="Matt Mitchell", email="mitchute@gmail.com" },
   { name="Nathan Moore", email="nathan.moore@nrel.gov" },
@@ -47,6 +47,7 @@ dev = [
 # https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html#dynamic-metadata
 [tool.setuptools.dynamic]
 readme = {file = ["README.md", ]}
+version = {attr = "thermalnetwork.VERSION"}
 
 [project.urls]
 "Homepage" = "https://github.com/NREL/ThermalNetwork"
