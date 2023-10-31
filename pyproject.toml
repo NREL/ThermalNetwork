@@ -1,0 +1,77 @@
+[build-system]
+requires = [
+    "setuptools>=67",
+    "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+[project]
+name = "ThermalNetwork"
+dynamic = [
+    "readme",
+    ]
+version = "0.2.3"
+authors = [
+  { name="Matt Mitchell", email="mitchute@gmail.com" },
+  { name="Nathan Moore", email="nathan.moore@nrel.gov" },
+]
+description = "A thermal network solver for GHE sizing."
+requires-python = "~=3.8"
+classifiers = [
+        "Development Status :: 4 - Beta",
+        "Topic :: Scientific/Engineering",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+    ]
+dependencies = [
+  'click ~= 8.1',
+  'ghedesigner ~= 1.3',
+  'pandas ~= 2.1',
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest >= 6.0",
+    "pre-commit ~= 3.5",
+    "black ~= 23.7",
+    "ruff ~= 0.1",
+    "jupyterlab ~= 4.0",
+]
+
+# https://setuptools.pypa.io/en/latest/userguide/package_discovery.html
+[tool.setuptools.packages.find]
+# Must include a MANIFEST.in file in our repo: https://setuptools.pypa.io/en/latest/userguide/datafiles.html
+
+# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html#dynamic-metadata
+[tool.setuptools.dynamic]
+readme = {file = ["README.md", ]}
+
+[project.urls]
+"Homepage" = "https://github.com/NREL/ThermalNetwork"
+"Bug Tracker" = "https://github.com/NREL/ThermalNetwork/issues"
+
+# https://docs.pytest.org/en/6.2.x/customize.html#pyproject-toml
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = "tests"
+
+[tool.black]
+line-length = 120 # Ruff and Black must have the same line-length setting to work together
+
+# https://github.com/charliermarsh/ruff
+[tool.ruff]
+fix = true # automatically fix problems if possible
+select = ["RUF", "E", "F", "I", "UP", "N", "S", "BLE", "A", "C4", "T10", "ISC", "ICN", "PT",
+"Q", "SIM", "TID", "ARG", "DTZ", "PD", "PGH", "PLC", "PLE", "PLR", "PLW", "PIE", "COM"] # Enable these rules
+ignore = ["PLR0913", "PLR2004", "PLR0402", "COM812", "COM819", "SIM108", "ARG002"] # except for these specific errors
+line-length = 120
+
+[tool.ruff.per-file-ignores]
+"thermalnetwork/tests/*" = ["S101", "S607", "S603"] # assert statements are allowed in tests, and paths are safe
+
+[project.scripts]
+thermalnetwork = "thermalnetwork.network:run_sizer_from_cli"
