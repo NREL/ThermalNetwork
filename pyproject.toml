@@ -37,7 +37,6 @@ dependencies = [
 dev = [
     "pytest >= 6.0",
     "pre-commit ~= 3.5",
-    "black ~= 23.7",
     "ruff ~= 0.1",
     "jupyterlab ~= 4.0",
 ]
@@ -59,16 +58,17 @@ readme = {file = ["README.md", ]}
 minversion = "6.0"
 testpaths = "tests"
 
-[tool.black]
-line-length = 120 # Ruff and Black must have the same line-length setting to work together
-
-# https://github.com/charliermarsh/ruff
+# https://docs.astral.sh/ruff/settings/
 [tool.ruff]
 fix = true # automatically fix problems if possible
 select = ["RUF", "E", "F", "I", "UP", "N", "S", "BLE", "A", "C4", "T10", "ISC", "ICN", "PT",
 "Q", "SIM", "TID", "ARG", "DTZ", "PD", "PGH", "PLC", "PLE", "PLR", "PLW", "PIE", "COM"] # Enable these rules
-ignore = ["PLR0913", "PLR2004", "PLR0402", "COM812", "COM819", "SIM108", "ARG002"] # except for these specific errors
+ignore = ["PLR0913", "PLR2004", "PLR0402", "COM812", "COM819", "SIM108", "ARG002", "ISC001"] # except for these specific errors
 line-length = 120
+
+# https://docs.astral.sh/ruff/settings/#format
+[tool.ruff.format]
+# quote-style = "double"
 
 [tool.ruff.per-file-ignores]
 "thermalnetwork/tests/*" = ["S101", "S607", "S603"] # assert statements are allowed in tests, and paths are safe
