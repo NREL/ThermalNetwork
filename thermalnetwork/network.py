@@ -31,8 +31,8 @@ class Network:
         :return: The feature ID of the start loop feature, or None if not found.
         """
         for feature in features:
-            if feature['properties'].get('is_ghe_start_loop'):
-                start_feature_id = feature['properties'].get('buildingId') or feature['properties'].get('DSId')
+            if feature["properties"].get("is_ghe_start_loop"):
+                start_feature_id = feature["properties"].get("buildingId") or feature["properties"].get("DSId")
                 return start_feature_id
         return None
 
@@ -43,22 +43,22 @@ class Network:
         :param geojson_data: GeoJSON data object containing features.
         :return: List of connected features with additional information.
         """
-        features = geojson_data['features']
-        connectors = [feature for feature in features if feature['properties']['type'] == 'ThermalConnector']
+        features = geojson_data["features"]
+        connectors = [feature for feature in features if feature["properties"]["type"] == "ThermalConnector"]
         connected_features = []
 
         # get the id of the building or ds from the thermaljunction that has is_ghe_start_loop: True
         startloop_feature_id = self.find_startloop_feature_id(features)
 
         # Start with the first connector
-        start_feature_id = connectors[0]['properties']['startFeatureId']
+        start_feature_id = connectors[0]["properties"]["startFeatureId"]
         connected_features.append(start_feature_id)
 
         while True:
             next_feature_id = None
             for connector in connectors:
-                if connector['properties']['startFeatureId'] == connected_features[-1]:
-                    next_feature_id = connector['properties']['endFeatureId']
+                if connector["properties"]["startFeatureId"] == connected_features[-1]:
+                    next_feature_id = connector["properties"]["endFeatureId"]
                     break
 
             if next_feature_id:
@@ -71,16 +71,18 @@ class Network:
         # Filter and return the building and district system features
         connected_objects = []
         for feature in features:
-            feature_id = feature['properties']['id']
-            if feature_id in connected_features and feature['properties']['type'] in ['Building', 'District System']:
-                connected_objects.append({
-                    'id': feature_id,
-                    'type': feature['properties']['type'],
-                    'name': feature['properties'].get('name', ''),
-                    'district_system_type': feature['properties'].get('district_system_type', ''),
-                    'properties': {k: v for k, v in feature['properties'].items() if k not in [':type', ':name']},
-                    'is_ghe_start_loop': True if feature_id == startloop_feature_id else None
-                })
+            feature_id = feature["properties"]["id"]
+            if feature_id in connected_features and feature["properties"]["type"] in ["Building", "District System"]:
+                connected_objects.append(
+                    {
+                        "id": feature_id,
+                        "type": feature["properties"]["type"],
+                        "name": feature["properties"].get("name", ""),
+                        "district_system_type": feature["properties"].get("district_system_type", ""),
+                        "properties": {k: v for k, v in feature["properties"].items() if k not in [":type", ":name"]},
+                        "is_ghe_start_loop": True if feature_id == startloop_feature_id else None,
+                    }
+                )
 
         return connected_objects
 
@@ -97,7 +99,7 @@ class Network:
         start_loop_index = None
 
         for i, feature in enumerate(features):
-            if feature.get('is_ghe_start_loop'):
+            if feature.get("is_ghe_start_loop"):
                 start_loop_index = i
                 break
 
@@ -110,8 +112,8 @@ class Network:
         return reordered_features
 
     def find_matching_ghe_id(self, feature_id):
-        for ghe in self.ghe_parameters['ghe_specific_params']:
-            if ghe['ghe_id'] == feature_id:
+        for ghe in self.ghe_parameters["ghe_specific_params"]:
+            if ghe["ghe_id"] == feature_id:
                 return ghe
         return None  # if no match found, return None
 
@@ -119,29 +121,30 @@ class Network:
         converted_features = []
 
         # Add pump as the first element
-        obj = {'id': '0',
-               'name': 'primary pump',
-               'type': 'PUMP',
-               "properties": {
-                   "design_flow_rate": 0.01,
-                   "design_head": 0,
-                   "motor_efficiency": 0.9,
-                   "motor_inefficiency_to_fluid_stream": 1.0
-               }
-               }
+        obj = {
+            "id": "0",
+            "name": "primary pump",
+            "type": "PUMP",
+            "properties": {
+                "design_flow_rate": 0.01,
+                "design_head": 0,
+                "motor_efficiency": 0.9,
+                "motor_inefficiency_to_fluid_stream": 1.0,
+            },
+        }
         converted_features.append(obj)
 
         # Convert the features from geojson list
         for feature in json_data:
-            feature_type = feature['type']
-            if feature_type == 'Building':
-                feature_type = 'ENERGYTRANSFERSTATION'
+            feature_type = feature["type"]
+            if feature_type == "Building":
+                feature_type = "ENERGYTRANSFERSTATION"
                 # add building directory ID to scenario path; look for dir named
                 # '_export_modelica_loads' for the building_loads.csv
-                new_path = self.scenario_directory_path / feature['properties']['id']
+                new_path = self.scenario_directory_path / feature["properties"]["id"]
                 for directory in new_path.iterdir():
                     if directory.is_dir() and "_export_modelica_loads" in directory.name:
-                        new_path = new_path / directory.name / 'building_loads.csv'
+                        new_path = new_path / directory.name / "building_loads.csv"
                         print(f"building_loads.csv path: {new_path}\n")
                         break
                 if not Path.is_file(new_path):
@@ -152,36 +155,33 @@ class Network:
                     "load_side_pump": "ets pump",
                     "source_side_pump": "ets pump",
                     "fan": "simple fan",
-                    "space_loads_file": new_path
+                    "space_loads_file": new_path,
                 }
-            elif feature_type == 'District System' and feature['district_system_type'] == 'Ground Heat Exchanger':
-                feature_type = 'GROUNDHEATEXCHANGER'
+            elif feature_type == "District System" and feature["district_system_type"] == "Ground Heat Exchanger":
+                feature_type = "GROUNDHEATEXCHANGER"
                 # get ghe parameters for 'ghe_specific_params' key of system_parameters.json
-                matching_ghe = self.find_matching_ghe_id(feature['id'])
+                matching_ghe = self.find_matching_ghe_id(feature["id"])
                 # matching_ghe.pop('ground_loads', None)
                 print(f"matching_ghe: {matching_ghe}\n")
-                length = matching_ghe['ghe_geometric_params']['length_of_ghe']
-                width = matching_ghe['ghe_geometric_params']['width_of_ghe']
-                geometric_constraints = self.ghe_parameters['geometric_constraints']
-                geometric_constraints['length'] = length
-                geometric_constraints['width'] = width
+                length = matching_ghe["ghe_geometric_params"]["length_of_ghe"]
+                width = matching_ghe["ghe_geometric_params"]["width_of_ghe"]
+                geometric_constraints = self.ghe_parameters["geometric_constraints"]
+                geometric_constraints["length"] = length
+                geometric_constraints["width"] = width
                 properties = {
-                    'fluid': self.ghe_parameters['fluid'],
-                    'grout': self.ghe_parameters['grout'],
-                    'soil': self.ghe_parameters['soil'],
-                    'pipe': self.ghe_parameters['pipe'],
-                    'borehole': matching_ghe['borehole'],
-                    'simulation': self.ghe_parameters['simulation'],
-                    'geometric_constraints': geometric_constraints,
-                    'design': self.ghe_parameters['design'],
-                    'loads': {'ground_loads': []}
+                    "fluid": self.ghe_parameters["fluid"],
+                    "grout": self.ghe_parameters["grout"],
+                    "soil": self.ghe_parameters["soil"],
+                    "pipe": self.ghe_parameters["pipe"],
+                    "borehole": matching_ghe["borehole"],
+                    "simulation": self.ghe_parameters["simulation"],
+                    "geometric_constraints": geometric_constraints,
+                    "design": self.ghe_parameters["design"],
+                    "loads": {"ground_loads": []},
                 }
-            converted_features.append({
-                'id': feature['id'],
-                'name': feature['name'],
-                'type': feature_type,
-                'properties': properties
-            })
+            converted_features.append(
+                {"id": feature["id"], "name": feature["name"], "type": feature_type, "properties": properties}
+            )
 
         return converted_features
 
@@ -211,56 +211,46 @@ class Network:
 
     def check_for_existing_component(self, name: str, comp_type_str: str, throw: bool = True):
         for comp in self.components_data:
-            if comp['name'] == name and comp['type'] == comp_type_str:
+            if comp["name"] == name and comp["type"] == comp_type_str:
                 if throw:
-                    msg = f"Duplicate {comp_type_str} name \"{name}\" encountered."
+                    msg = f'Duplicate {comp_type_str} name "{name}" encountered.'
                     print(msg, file=stderr)
                 return 1
         return 0
 
     def set_components(self, comp_data_list: list[dict], throw: bool = True):
-
         # Add ets pump
-        obj = {'id': '',
-               'name': 'ets pump',
-               'type': 'PUMP',
-               "properties": {
-                   "design_flow_rate": 0.0005,
-                   "design_head": 0,
-                   "motor_efficiency": 0.9,
-                   "motor_inefficiency_to_fluid_stream": 1.0
-               }
-               }
+        obj = {
+            "id": "",
+            "name": "ets pump",
+            "type": "PUMP",
+            "properties": {
+                "design_flow_rate": 0.0005,
+                "design_head": 0,
+                "motor_efficiency": 0.9,
+                "motor_inefficiency_to_fluid_stream": 1.0,
+            },
+        }
         obj["name"] = str(obj["name"]).strip().upper()
         self.components_data.append(obj)
 
         # Add fan
-        obj = {'id': '',
-               "name": "simple fan",
-               "type": "FAN",
-               "properties": {
-                   "design_flow_rate": 0.25,
-                   "design_head": 0,
-                   "motor_efficiency": 0.6
-               }
-               }
+        obj = {
+            "id": "",
+            "name": "simple fan",
+            "type": "FAN",
+            "properties": {"design_flow_rate": 0.25, "design_head": 0, "motor_efficiency": 0.6},
+        }
         obj["name"] = str(obj["name"]).strip().upper()
         self.components_data.append(obj)
 
         # Add WAHP
-        obj = {'id': '',
-               "name": "small wahp",
-               "type": "HEATPUMP",
-               "properties": {
-                   "cop_c": 3.0,
-                   "cop_h": 3.0
-               }
-               }
+        obj = {"id": "", "name": "small wahp", "type": "HEATPUMP", "properties": {"cop_c": 3.0, "cop_h": 3.0}}
         obj["name"] = str(obj["name"]).strip().upper()
         self.components_data.append(obj)
 
         for comp in comp_data_list:
-            if self.check_for_existing_component(comp['name'], comp['type'], throw) != 0:
+            if self.check_for_existing_component(comp["name"], comp["type"], throw) != 0:
                 return 1
             comp["name"] = str(comp["name"]).strip().upper()
             self.components_data.append(comp)
@@ -269,52 +259,54 @@ class Network:
     def get_component(self, name: str, comp_type: ComponentType):
         for comp in self.components_data:
             # print(f"comp: {comp}\n")
-            if comp['name'] == name and comp_type.name == comp['type']:
+            if comp["name"] == name and comp_type.name == comp["type"]:
                 return comp
 
     def add_ets_to_network(self, name: str):
         name_uc = name.strip().upper()
         ets_data = self.get_component(name_uc, ComponentType.ENERGYTRANSFERSTATION)
         print(f"ets_data: {ets_data}")
-        props = ets_data['properties']
+        props = ets_data["properties"]
         print(f"props: {props}")
-        hp_name = str(props['heat_pump']).strip().upper()
+        hp_name = str(props["heat_pump"]).strip().upper()
         hp_data = self.get_component(hp_name, ComponentType.HEATPUMP)
-        props['heat_pump'] = hp_data
+        props["heat_pump"] = hp_data
 
-        load_pump_name = str(props['load_side_pump']).strip().upper()
+        load_pump_name = str(props["load_side_pump"]).strip().upper()
         load_pump_data = self.get_component(load_pump_name, ComponentType.PUMP)
-        props['load_side_pump'] = load_pump_data
+        props["load_side_pump"] = load_pump_data
 
-        src_pump_name = str(props['source_side_pump']).strip().upper()
+        src_pump_name = str(props["source_side_pump"]).strip().upper()
         src_pump_data = self.get_component(src_pump_name, ComponentType.PUMP)
-        props['source_side_pump'] = src_pump_data
+        props["source_side_pump"] = src_pump_data
 
-        fan_name = str(props['fan']).strip().upper()
+        fan_name = str(props["fan"]).strip().upper()
         fan_data = self.get_component(fan_name, ComponentType.FAN)
-        props['fan'] = fan_data
+        props["fan"] = fan_data
 
-        ets_data['properties'] = props
+        ets_data["properties"] = props
         print(f"final ets_data: {ets_data}")
         ets = ETS(ets_data)
-        print('made ETS')
+        print("made ETS")
         # check size of space loads
         print(f"length of spaceloads: {len(ets.space_loads)}\n")
         print(f"space_loads_file: {props['space_loads_file']}\n")
         if len(ets.space_loads) != 8760:
-            df = pd.read_csv(props['space_loads_file'])
-            df['Date Time'] = pd.to_datetime(df['Date Time'])
-            df.set_index('Date Time', inplace=True)
+            space_loads_df = pd.read_csv(props["space_loads_file"])
+            space_loads_df["Date Time"] = pd.to_datetime(space_loads_df["Date Time"])
+            space_loads_df = space_loads_df.set_index("Date Time")
             # Find the last date in the DataFrame and add one day so interpolation will get the last day
-            new_date = df.index[-1] + pd.Timedelta(days=1)
+            new_date = space_loads_df.index[-1] + pd.Timedelta(days=1)
             # add duplicate entry at end of dataframe
-            new_data = pd.DataFrame(df.iloc[-1].values.reshape(1, -1), index=[new_date], columns=df.columns)
-            df = pd.concat([df, new_data])
+            new_data = pd.DataFrame(
+                space_loads_df.iloc[-1].to_numpy().reshape(1, -1), index=[new_date], columns=space_loads_df.columns
+            )
+            space_loads_df = pd.concat([space_loads_df, new_data])
             # interpolate data to hourly
-            df = df.resample('H').interpolate(method='linear')
+            space_loads_df = space_loads_df.resample("H").interpolate(method="linear")
             # keep only8760
-            df = df.iloc[:8760]
-            ets.space_loads = df['TotalSensibleLoad']
+            space_loads_df = space_loads_df.iloc[:8760]
+            ets.space_loads = space_loads_df["TotalSensibleLoad"]
             print(f"NEW length of spaceloads: {len(ets.space_loads)}\n")
         self.network.append(ets)
         return 0
@@ -335,7 +327,6 @@ class Network:
         return 0
 
     def set_component_network_loads(self):
-
         # len_loads = []
 
         # for comp in self.network:
@@ -407,7 +398,7 @@ class Network:
         # loop over GHEs and size per area
         for i in ghe_indexes:
             ghe_area = self.network[i].area
-            self.network[i].json_data['loads']['ground_loads'] = np.array(network_load_per_area) * ghe_area
+            self.network[i].json_data["loads"]["ground_loads"] = np.array(network_load_per_area) * ghe_area
             self.network[i].ghe_size(sum(network_load_per_area) * ghe_area, output_path)
 
     def size_to_upstream_equipment(self, output_path: Path):
@@ -432,7 +423,7 @@ class Network:
             if i == 0:  # first GHE
                 devices_before_ghe = self.network[:ghe_index]
             else:
-                devices_before_ghe = self.network[ghe_indexes[i - 1] + 1:ghe_index]
+                devices_before_ghe = self.network[ghe_indexes[i - 1] + 1 : ghe_index]
             print(f"Devices before GHE at index {ghe_index}: {devices_before_ghe}")
 
             # Initialize an array to store the summed network loads for each hour of the year
@@ -452,7 +443,7 @@ class Network:
                     network_loads = np.array(network_loads) + np.array(device_loads)
 
             print(f"Total network loads for devices before GHE: {sum(network_loads)}")
-            self.network[ghe_index].json_data['loads']['ground_loads'] = network_loads
+            self.network[ghe_index].json_data["loads"]["ground_loads"] = network_loads
             # call ghe_size() with total load
             self.network[ghe_index].ghe_size(sum(network_loads), output_path)
 
@@ -481,11 +472,10 @@ class Network:
 
         # This is being done in the GHE sizer call.  Should those dirs get moved somewhere else?
 
-        pass
 
-
-def run_sizer_from_cli_worker(system_parameter_path: Path, scenario_directory_path: Path, geojson_file_path: Path,
-                              output_directory_path: Path) -> int:
+def run_sizer_from_cli_worker(
+    system_parameter_path: Path, scenario_directory_path: Path, geojson_file_path: Path, output_directory_path: Path
+) -> int:
     """
     Sizing worker function. Worker is called by tests, and thus not wrapped by `click`.
 
@@ -570,14 +560,10 @@ def run_sizer_from_cli_worker(system_parameter_path: Path, scenario_directory_pa
 
 
 @click.command(name="ThermalNetworkCommandLine")
-@click.option("-y", "--system-parameter-file", type=click.Path(exists=True),
-              help="Path to System Parameter file")
-@click.option("-s", "--scenario-directory", type=click.Path(exists=True),
-              help="Path to scenario directory")
-@click.option("-f", "--geojson-file", type=click.Path(exists=True),
-              help="Path to GeoJSON file")
-@click.option("-o", "--output-directory", type=click.Path(),
-              help="Path to output directory")
+@click.option("-y", "--system-parameter-file", type=click.Path(exists=True), help="Path to System Parameter file")
+@click.option("-s", "--scenario-directory", type=click.Path(exists=True), help="Path to scenario directory")
+@click.option("-f", "--geojson-file", type=click.Path(exists=True), help="Path to GeoJSON file")
+@click.option("-o", "--output-directory", type=click.Path(), help="Path to output directory")
 @click.version_option(VERSION)
 def run_sizer_from_cli(system_parameter_file, scenario_directory, geojson_file, output_directory):
     """
@@ -616,15 +602,13 @@ def run_sizer_from_cli(system_parameter_file, scenario_directory, geojson_file, 
     output_directory_path = Path(output_directory)
     print(f"Output path: {output_directory_path}\n")
     if not output_directory_path.exists():
-        print("Output path does not exist. attempting to create")  # Add this line
-        try:
-            output_directory_path.mkdir(parents=True, exist_ok=True)
-        except Exception as e:
-            print(f"Failed to create directory: {e}")
+        print("Output path does not exist. attempting to create")
+        output_directory_path.mkdir(parents=True, exist_ok=True)
 
     output_directory_path = output_directory_path.resolve()
-    return run_sizer_from_cli_worker(system_parameter_path, scenario_directory_path,
-                                     geojson_file_path, output_directory_path)
+    return run_sizer_from_cli_worker(
+        system_parameter_path, scenario_directory_path, geojson_file_path, output_directory_path
+    )
 
 
 if __name__ == "__main__":
