@@ -56,7 +56,7 @@ readme = {file = ["README.md", ]}
 # https://docs.pytest.org/en/6.2.x/customize.html#pyproject-toml
 [tool.pytest.ini_options]
 minversion = "6.0"
-testpaths = "tests"
+testpaths = "thermalnetwork/tests"
 
 # https://docs.astral.sh/ruff/settings/
 [tool.ruff]
