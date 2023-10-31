@@ -128,8 +128,13 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Linting/formatting/IDE settings
+.vscode/
+.ruff_cache
 .idea/
 .vscode/
+
+# Test output files
 thermalnetwork/tests/test_outputs
 
 output/
