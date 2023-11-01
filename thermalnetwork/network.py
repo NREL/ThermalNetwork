@@ -1,10 +1,12 @@
 import json
+import logging
 from pathlib import Path
-from sys import exit, stderr
+from sys import exit
 
 import click
 import numpy as np
 import pandas as pd
+from rich.logging import RichHandler
 
 from thermalnetwork import VERSION
 from thermalnetwork.base_component import BaseComponent
@@ -12,6 +14,9 @@ from thermalnetwork.energy_transfer_station import ETS
 from thermalnetwork.enums import ComponentType, DesignType
 from thermalnetwork.ground_heat_exchanger import GHE
 from thermalnetwork.pump import Pump
+
+logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
+logger = logging.getLogger(__name__)
 
 
 class Network:
@@ -145,10 +150,10 @@ class Network:
                 for directory in new_path.iterdir():
                     if directory.is_dir() and "_export_modelica_loads" in directory.name:
                         new_path = new_path / directory.name / "building_loads.csv"
-                        print(f"building_loads.csv path: {new_path}\n")
+                        logger.debug(f"building_loads.csv path: {new_path}\n")
                         break
-                if not Path.is_file(new_path):
-                    print("BUILDING_LOADS.CSV NOT FOUND! {new_path}", file=stderr)
+                if not new_path.is_file():
+                    logger.error(f"BUILDING_LOADS.CSV NOT FOUND! {new_path}")
                     return 1
                 properties = {
                     "heat_pump": "small wahp",
@@ -162,7 +167,7 @@ class Network:
                 # get ghe parameters for 'ghe_specific_params' key of system_parameters.json
                 matching_ghe = self.find_matching_ghe_id(feature["id"])
                 # matching_ghe.pop('ground_loads', None)
-                print(f"matching_ghe: {matching_ghe}\n")
+                logger.debug(f"matching_ghe: {matching_ghe}\n")
                 length = matching_ghe["ghe_geometric_params"]["length_of_ghe"]
                 width = matching_ghe["ghe_geometric_params"]["width_of_ghe"]
                 geometric_constraints = self.ghe_parameters["geometric_constraints"]
@@ -204,8 +209,7 @@ class Network:
             self.des_method = DesignType.UPSTREAM
         else:
             if throw:
-                msg = "Design method not supported."
-                print(msg, file=stderr)
+                logger.error(f"Design method '{des_method_str}' not supported.")
             return 1
         return 0
 
@@ -213,8 +217,7 @@ class Network:
         for comp in self.components_data:
             if comp["name"] == name and comp["type"] == comp_type_str:
                 if throw:
-                    msg = f'Duplicate {comp_type_str} name "{name}" encountered.'
-                    print(msg, file=stderr)
+                    logger.error(f'Duplicate {comp_type_str} name "{name}" encountered.')
                 return 1
         return 0
 
@@ -265,9 +268,9 @@ class Network:
     def add_ets_to_network(self, name: str):
         name_uc = name.strip().upper()
         ets_data = self.get_component(name_uc, ComponentType.ENERGYTRANSFERSTATION)
-        print(f"ets_data: {ets_data}")
+        logger.debug(f"ets_data: {ets_data}")
         props = ets_data["properties"]
-        print(f"props: {props}")
+        logger.debug(f"props: {props}")
         hp_name = str(props["heat_pump"]).strip().upper()
         hp_data = self.get_component(hp_name, ComponentType.HEATPUMP)
         props["heat_pump"] = hp_data
@@ -285,12 +288,12 @@ class Network:
         props["fan"] = fan_data
 
         ets_data["properties"] = props
-        print(f"final ets_data: {ets_data}")
+        logger.debug(f"final ets_data: {ets_data}")
         ets = ETS(ets_data)
-        print("made ETS")
+        logger.info("made ETS")
         # check size of space loads
-        print(f"length of spaceloads: {len(ets.space_loads)}\n")
-        print(f"space_loads_file: {props['space_loads_file']}\n")
+        logger.debug(f"length of spaceloads: {len(ets.space_loads)}\n")
+        logger.debug(f"space_loads_file: {props['space_loads_file']}\n")
         if len(ets.space_loads) != 8760:
             space_loads_df = pd.read_csv(props["space_loads_file"])
             space_loads_df["Date Time"] = pd.to_datetime(space_loads_df["Date Time"])
@@ -307,7 +310,7 @@ class Network:
             # keep only8760
             space_loads_df = space_loads_df.iloc[:8760]
             ets.space_loads = space_loads_df["TotalSensibleLoad"]
-            print(f"NEW length of spaceloads: {len(ets.space_loads)}\n")
+            logger.warning(f"NEW length of spaceloads: {len(ets.space_loads)}\n")
         self.network.append(ets)
         return 0
 
@@ -347,7 +350,7 @@ class Network:
         """
         Sizing method for area proportional approach.
         """
-        print("size_area_proportional")
+        logger.info("size_area_proportional")
         # find all objects between each groundheatexchanger
         #  sum loads
         # find all GHE and their sizes
@@ -356,23 +359,23 @@ class Network:
         other_indexes = []  # This will store the indexes of all other devices
 
         for i, device in enumerate(self.network):
-            print(f"Network Index {i}: {device}")
+            logger.debug(f"Network Index {i}: {device}")
             if device.comp_type == ComponentType.GROUNDHEATEXCHANGER:
                 ghe_indexes.append(i)
             else:
                 other_indexes.append(i)
 
-        print("GROUNDHEATEXCHANGER indices in network:")
-        print(ghe_indexes)
-        print("Other equip indices in network:")
-        print(other_indexes)
+        logger.info("GROUNDHEATEXCHANGER indices in network:")
+        logger.info(ghe_indexes)
+        logger.info("Other equipment indices in network:")
+        logger.info(other_indexes)
 
         total_ghe_area = 0
         for i in ghe_indexes:
             ghe_area = self.network[i].area
-            print(f"{self.network[i]}.area: {ghe_area}")
+            logger.info(f"{self.network[i]}.area: {ghe_area}")
             total_ghe_area += ghe_area
-        print(f"total_ghe_area: {total_ghe_area}")
+        logger.info(f"total_ghe_area: {total_ghe_area}")
 
         # Initialize an array to store the summed loads for each hour of the year
         total_network_loads = [0] * 8760
@@ -381,17 +384,17 @@ class Network:
             # ETS .get_loads() doesnt take num_loads arg
             device = self.network[i]
             if device.comp_type != ComponentType.ENERGYTRANSFERSTATION:
-                print(f"{device.comp_type}.get_loads: {device.get_loads(1)}")
+                logger.debug(f"{device.comp_type}.get_loads: {device.get_loads(1)}")
                 device_load = device.get_loads(1)
                 # Add the scalar load to the total space loads for each hour of the year
                 total_network_loads = np.array(total_network_loads) + device_load[0]
             else:
-                print(f"{device.comp_type}.get_loads len: {len(device.get_loads())}")
+                logger.debug(f"{device.comp_type}.get_loads len: {len(device.get_loads())}")
                 device_loads = device.get_loads()
                 # Add the array of loads for each hour to the total space loads array
                 total_network_loads = np.array(total_network_loads) + np.array(device_loads)
 
-        print(f"Total network loads for devices: {sum(total_network_loads)}")
+        logger.info(f"Total network loads for devices: {sum(total_network_loads)}")
 
         network_load_per_area = np.array(total_network_loads) / total_ghe_area
 
@@ -405,44 +408,44 @@ class Network:
         """
         Sizing method for upstream equipment approach.
         """
-        print("size_to_upstream")
+        logger.info("size_to_upstream_equipment")
         # find all objects between each groundheatexchanger
         # size to those buildings
 
         ghe_indexes = []  # This will store the indexes of all GROUNDHEATEXCHANGER devices
 
         for i, device in enumerate(self.network):
-            print(f"Network Index {i}: {device}")
+            logger.debug(f"Network Index {i}: {device}")
             if device.comp_type == ComponentType.GROUNDHEATEXCHANGER:
                 ghe_indexes.append(i)
 
-        print("GROUNDHEATEXCHANGER indices in network:")
-        print(ghe_indexes)
+        logger.info("GROUNDHEATEXCHANGER indices in network:")
+        logger.info(ghe_indexes)
         # slice the self.network by ghe_indexes
         for i, ghe_index in enumerate(ghe_indexes):
             if i == 0:  # first GHE
                 devices_before_ghe = self.network[:ghe_index]
             else:
                 devices_before_ghe = self.network[ghe_indexes[i - 1] + 1 : ghe_index]
-            print(f"Devices before GHE at index {ghe_index}: {devices_before_ghe}")
+            logger.info(f"Devices before GHE at index {ghe_index}: {devices_before_ghe}")
 
             # Initialize an array to store the summed network loads for each hour of the year
             network_loads = [0] * 8760
             for device in devices_before_ghe:
                 # ETS .get_loads() doesnt take num_loads arg
                 if device.comp_type != ComponentType.ENERGYTRANSFERSTATION:
-                    print(f"{device.comp_type}.get_loads: {device.get_loads(1)}")
+                    logger.debug(f"{device.comp_type}.get_loads: {device.get_loads(1)}")
                     device_load = device.get_loads(1)
                     # Add the scalar load to the total space loads for each hour of the year
                     network_loads = np.array(network_loads) + device_load[0]
 
                 else:
-                    print(f"{device.comp_type}.get_loads len: {len(device.get_loads())}")
+                    logger.debug(f"{device.comp_type}.get_loads len: {len(device.get_loads())}")
                     device_loads = device.get_loads()
                     # Add the array of loads for each hour to the total space loads array
                     network_loads = np.array(network_loads) + np.array(device_loads)
 
-            print(f"Total network loads for devices before GHE: {sum(network_loads)}")
+            logger.info(f"Total network loads for devices before GHE: {sum(network_loads)}")
             self.network[ghe_index].json_data["loads"]["ground_loads"] = network_loads
             # call ghe_size() with total load
             self.network[ghe_index].ghe_size(sum(network_loads), output_path)
@@ -451,15 +454,14 @@ class Network:
         """
         High-level sizing call that handles any lower-level calls or iterations.
         """
-        print("size")
+        logger.debug("Choosing sizing method...")
         if self.des_method == DesignType.AREAPROPORTIONAL:
             self.size_area_proportional(output_path)
         elif self.des_method == DesignType.UPSTREAM:
             self.size_to_upstream_equipment(output_path)
         else:
             if throw:
-                msg = f"Unsupported design method {self.des_method}"
-                print(msg, file=stderr)
+                logger.error(f"Unsupported design method {self.des_method}")
             return 1
         return 0
 
@@ -487,7 +489,7 @@ def run_sizer_from_cli_worker(
 
     # load geojson_file file
     if not geojson_file_path.exists():
-        print(f"No input file found at {geojson_file_path}, aborting.", file=stderr)
+        logger.warning(f"No input file found at {geojson_file_path}, aborting.")
         return 1
 
     geojson_data = json.loads(geojson_file_path.read_text())
@@ -495,7 +497,7 @@ def run_sizer_from_cli_worker(
 
     # Check if the file exists
     if not system_parameter_path.exists():
-        print(f"No system_parameter.json file found at {system_parameter_path}, aborting.", file=stderr)
+        logger.warning(f"No system_parameter.json file found at {system_parameter_path}, aborting.")
         return 1
 
     system_parameters_data = json.loads(system_parameter_path.read_text())
@@ -504,10 +506,10 @@ def run_sizer_from_cli_worker(
     # load all input data
     version: int = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]["version"]
     if version != VERSION:
-        print("Mismatched ThermalNetwork versions. Could be a problem.", file=stderr)
+        logger.warning("Mismatched ThermalNetwork versions. Could be a problem.")
 
     ghe_design_data: dict = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]["design"]
-    print(f"ghe_design_data: {ghe_design_data}\n")
+    logger.info(f"{ghe_design_data=}")
     # instantiate a new Network object
     network = Network()
     network.geojson_data = geojson_data
@@ -516,10 +518,10 @@ def run_sizer_from_cli_worker(
 
     # get network list from geojson
     connected_features = network.get_connected_features(geojson_data)
-    print(f"Features in district loop: {connected_features}\n")
+    logger.debug(f"Features in district loop: {connected_features}\n")
 
     reordered_features = network.reorder_connected_features(connected_features)
-    print(f"Features in loop order: {reordered_features}\n")
+    logger.debug(f"Features in loop order: {reordered_features}\n")
 
     # convert geojson type "Building","District System" to "ENERGYTRANSFERSTATION",
     # "GROUNDHEATEXCHANGER" and add properties
@@ -545,8 +547,7 @@ def run_sizer_from_cli_worker(
         elif comp_type_str == ComponentType.PUMP.name:
             errors += network.add_pump_to_network(comp_name)
         else:
-            msg = f"Unsupported component type, {comp_type_str}"
-            print(msg, file=stderr)
+            logger.error(f"Unsupported component type, {comp_type_str}")
             errors += 1
 
     if errors != 0:
@@ -570,15 +571,18 @@ def run_sizer_from_cli(system_parameter_file, scenario_directory, geojson_file, 
     CLI entrypoint for sizing runner.
 
     :param system_parameter_file: path to system parameter file
+
     :param scenario_directory: path to scenario directory
+
     :param geojson_file: path to GeoJSON file
+
     :param output_directory: path to output directory
     """
 
-    print("System Parameter File:", system_parameter_file)
-    print("Scenario directory:", scenario_directory)
-    print("GeoJSON file:", geojson_file)
-    print("Output directory:", output_directory)
+    logger.debug(f"{system_parameter_file=}")
+    logger.debug(f"{scenario_directory=}")
+    logger.debug(f"{geojson_file=}")
+    logger.debug(f"{output_directory=}")
 
     # if validate:
     #    try:
@@ -591,18 +595,16 @@ def run_sizer_from_cli(system_parameter_file, scenario_directory, geojson_file, 
     # calling the worker function here
 
     system_parameter_path = Path(system_parameter_file).resolve()
-    print(f"scenario_directory path: {system_parameter_path}\n")
-
     scenario_directory_path = Path(scenario_directory).resolve()
-    print(f"scenario_directory path: {scenario_directory_path}\n")
-
     geojson_file_path = Path(geojson_file).resolve()
-    print(f"geojson_file path: {geojson_file_path}\n")
-
     output_directory_path = Path(output_directory)
-    print(f"Output path: {output_directory_path}\n")
+    logger.debug(f"{system_parameter_path=}")
+    logger.debug(f"{scenario_directory_path=}")
+    logger.debug(f"{geojson_file_path=}")
+    logger.debug(f"{output_directory_path=}")
+
     if not output_directory_path.exists():
-        print("Output path does not exist. attempting to create")
+        logger.info("Output path does not exist. attempting to create")
         output_directory_path.mkdir(parents=True, exist_ok=True)
 
     output_directory_path = output_directory_path.resolve()
