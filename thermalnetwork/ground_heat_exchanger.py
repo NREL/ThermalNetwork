@@ -97,6 +97,3 @@ class GHE(BaseComponent):
         glhe_json_data = current_file_directory / "Atlanta_loads/Atlanta_Office_Building_Loads.csv"
         raw_lines = glhe_json_data.read_text().split("\n")
         return [float(x) for x in raw_lines[1:] if x.strip() != ""]
-
-    def update_sys_params(self, system_parameter_path: Path) -> None:
-        print("sys_params method not yet implemented")

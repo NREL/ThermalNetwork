@@ -150,7 +150,7 @@ class Network:
                 for directory in new_path.iterdir():
                     if directory.is_dir() and "_export_modelica_loads" in directory.name:
                         new_path = new_path / directory.name / "building_loads.csv"
-                        logger.debug(f"building_loads.csv path: {new_path}\n")
+                        logger.debug(f"building_loads.csv path: {new_path}")
                         break
                 if not new_path.is_file():
                     logger.error(f"BUILDING_LOADS.CSV NOT FOUND! {new_path}")
@@ -292,8 +292,8 @@ class Network:
         ets = ETS(ets_data)
         logger.info("made ETS")
         # check size of space loads
-        logger.debug(f"length of spaceloads: {len(ets.space_loads)}\n")
-        logger.debug(f"space_loads_file: {props['space_loads_file']}\n")
+        logger.debug(f"length of spaceloads: {len(ets.space_loads)}")
+        logger.debug(f"space_loads_file: {props['space_loads_file']}")
         if len(ets.space_loads) != 8760:
             space_loads_df = pd.read_csv(props["space_loads_file"])
             space_loads_df["Date Time"] = pd.to_datetime(space_loads_df["Date Time"])
@@ -310,7 +310,7 @@ class Network:
             # keep only8760
             space_loads_df = space_loads_df.iloc[:8760]
             ets.space_loads = space_loads_df["TotalSensibleLoad"]
-            logger.warning(f"NEW length of spaceloads: {len(ets.space_loads)}\n")
+            logger.warning(f"NEW length of spaceloads: {len(ets.space_loads)}")
         self.network.append(ets)
         return 0
 
@@ -350,7 +350,7 @@ class Network:
         """
         Sizing method for area proportional approach.
         """
-        logger.info("size_area_proportional")
+        logger.info("Sizing with: size_area_proportional")
         # find all objects between each groundheatexchanger
         #  sum loads
         # find all GHE and their sizes
@@ -408,7 +408,7 @@ class Network:
         """
         Sizing method for upstream equipment approach.
         """
-        logger.info("size_to_upstream_equipment")
+        logger.info("Sizing with: size_to_upstream_equipment")
         # find all objects between each groundheatexchanger
         # size to those buildings
 
@@ -465,14 +465,23 @@ class Network:
             return 1
         return 0
 
-    def write_outputs(self, output_path: Path):
-        """
-        Write all outputs.
-
-        :param output_path: path to write outputs
-        """
-
-        # This is being done in the GHE sizer call.  Should those dirs get moved somewhere else?
+    def update_sys_params(self, system_parameter_path: Path, output_directory_path: Path) -> None:
+        # Load the existing system parameters
+        sys_params: dict = json.loads(system_parameter_path.read_text())
+        ghe_params: list = sys_params["district_system"]["fifth_generation"]["ghe_parameters"]["ghe_specific_params"]
+        for ghe_id in output_directory_path.iterdir():
+            summary_data_path = ghe_id / "SimulationSummary.json"
+            # Get the new data from the GHEDesigner output
+            ghe_data: dict = json.loads(summary_data_path.read_text())["ghe_system"]
+            for ghe_sys_params in ghe_params:
+                if ghe_sys_params["ghe_id"] == ghe_id.stem:
+                    # Update system parameters dict with the new values
+                    ghe_sys_params["borehole"]["length_of_boreholes"] = ghe_data["active_borehole_length"]["value"]
+                    ghe_sys_params["borehole"]["number_of_boreholes"] = ghe_data["number_of_boreholes"]
+        with open(system_parameter_path, "w") as sys_param_file:
+            json.dump(sys_params, sys_param_file, indent=2)
+            # Restore the trailing newline
+            sys_param_file.write("\n")
 
 
 def run_sizer_from_cli_worker(
@@ -555,7 +564,7 @@ def run_sizer_from_cli_worker(
 
     network.set_component_network_loads()
     network.size(output_directory_path)
-    # network.write_outputs(output_path)
+    network.update_sys_params(system_parameter_path, output_directory_path)
 
     return 0
 
