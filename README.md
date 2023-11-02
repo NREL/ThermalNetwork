@@ -8,7 +8,7 @@ A library for sizing multiple ground heat exchangers distributed around a single
 
 # Usage
 
-This package is available via a command-line interface, intended to be used via URBANopt. To access the CLI directly, after installing call `thermalnetwork --help` for all the commands.
+This package has a command-line interface, intended to be used via URBANopt. To access the CLI directly, after installing call `thermalnetwork --help` for all the commands.
 
 # Developer installation
 
@@ -28,13 +28,13 @@ This package is available via a command-line interface, intended to be used via 
 
 # Testing
 
-Once you are set up as a developer, run `pytest` from the root dir.
+Once you are set up as a developer, run `pytest` from the root dir. Increase verbosity with `-v` and `-vv`.
 
-Test files are in thermalnetwork/tests/
+Test files are in _thermalnetwork/tests/_
 
-Test output will be written to thermalnetwork/tests/test_output/
+Test output will be written to _thermalnetwork/tests/test_output/_
 
 # Releasing
 
 Increment the version in thermalnetwork/_\_init__.py. Use [semantic versioning](https://semver.org/).
-When a new tag is established in GitHub, a [workflow](https://github.com/marketplace/actions/pypi-publish) automatically releases to PyPI.
+When a new release is made in GitHub, a [workflow](https://github.com/marketplace/actions/pypi-publish) automatically releases to PyPI.
