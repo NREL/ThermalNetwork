@@ -1,12 +1,17 @@
+import logging
 import os
 import shutil
 from pathlib import Path
 
 import pandas as pd
 from ghedesigner.manager import GHEManager
+from rich.logging import RichHandler
 
 from thermalnetwork.base_component import BaseComponent
 from thermalnetwork.enums import ComponentType
+
+logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
+logger = logging.getLogger(__name__)
 
 
 class GHE(BaseComponent):
@@ -21,7 +26,7 @@ class GHE(BaseComponent):
         self.area = self.json_data["geometric_constraints"]["length"] * self.json_data["geometric_constraints"]["width"]
 
     def ghe_size(self, total_space_loads, output_path: Path) -> float:
-        print(f"GHE_SIZE with total_space_loads: {total_space_loads}")
+        logger.info(f"GHE_SIZE with total_space_loads: {total_space_loads}")
         ghe = GHEManager()
         ghe.set_single_u_tube_pipe(
             inner_diameter=self.json_data["pipe"]["inner_diameter"],
@@ -62,23 +67,20 @@ class GHE(BaseComponent):
             flow_rate=self.json_data["design"]["flow_rate"], flow_type_str=self.json_data["design"]["flow_type"]
         )
 
-        # Construct the path to the new subdirectory
-        # current_file_directory = Path(os.path.dirname(os.path.abspath(__file__)))
-        # output_file_directory = current_file_directory / self.name
         output_file_directory = output_path / self.id
 
         # Check if the directory exists and delete it if so
         if output_file_directory.is_dir():
-            print(f"deleting directory: {output_file_directory}")
+            logger.debug(f"deleting directory: {output_file_directory}")
             shutil.rmtree(output_file_directory)
 
         # Create the subdirectory
-        print(f"creating directory: {output_file_directory}")
+        logger.debug(f"creating directory: {output_file_directory}")
         output_file_directory.mkdir(parents=True)
 
         ground_loads_df = pd.DataFrame(self.json_data["loads"]["ground_loads"])
         file_name = output_file_directory / "ground_loads.csv"
-        print(f"saving loads to: {file_name}")
+        logger.info(f"saving loads to: {file_name}")
         ground_loads_df.to_csv(file_name, index=False)
 
         ghe.find_design()
