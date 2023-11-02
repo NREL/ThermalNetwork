@@ -1,11 +1,10 @@
-from unittest import TestCase
-
 import pytest
 
 from thermalnetwork.heat_pump import HeatPump
+from thermalnetwork.tests.test_base import BaseCase
 
 
-class TestHeatPump(TestCase):
+class TestHeatPump(BaseCase):
     def test_calc_src_side_load(self):
         data = {"name": "WSHP", "type": "HEATPUMP", "properties": {"cop_c": 3.5, "cop_h": 2.5}}
 
