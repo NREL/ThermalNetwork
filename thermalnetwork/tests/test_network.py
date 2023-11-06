@@ -8,9 +8,11 @@ from thermalnetwork.tests.test_base import BaseCase
 
 class TestNetwork(BaseCase):
     def test_network_one_ghe(self):
+        # -- Set up
         output_path = self.test_outputs_path / "one_ghe"
         output_path.mkdir(parents=True, exist_ok=True)
 
+        # -- Run
         run_sizer_from_cli_worker(
             self.system_parameter_path_1_ghe,
             self.scenario_directory_path_1_ghe,
@@ -18,6 +20,7 @@ class TestNetwork(BaseCase):
             output_path,
         )
 
+        # -- Check
         for ghe_id in output_path.iterdir():
             sim_summary = json.loads((ghe_id / "SimulationSummary.json").read_text())
 
@@ -26,6 +29,7 @@ class TestNetwork(BaseCase):
         # ie: sim_summary["ghe_system"]["active_borehole_length"]["value"] should not only be a number,
         # but the CORRECT number.
 
+        # -- Clean up
         # Restore the original borehole length and number of boreholes.
         sys_param_1_ghe = json.loads((self.system_parameter_path_1_ghe).read_text())
         one_ghe_specific_params = sys_param_1_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
@@ -41,9 +45,11 @@ class TestNetwork(BaseCase):
 
     @pytest.mark.skip(reason="Test consumes too much memory/cpu for GHA runners. Please run locally instead")
     def test_network_two_ghe(self):
+        # -- Set up
         output_path = self.test_outputs_path / "two_ghe"
         output_path.mkdir(parents=True, exist_ok=True)
 
+        # -- Run
         run_sizer_from_cli_worker(
             self.system_parameter_path_2_ghe,
             self.scenario_directory_path_2_ghe,
@@ -51,6 +57,7 @@ class TestNetwork(BaseCase):
             output_path,
         )
 
+        # -- Check
         for ghe_id in output_path.iterdir():
             sim_summary = json.loads((ghe_id / "SimulationSummary.json").read_text())
 
@@ -59,6 +66,7 @@ class TestNetwork(BaseCase):
         # ie: sim_summary["ghe_system"]["active_borehole_length"]["value"] should not only be a number,
         # but the CORRECT number.
 
+        # -- Clean up
         # Restore the original borehole length and number of boreholes.
         sys_param_2_ghe = json.loads((self.system_parameter_path_2_ghe).read_text())
         two_ghe_specific_params = sys_param_2_ghe["district_system"]["fifth_generation"]["ghe_parameters"][

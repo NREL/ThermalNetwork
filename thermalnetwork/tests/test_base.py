@@ -6,9 +6,9 @@ from pathlib import Path
 class BaseCase(unittest.TestCase):
     def setUp(self) -> None:
         here = Path(__file__).parent
+
+        # -- Input paths
         self.demos_path = here.parent.parent / "demos"
-        self.test_outputs_path = here.resolve() / "test_outputs"
-        self.test_outputs_path.mkdir(exist_ok=True)
 
         self.geojson_file_path_1_ghe = (self.demos_path / "sdk_output_skeleton_1_ghe" / "network.geojson").resolve()
         self.scenario_directory_path_1_ghe = (
@@ -27,6 +27,10 @@ class BaseCase(unittest.TestCase):
         self.system_parameter_path_2_ghe = (
             self.scenario_directory_path_2_ghe / "ghe_dir" / "sys_params.json"
         ).resolve()
+
+        # -- Output paths
+        self.test_outputs_path = here.resolve() / "test_outputs"
+        self.test_outputs_path.mkdir(exist_ok=True)
 
         # Save the original borehole length and number of boreholes, so they can be restored after the tests run.
         sys_param_1_ghe = json.loads((self.system_parameter_path_1_ghe).read_text())
