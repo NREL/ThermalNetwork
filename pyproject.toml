@@ -36,6 +36,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest >= 6.0",
+    "pytest-cov ~= 4.1",
     "pre-commit ~= 3.5",
     "ruff ~= 0.1",
     "jupyterlab ~= 4.0",
@@ -58,6 +59,15 @@ version = {attr = "thermalnetwork.VERSION"}
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = "thermalnetwork/tests"
+addopts = ["--cov=thermalnetwork"]
+
+
+# https://pytest-cov.readthedocs.io/en/latest/config.html
+# https://coverage.readthedocs.io/en/latest/config.html
+[tool.coverage.run]
+omit = [
+  "thermalnetwork/tests/**"
+]
 
 # https://docs.astral.sh/ruff/settings/
 [tool.ruff]
