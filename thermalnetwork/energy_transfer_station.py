@@ -11,15 +11,15 @@ from thermalnetwork.pump import Pump
 
 class ETS(BaseComponent):
     def __init__(self, data: dict):
-        super().__init__(data['name'], ComponentType.ENERGYTRANSFERSTATION)
-        props: dict = data['properties']
-        self.hp = HeatPump(props['heat_pump'])
-        self.load_pump = Pump(props['load_side_pump'])
-        self.src_pump = Pump(props['source_side_pump'])
-        self.fan = Fan(props['fan'])
-        self.space_loads_file = props['space_loads_file']
-        df = pd.read_csv(self.space_loads_file)
-        self.space_loads = df['TotalSensibleLoad']
+        super().__init__(data["name"], ComponentType.ENERGYTRANSFERSTATION)
+        props: dict = data["properties"]
+        self.hp = HeatPump(props["heat_pump"])
+        self.load_pump = Pump(props["load_side_pump"])
+        self.src_pump = Pump(props["source_side_pump"])
+        self.fan = Fan(props["fan"])
+        self.space_loads_file = props["space_loads_file"]
+        space_loads_df = pd.read_csv(self.space_loads_file)
+        self.space_loads = space_loads_df["TotalSensibleLoad"]
 
     def get_loads(self):
         num_loads = len(self.space_loads)

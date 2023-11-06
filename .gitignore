@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+.DS_Store
 
 # C extensions
 *.so
@@ -128,8 +129,13 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Linting/formatting/IDE settings
+.vscode/
+.ruff_cache
 .idea/
 .vscode/
+
+# Test output files
 thermalnetwork/tests/test_outputs
 
 output/
