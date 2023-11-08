@@ -17,6 +17,7 @@ authors = [
   { name="Nathan Moore", email="nathan.moore@nrel.gov" },
 ]
 description = "A thermal network solver for GHE sizing."
+long_description = "A thermal network solver for GHE sizing."
 requires-python = "~=3.9"
 classifiers = [
         "Development Status :: 4 - Beta",
