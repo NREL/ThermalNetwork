@@ -1,13 +1,17 @@
 name: PyPIRelease
 
 on:
-  push:
-    tags:
-      - '*'
+  release:
+    types: [published]
 
 jobs:
   release:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    environment:
+      name: release
+      url: https://pypi.org/p/ThermalNetwork
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
 
     steps:
       - uses: actions/checkout@v4
@@ -15,19 +19,19 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: 3.12
 
-      - name: Install Pip Dependencies
+      - name: Install Dependencies
         shell: bash
-        run: pip install wheel
+        run: python3 -m pip install --upgrade build pip setuptools
 
       - name: Build the Wheel
         shell: bash
-        run: rm -rf dist/ build/ && python3 setup.py bdist_wheel sdist
+        run: |
+          rm -rf dist/ build/
+          python3 -m build
 
       - name: Deploy on PyPi
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          user: __token__
-          password: ${{ secrets.PYPIPW }}
           repository-url: https://upload.pypi.org/legacy/
