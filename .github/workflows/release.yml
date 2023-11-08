@@ -19,7 +19,7 @@ jobs:
 
       - name: Install Dependencies
         shell: bash
-        run: python3 -m pip install --upgrade build
+        run: python3 -m pip install --upgrade build pip setuptools
 
       - name: Build the Wheel
         shell: bash
