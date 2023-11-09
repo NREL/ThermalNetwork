@@ -1,11 +1,43 @@
 name: PyPIRelease
+# https://packaging.python.org/en/latest/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/
 
 on:
   release:
     types: [published]
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+
+      - name: Install pypa/build
+        run: >-
+          python3 -m
+          pip install
+          build
+          --user
+
+      - name: Build a binary wheel and a source tarball
+        run: python3 -m build
+
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@v3
+        with:
+          name: python-package-distributions
+          path: dist/
+
   release:
+    name: >-
+      Publish Python 🐍 distribution 📦 to PyPI
+    needs:
+    - build
     runs-on: ubuntu-latest
     environment:
       name: release
@@ -14,20 +46,10 @@ jobs:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Download all the dists
+        uses: actions/download-artifact@v3
         with:
-          python-version: 3.11
-
-      - name: Install Dependencies
-        run: python3 -m pip install --upgrade build pip setuptools
-
-      - name: Build the Wheel
-        run: |
-          rm -rf dist/ build/
-          python3 -m build
-
-      - name: Deploy on PyPi
+          name: python-package-distributions
+          path: dist/
+      - name: Publish distribution 📦 to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
