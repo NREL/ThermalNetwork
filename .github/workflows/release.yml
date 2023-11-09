@@ -33,5 +33,3 @@ jobs:
 
       - name: Deploy on PyPi
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://upload.pypi.org/legacy/
