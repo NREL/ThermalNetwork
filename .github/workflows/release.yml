@@ -22,11 +22,9 @@ jobs:
           python-version: 3.11
 
       - name: Install Dependencies
-        shell: bash
         run: python3 -m pip install --upgrade build pip setuptools
 
       - name: Build the Wheel
-        shell: bash
         run: |
           rm -rf dist/ build/
           python3 -m build
