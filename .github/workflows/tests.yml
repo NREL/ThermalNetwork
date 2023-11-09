@@ -3,7 +3,7 @@ name: Python Testing
 on: [ push ]
 
 jobs:
-  build:
+  pytest:
 
     strategy:
       matrix:
