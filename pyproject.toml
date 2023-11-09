@@ -17,7 +17,7 @@ authors = [
   { name="Nathan Moore", email="nathan.moore@nrel.gov" },
 ]
 description = "A thermal network solver for GHE sizing."
-requires-python = "~=3.9"
+requires-python = ">=3.9,<3.13"
 classifiers = [
         "Development Status :: 4 - Beta",
         "Topic :: Scientific/Engineering",
@@ -49,7 +49,7 @@ dev = [
 
 # https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html#dynamic-metadata
 [tool.setuptools.dynamic]
-readme = {file = ["README.md", ]}
+readme = {file = "README.md", content-type = "text/markdown"}
 version = {attr = "thermalnetwork.VERSION"}
 
 [project.urls]
