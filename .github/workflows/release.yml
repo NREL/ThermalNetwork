@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: release
-      url: https://pypi.org/p/ThermalNetwork
+      # url: https://pypi.org/p/ThermalNetwork
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
 
