@@ -14,6 +14,7 @@ class BaseCase(unittest.TestCase):
         self.scenario_directory_path_1_ghe = (
             self.demos_path / "sdk_output_skeleton_1_ghe" / "run" / "baseline_scenario"
         ).resolve()
+
         self.system_parameter_path_1_ghe = (
             self.scenario_directory_path_1_ghe / "ghe_dir" / "sys_params.json"
         ).resolve()
@@ -21,9 +22,11 @@ class BaseCase(unittest.TestCase):
         self.geojson_file_path_2_ghe = (
             self.demos_path / "sdk_output_skeleton_2_ghe_sequential" / "network.geojson"
         ).resolve()
+
         self.scenario_directory_path_2_ghe = (
             self.demos_path / "sdk_output_skeleton_2_ghe_sequential" / "run" / "baseline_scenario"
         ).resolve()
+
         self.system_parameter_path_2_ghe = (
             self.scenario_directory_path_2_ghe / "ghe_dir" / "sys_params.json"
         ).resolve()
