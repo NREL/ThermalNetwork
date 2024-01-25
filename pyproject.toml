@@ -1,6 +1,7 @@
 [build-system]
 requires = [
-    "setuptools>=67",
+    "setuptools >= 67",
+    "setuptools_scm >= 8",
     "wheel",
 ]
 build-backend = "setuptools.build_meta"
@@ -43,6 +44,10 @@ dev = [
     "jupyterlab ~= 4.0",
 ]
 
+[project.urls]
+"Homepage" = "https://github.com/NREL/ThermalNetwork"
+"Bug Tracker" = "https://github.com/NREL/ThermalNetwork/issues"
+
 # https://setuptools.pypa.io/en/latest/userguide/package_discovery.html
 [tool.setuptools.packages.find]
 # Must include a MANIFEST.in file in our repo: https://setuptools.pypa.io/en/latest/userguide/datafiles.html
@@ -50,11 +55,8 @@ dev = [
 # https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html#dynamic-metadata
 [tool.setuptools.dynamic]
 readme = {file = "README.md", content-type = "text/markdown"}
-version = {attr = "thermalnetwork.VERSION"}
 
-[project.urls]
-"Homepage" = "https://github.com/NREL/ThermalNetwork"
-"Bug Tracker" = "https://github.com/NREL/ThermalNetwork/issues"
+[tool.setuptools_scm]
 
 # https://docs.pytest.org/en/6.2.x/customize.html#pyproject-toml
 [tool.pytest.ini_options]
