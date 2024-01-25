@@ -1,5 +1,6 @@
 import json
 import logging
+from importlib.metadata import version
 from pathlib import Path
 from sys import exit
 
@@ -8,7 +9,6 @@ import numpy as np
 import pandas as pd
 from rich.logging import RichHandler
 
-from thermalnetwork import VERSION
 from thermalnetwork.base_component import BaseComponent
 from thermalnetwork.energy_transfer_station import ETS
 from thermalnetwork.enums import ComponentType, DesignType
@@ -531,9 +531,13 @@ def run_sizer_from_cli_worker(
     geojson_data["features"].extend(building_features)
 
     # load all input data
-    version: int = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]["version"]
-    if version != VERSION:
-        logger.warning("Mismatched ThermalNetwork versions. Could be a problem.")
+    sys_param_version: int = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]["version"]
+    if version("thermalnetwork") != sys_param_version:
+        logger.warning(
+            "Mismatched ThermalNetwork versions. Could be a problem. "
+            f"The system_parameter.json version is {sys_param_version}, but the ThermalNetwork version is "
+            f"{version('thermalnetwork')}."
+        )
 
     ghe_design_data: dict = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]["design"]
     logger.info(f"{ghe_design_data=}")
@@ -592,7 +596,7 @@ def run_sizer_from_cli_worker(
 @click.option("-s", "--scenario-directory", type=click.Path(exists=True), help="Path to scenario directory")
 @click.option("-f", "--geojson-file", type=click.Path(exists=True), help="Path to GeoJSON file")
 @click.option("-o", "--output-directory", type=click.Path(), help="Path to output directory")
-@click.version_option(VERSION)
+@click.version_option(version("thermalnetwork"))
 def run_sizer_from_cli(system_parameter_file, scenario_directory, geojson_file, output_directory):
     """
     CLI entrypoint for sizing runner.
