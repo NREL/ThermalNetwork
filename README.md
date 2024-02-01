@@ -41,5 +41,4 @@ Test output will be written to _thermalnetwork/tests/test_output/_
 
 # Releasing
 
-Increment the version in *thermalnetwork/_\_init__.py*. Use [semantic versioning](https://semver.org/).
-When a new release from the `main` branch is made in GitHub, a [workflow](https://github.com/marketplace/actions/pypi-publish) automatically publishes to PyPI.
+Versioning is done by GitHub tag, thanks to [SetupTools-SCM](https://setuptools-scm.readthedocs.io/en/latest/). Use [semantic versioning](https://semver.org/) when tagging. When a new release is made in GitHub, a [workflow](https://github.com/marketplace/actions/pypi-publish) automatically publishes to PyPI.
