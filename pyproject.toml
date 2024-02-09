@@ -56,21 +56,16 @@ dev = [
 [tool.setuptools.dynamic]
 readme = {file = "README.md", content-type = "text/markdown"}
 
+# https://setuptools-scm.readthedocs.io/
+# Presence of this command tells it to find the version from GitHub
 [tool.setuptools_scm]
 
 # https://docs.pytest.org/en/6.2.x/customize.html#pyproject-toml
 [tool.pytest.ini_options]
 minversion = "6.0"
-testpaths = "thermalnetwork/tests"
-addopts = ["--cov=thermalnetwork"]
-
-
-# https://pytest-cov.readthedocs.io/en/latest/config.html
-# https://coverage.readthedocs.io/en/latest/config.html
-[tool.coverage.run]
-omit = [
-  "thermalnetwork/tests/**"
-]
+testpaths = "tests"
+# Manually add this flag to `pytest` when running locally for coverage details.
+# addopts = ["--cov=thermalnetwork"]
 
 # https://docs.astral.sh/ruff/settings/
 [tool.ruff]
@@ -85,7 +80,7 @@ line-length = 120
 # quote-style = "double"
 
 [tool.ruff.per-file-ignores]
-"thermalnetwork/tests/*" = ["S101", "S607", "S603"] # assert statements are allowed in tests, and paths are safe
+"tests/*" = ["S101", "S607", "S603"] # assert statements are allowed in tests, and paths are safe
 
 [project.scripts]
 thermalnetwork = "thermalnetwork.network:run_sizer_from_cli"
