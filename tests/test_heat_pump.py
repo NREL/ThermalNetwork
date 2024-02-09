@@ -1,7 +1,7 @@
 import pytest
 
+from tests.test_base import BaseCase
 from thermalnetwork.heat_pump import HeatPump
-from thermalnetwork.tests.test_base import BaseCase
 
 
 class TestHeatPump(BaseCase):
