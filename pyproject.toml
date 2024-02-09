@@ -64,8 +64,8 @@ readme = {file = "README.md", content-type = "text/markdown"}
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = "tests"
-# Manually add this flag to `pytest` when running locally for coverage details.
-# addopts = ["--cov=thermalnetwork"]
+# Manually add these flags to `pytest` when running locally for coverage details.
+addopts = ["--cov=thermalnetwork", "--cov-report=html"]
 
 # https://docs.astral.sh/ruff/tutorial/#configuration
 [tool.ruff]
