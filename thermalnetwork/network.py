@@ -510,7 +510,8 @@ def run_sizer_from_cli_worker(
         return 1
 
     system_parameters_data = json.loads(system_parameter_path.read_text())
-    # print(f"system_parameters_data: {system_parameters_data}")
+
+    # Downselect the buildings in the geojson that are in the system parameters file
 
     # List the building ids from the system parameters file
     building_id_list = []
@@ -525,9 +526,12 @@ def run_sizer_from_cli_worker(
     ]
 
     # Rebuild the geojson data using only the buildings in the system parameters file
+    # Put in everything that isn't a building
     geojson_data["features"] = [
         feature for feature in geojson_data["features"] if feature["properties"]["type"] != "Building"
     ]
+    # Only add the buildings in the system parameters file back to the geojson data
+    # This has the effect of removing buildings that are not in the system parameters file
     geojson_data["features"].extend(building_features)
 
     # load all input data
