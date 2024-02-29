@@ -1,7 +1,7 @@
 {
   "buildings": [
     {
-      "geojson_id": "2",
+      "geojson_id": "8",
       "load_model": "time_series",
       "load_model_parameters": {
         "time_series": {
@@ -43,7 +43,7 @@
       }
     },
     {
-      "geojson_id": "5",
+      "geojson_id": "9",
       "load_model": "time_series",
       "load_model_parameters": {
         "time_series": {
