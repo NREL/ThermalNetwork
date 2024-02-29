@@ -56,6 +56,7 @@ class GHE(BaseComponent):
             max_height=self.json_data["geometric_constraints"]["max_height"],
             min_height=self.json_data["geometric_constraints"]["min_height"],
             continue_if_design_unmet=True,
+            max_boreholes=2500,
         )
         ghe.set_ground_loads_from_hourly_list(self.json_data["loads"]["ground_loads"])
         ghe.set_geometry_constraints_rectangle(
