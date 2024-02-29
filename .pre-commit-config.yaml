@@ -24,10 +24,10 @@ repos:
     # hooks:
       # - id: check-useless-excludes # Ensure the exclude syntax is correct
       # - id: check-hooks-apply # Fails if a hook doesn't apply to any file
-  # Run the Ruff linter
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.3.0
     hooks:
+      # Run the Ruff linter
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
         types_or: [python, pyi, jupyter]
@@ -37,3 +37,4 @@ repos:
     rev: v0.3.0
     hooks:
       - id: ruff-format
+        types_or: [python, pyi, jupyter]

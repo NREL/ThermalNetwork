@@ -56,36 +56,34 @@ dev = [
 [tool.setuptools.dynamic]
 readme = {file = "README.md", content-type = "text/markdown"}
 
+# https://setuptools-scm.readthedocs.io/
+# Presence of this command tells it to find the version from GitHub
 [tool.setuptools_scm]
 
 # https://docs.pytest.org/en/6.2.x/customize.html#pyproject-toml
 [tool.pytest.ini_options]
 minversion = "6.0"
-testpaths = "thermalnetwork/tests"
-addopts = ["--cov=thermalnetwork"]
+testpaths = "tests"
+# Manually add these flags to `pytest` when running locally for coverage details.
+addopts = ["--cov=thermalnetwork", "--cov-report=html"]
 
-
-# https://pytest-cov.readthedocs.io/en/latest/config.html
-# https://coverage.readthedocs.io/en/latest/config.html
-[tool.coverage.run]
-omit = [
-  "thermalnetwork/tests/**"
-]
-
-# https://docs.astral.sh/ruff/settings/
+# https://docs.astral.sh/ruff/tutorial/#configuration
 [tool.ruff]
 fix = true # automatically fix problems if possible
-select = ["RUF", "E", "F", "I", "UP", "N", "S", "BLE", "A", "C4", "T10", "ISC", "ICN", "PT",
-"Q", "SIM", "TID", "ARG", "DTZ", "PD", "PGH", "PLC", "PLE", "PLR", "PLW", "PIE", "COM"] # Enable these rules
-ignore = ["PLR0913", "PLR2004", "PLR0402", "COM812", "COM819", "SIM108", "ARG002", "ISC001"] # except for these specific errors
 line-length = 120
 
-# https://docs.astral.sh/ruff/settings/#format
+# https://docs.astral.sh/ruff/linter/#rule-selection
+[tool.ruff.lint]
+extend-select = ["RUF", "E", "F", "I", "UP", "N", "S", "BLE", "A", "C4", "T10", "ISC", "ICN", "PT",
+"Q", "SIM", "TID", "ARG", "DTZ", "PD", "PGH", "PLC", "PLE", "PLR", "PLW", "PIE", "COM"] # Enable these rules
+ignore = ["PLR0913", "PLR2004", "PLR0402", "COM812", "COM819", "SIM108", "ARG002", "ISC001"] # except for these specific errors
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "S607", "S603"] # assert statements are allowed in tests, and paths are safe
+
+# https://docs.astral.sh/ruff/formatter/#configuration
 [tool.ruff.format]
 # quote-style = "double"
-
-[tool.ruff.per-file-ignores]
-"thermalnetwork/tests/*" = ["S101", "S607", "S603"] # assert statements are allowed in tests, and paths are safe
 
 [project.scripts]
 thermalnetwork = "thermalnetwork.network:run_sizer_from_cli"

@@ -8,7 +8,7 @@ class BaseCase(unittest.TestCase):
         here = Path(__file__).parent
 
         # -- Input paths
-        self.demos_path = here.parent.parent / "demos"
+        self.demos_path = here.parent / "demos"
 
         self.geojson_file_path_1_ghe = (self.demos_path / "sdk_output_skeleton_1_ghe" / "network.geojson").resolve()
         self.scenario_directory_path_1_ghe = (

@@ -56,6 +56,7 @@ class GHE(BaseComponent):
             max_height=self.json_data["geometric_constraints"]["max_height"],
             min_height=self.json_data["geometric_constraints"]["min_height"],
             continue_if_design_unmet=True,
+            max_boreholes=2500,
         )
         ghe.set_ground_loads_from_hourly_list(self.json_data["loads"]["ground_loads"])
         ghe.set_geometry_constraints_rectangle(
@@ -83,13 +84,18 @@ class GHE(BaseComponent):
         file_name = output_file_directory / "ground_loads.csv"
         logger.info(f"saving loads to: {file_name}")
         ground_loads_df.to_csv(file_name, index=False)
+        logger.debug("loads saved to csv file")
 
         ghe.find_design()
+        logger.debug("design found")
         ghe.prepare_results("Project Name", "Notes", "Author", "Iteration Name")
+        logger.debug("results prepared for writing to output directory")
 
         ghe.write_output_files(output_file_directory, "")
+        logger.debug("output written to output directory")
         u_tube_height = ghe.results.output_dict["ghe_system"]["active_borehole_length"]["value"]
         # selected_coordinates = ghe.results.borehole_location_data_rows  # includes a header row
+        logger.debug("Done writing output")
         return u_tube_height
 
     def get_atlanta_loads(self) -> list[float]:

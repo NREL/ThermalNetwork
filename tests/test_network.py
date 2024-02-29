@@ -1,9 +1,7 @@
 import json
 
-import pytest
-
+from tests.test_base import BaseCase
 from thermalnetwork.network import run_sizer_from_cli_worker
-from thermalnetwork.tests.test_base import BaseCase
 
 
 class TestNetwork(BaseCase):
@@ -43,7 +41,6 @@ class TestNetwork(BaseCase):
             # Restore the trailing newline
             sys_param_file.write("\n")
 
-    @pytest.mark.skip(reason="Test consumes too much memory/cpu for GHA runners. Please run locally instead")
     def test_network_two_ghe(self):
         # -- Set up
         output_path = self.test_outputs_path / "two_ghe"
