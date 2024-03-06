@@ -66,7 +66,7 @@ class GHE(BaseComponent):
             b_max=self.json_data["geometric_constraints"]["b_max"],
         )
         ghe.set_design(
-            flow_rate=self.json_data["design"]["flow_rate"], flow_type_str=self.json_data["design"]["flow_type"]
+            flow_rate=self.json_data["design"]["flow_rate"] * 1000, flow_type_str=self.json_data["design"]["flow_type"]
         )
 
         output_file_directory = output_path / self.id
