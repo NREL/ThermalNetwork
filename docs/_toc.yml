@@ -1,0 +1,15 @@
+
+# In _toc.yml
+format: jb-book
+root: index
+chapters:
+- file: installation
+- file: inputs
+# - file: inputs/inputs
+#   sections:
+#     - file: inputs/project_cfg
+#     - file: inputs/population
+#     - file: inputs/buildstocks
+#     - file: inputs/building_options
+- file: usage
+- file: outputs
