@@ -1,0 +1,47 @@
+name: deploy-docs
+on:
+  push:
+    # branches:
+    #   - main
+    paths:
+    - docs/**
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build-book:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: 3.12
+    - run: pip install jupyter-book
+    - name: Build the book
+      run: |
+        jupyter-book build docs
+
+  deploy-to-gh-pages:
+    # Add a dependency to the build job
+    needs: build-book
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+    # Upload the book's HTML as an artifact
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: "docs/_build/html"
+    # Deploy the book's HTML to GitHub Pages
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
