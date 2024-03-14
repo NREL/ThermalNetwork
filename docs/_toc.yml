@@ -4,6 +4,7 @@ format: jb-book
 root: index
 chapters:
 - file: installation
+- file: usage
 - file: inputs
 # - file: inputs/inputs
 #   sections:
@@ -11,5 +12,4 @@ chapters:
 #     - file: inputs/population
 #     - file: inputs/buildstocks
 #     - file: inputs/building_options
-- file: usage
 - file: outputs
