@@ -9,39 +9,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  # build-book:
-  #   runs-on: ubuntu-latest
-    # permissions:
-    #   contents: write
-      # pages: write      # to deploy to Pages
-      # id-token: write   # to verify the deployment originates from an appropriate source
-    # environment:
-    #   name: github-pages
-    #   url: ${{ steps.deployment.outputs.page_url }}
-
-    # steps:
-    # - uses: actions/checkout@v4
-    # - uses: actions/setup-python@v5
-    #   with:
-    #     python-version: 3.12
-    # - run: pip install jupyter-book
-    # - name: Build the book
-    #   run: |
-    #     jupyter-book build docs
-
-
-    # - name: GitHub Pages action
-    #   uses: peaceiris/actions-gh-pages@v3
-    #   with:
-    #     github_token: ${{ secrets.GITHUB_TOKEN  }}
-    #     publish_dir: docs/_build/html
-
   deploy-to-gh-pages:
-    # Add a dependency to the build job
-    # needs: build-book
     runs-on: ubuntu-latest
     permissions:
-      # contents: write
       pages: write      # to deploy to Pages
       id-token: write   # to verify the deployment originates from an appropriate source
     environment:
@@ -53,10 +23,9 @@ jobs:
     - uses: actions/setup-python@v5
       with:
         python-version: 3.12
-    - run: pip install jupyter-book
+    - run: pip install -U jupyter-book
     - name: Build the book
-      run: |
-        jupyter-book build docs
+      run: jupyter-book build docs
     - name: Setup Pages
       uses: actions/configure-pages@v4
     # Upload the book's HTML as an artifact
