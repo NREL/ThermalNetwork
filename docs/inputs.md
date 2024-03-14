@@ -1,4 +1,4 @@
-# Inputs to ThermalNetwork
+# Inputs
 
 - System parameters file defining the network
   - Including GHE parameters
