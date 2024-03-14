@@ -1,0 +1,6 @@
+site_name: ThermalNetwork
+repo_url: https://github.com/NREL/ThermalNetwork
+site_url: NREL.github.io/ThermalNetwork
+
+theme:
+  name: material
