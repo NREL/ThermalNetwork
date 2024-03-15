@@ -1,15 +1,7 @@
 # ThermalNetwork Documentation
 
-## Commands
+A library for sizing multiple ground heat exchangers distributed around a single-pipe thermal network.
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+The primary entry point is through the CLI, intended to be used with [URBANopt](https://docs.urbanopt.net/). In the course of a typical UO workflow, sizing a Ground-source Heat Pump (GHP) is done with [this command](https://docs.urbanopt.net/workflows/ghp/ghp.html#size-ghp).
 
-## Project layout
-
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+It is possible to access the CLI directly. Once this package has been installed successfully, the available commands may be seen with `thermalnetwork --help`.
