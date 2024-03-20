@@ -31,6 +31,10 @@ class BaseCase(unittest.TestCase):
             self.scenario_directory_path_2_ghe / "ghe_dir" / "sys_params.json"
         ).resolve()
 
+        self.system_parameter_path_2_ghe_upstream = (
+            self.scenario_directory_path_2_ghe / "ghe_dir" / "sys_params_upstream.json"
+        ).resolve()
+
         # -- Output paths
         self.test_outputs_path = here.resolve() / "test_outputs"
         self.test_outputs_path.mkdir(exist_ok=True)
