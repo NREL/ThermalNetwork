@@ -88,7 +88,7 @@
   "district_system": {
     "fifth_generation": {
       "ghe_parameters": {
-        "version": "0.2.3",
+        "version": "0.2.4",
         "ghe_dir": "tests\\management\\data\\sdk_project_scraps\\run\\baseline_scenario\\ghe_dir",
         "fluid": {
           "fluid_name": "Water",
