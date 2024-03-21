@@ -41,7 +41,7 @@ class TestNetwork(BaseCase):
             # Restore the trailing newline
             sys_param_file.write("\n")
 
-    def test_network_two_ghe(self):
+    def test_network_two_ghe_area_proportional(self):
         # -- Set up
         output_path = self.test_outputs_path / "two_ghe"
         output_path.mkdir(parents=True, exist_ok=True)
@@ -59,9 +59,10 @@ class TestNetwork(BaseCase):
             sim_summary = json.loads((ghe_id / "SimulationSummary.json").read_text())
 
             assert isinstance(sim_summary["ghe_system"]["active_borehole_length"]["value"], float)
+            assert sim_summary["ghe_system"]["active_borehole_length"]["value"] == 60
         # TODO: We should test the quality of the output.
         # ie: sim_summary["ghe_system"]["active_borehole_length"]["value"] should not only be a number,
-        # but the CORRECT number.
+        # but the CORRECT number. No idea if 60 is the correct number.
 
         # -- Clean up
         # Restore the original borehole length and number of boreholes.
@@ -74,6 +75,43 @@ class TestNetwork(BaseCase):
             ghe["borehole"]["number_of_boreholes"] = self.original_num_boreholes
         with open(self.system_parameter_path_2_ghe, "w") as sys_param_file:
             json.dump(sys_param_2_ghe, sys_param_file, indent=2)
+            # Restore the trailing newline
+            sys_param_file.write("\n")
+
+    def test_network_ghe_upstream(self):
+        # -- Set up
+        output_path = self.test_outputs_path / "upstream_ghe"
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        # -- Run
+        run_sizer_from_cli_worker(
+            self.system_parameter_path_13_buildings_upstream_ghe,
+            self.scenario_directory_path_13_buildings,
+            self.geojson_file_path_13_buildings,
+            output_path,
+        )
+
+        # -- Check
+        for ghe_id in output_path.iterdir():
+            sim_summary = json.loads((ghe_id / "SimulationSummary.json").read_text())
+
+            assert isinstance(sim_summary["ghe_system"]["active_borehole_length"]["value"], float)
+            # assert sim_summary["ghe_system"]["active_borehole_length"]["value"] ==
+        # TODO: We should test the quality of the output.
+        # ie: sim_summary["ghe_system"]["active_borehole_length"]["value"] should not only be a number,
+        # but the CORRECT number. Pretty sure it should be different than the area_proportional test.
+
+        # -- Clean up
+        # Restore the original borehole length and number of boreholes.
+        sys_param_ghe = json.loads((self.system_parameter_path_13_buildings_upstream_ghe).read_text())
+        upstream_ghe_specific_params = sys_param_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
+            "ghe_specific_params"
+        ]
+        for ghe in upstream_ghe_specific_params:
+            ghe["borehole"]["length_of_boreholes"] = self.original_borehole_length
+            ghe["borehole"]["number_of_boreholes"] = self.original_num_boreholes
+        with open(self.system_parameter_path_13_buildings_upstream_ghe, "w") as sys_param_file:
+            json.dump(sys_param_ghe, sys_param_file, indent=2)
             # Restore the trailing newline
             sys_param_file.write("\n")
 
