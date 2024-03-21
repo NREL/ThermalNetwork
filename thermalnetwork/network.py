@@ -141,8 +141,7 @@ class Network:
 
         # Convert the features from geojson list
         for feature in json_data:
-            feature_type = feature["type"]
-            if feature_type == "Building":
+            if feature["type"] == "Building":
                 feature_type = "ENERGYTRANSFERSTATION"
                 # add building directory ID to scenario path; look for dir named
                 # '_export_modelica_loads' for the building_loads.csv
@@ -162,7 +161,7 @@ class Network:
                     "fan": "simple fan",
                     "space_loads_file": new_path,
                 }
-            elif feature_type == "District System" and feature["district_system_type"] == "Ground Heat Exchanger":
+            elif feature["type"] == "District System" and feature["district_system_type"] == "Ground Heat Exchanger":
                 feature_type = "GROUNDHEATEXCHANGER"
                 # get ghe parameters for 'ghe_specific_params' key of system_parameters.json
                 matching_ghe = self.find_matching_ghe_id(feature["id"])
@@ -501,8 +500,8 @@ def run_sizer_from_cli_worker(
         logger.warning(f"No input file found at {geojson_file_path}, aborting.")
         return 1
 
-    geojson_data = json.loads(geojson_file_path.read_text())
-    # print(f"geojson_data: {geojson_data}")
+    geojson_data: dict = json.loads(geojson_file_path.read_text())
+    # logger.debug(f"{geojson_data=}")
 
     # Check if the file exists
     if not system_parameter_path.exists():
@@ -510,6 +509,7 @@ def run_sizer_from_cli_worker(
         return 1
 
     system_parameters_data = json.loads(system_parameter_path.read_text())
+    ghe_parameters_data: dict = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]
 
     # Downselect the buildings in the geojson that are in the system parameters file
 
@@ -517,6 +517,8 @@ def run_sizer_from_cli_worker(
     building_id_list = []
     for building in system_parameters_data["buildings"]:
         building_id_list.append(building["geojson_id"])
+
+    # logger.debug(f"{building_id_list=}")
 
     # Select the buildings in the geojson that are in the system parameters file
     building_features = [
@@ -534,8 +536,15 @@ def run_sizer_from_cli_worker(
     # This has the effect of removing buildings that are not in the system parameters file
     geojson_data["features"].extend(building_features)
 
+    # print("Building features:")
+    # for feature in geojson_data["features"]:
+    #     if feature["properties"]["type"] == "Building":
+    #         print(feature["properties"])
+    #         print("")
+    # logger.debug(f"Feature :: {feature['properties']['type']}: {feature['properties']['id']}")
+
     # load all input data
-    sys_param_version: int = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]["version"]
+    sys_param_version: int = ghe_parameters_data["version"]
     if version("thermalnetwork") != sys_param_version:
         logger.warning(
             "Mismatched ThermalNetwork versions. Could be a problem. "
@@ -543,12 +552,12 @@ def run_sizer_from_cli_worker(
             f"{version('thermalnetwork')}."
         )
 
-    ghe_design_data: dict = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]["design"]
-    logger.info(f"{ghe_design_data=}")
+    ghe_design_data: dict = ghe_parameters_data["design"]
+    logger.debug(f"{ghe_design_data=}")
     # instantiate a new Network object
     network = Network()
     network.geojson_data = geojson_data
-    network.ghe_parameters = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]
+    network.ghe_parameters = ghe_parameters_data
     network.scenario_directory_path = scenario_directory_path
 
     # get network list from geojson
