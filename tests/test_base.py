@@ -31,8 +31,20 @@ class BaseCase(unittest.TestCase):
             self.scenario_directory_path_2_ghe / "ghe_dir" / "sys_params.json"
         ).resolve()
 
-        self.system_parameter_path_2_ghe_upstream = (
+        self.geojson_file_path_13_buildings = (
+            self.demos_path / "sdk_output_skeleton_13_buildings" / "exportGeo.json"
+        ).resolve()
+
+        self.scenario_directory_path_13_buildings = (
+            self.demos_path / "sdk_output_skeleton_13_buildings" / "run" / "baseline_scenario"
+        ).resolve()
+
+        self.system_parameter_path_13_buildings_upstream_ghe = (
             self.scenario_directory_path_2_ghe / "ghe_dir" / "sys_params_upstream.json"
+        ).resolve()
+
+        self.system_parameter_path_13_buildings_proportional_ghe = (
+            self.scenario_directory_path_2_ghe / "ghe_dir" / "sys_params_proportional.json"
         ).resolve()
 
         # -- Output paths
