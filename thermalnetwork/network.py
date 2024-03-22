@@ -50,6 +50,7 @@ class Network:
         """
         features = geojson_data["features"]
         connectors = [feature for feature in features if feature["properties"]["type"] == "ThermalConnector"]
+        # logger.debug(f"{connectors=}")
         connected_features = []
 
         # get the id of the building or ds from the thermaljunction that has is_ghe_start_loop: True
@@ -58,6 +59,7 @@ class Network:
         # Start with the first connector
         start_feature_id = connectors[0]["properties"]["startFeatureId"]
         connected_features.append(start_feature_id)
+        # logger.debug(f"{connected_features=}")
 
         while True:
             next_feature_id = None
@@ -72,6 +74,7 @@ class Network:
                     break
             else:
                 break
+        # logger.debug(f"{connected_features=}")
 
         # Filter and return the building and district system features
         connected_objects = []
