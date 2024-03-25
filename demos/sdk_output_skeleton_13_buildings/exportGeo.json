@@ -732,7 +732,7 @@
         "footprint_area": 37454,
         "footprint_perimeter": 782,
         "floor_area": 37454,
-        "district_system_type": "Central Ambient Water",
+        "district_system_type": "Ground Heat Exchanger",
         "equipment": [
           "Ground Source Heat Pump--Ambient Water"
         ]
