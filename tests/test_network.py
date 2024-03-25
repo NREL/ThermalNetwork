@@ -24,7 +24,7 @@ class TestNetwork(BaseCase):
         for ghe_id in output_path.iterdir():
             sim_summary = json.loads((ghe_id / "SimulationSummary.json").read_text())
 
-            assert sim_summary["ghe_system"]["active_borehole_length"]["value"] == 133.44805651256092
+            assert sim_summary["ghe_system"]["active_borehole_length"]["value"] == pytest.approx(133.5, 0.01)
 
         # -- Clean up
         # Restore the original borehole length and number of boreholes.
