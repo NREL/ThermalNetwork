@@ -94,13 +94,38 @@ class Network:
                             "name": feature["properties"].get("name", ""),
                             "district_system_type": feature["properties"].get("district_system_type", ""),
                             "properties": {
-                                k: v for k, v in feature["properties"].items() if k not in [":type", ":name"]
+                                k: v for k, v in feature["properties"].items() if k not in ["type", "name", "id"]
                             },
                             "is_ghe_start_loop": True if feature_id == startloop_feature_id else None,
                         }
                     )
 
         return connected_objects
+
+    @staticmethod
+    def reorder_connected_features(features):
+        """
+        Reorders a list of connected features so that the feature with
+        'is_ghe_start_loop' set to True is at the beginning.
+
+        :param features: List of connected features.
+        :return: Reordered list of connected features.
+        :raises ValueError: If no feature with 'is_ghe_start_loop' set to True is found.
+        """
+        start_loop_index = None
+
+        for i, feature in enumerate(features):
+            if feature.get("is_ghe_start_loop"):
+                start_loop_index = i
+                break
+
+        if start_loop_index is None:
+            raise ValueError("No feature with 'is_ghe_start_loop' set to True was found in the list.")
+
+        # Reorder the features list to start with the feature having 'startloop' set to 'true'
+        reordered_features = features[start_loop_index:] + features[:start_loop_index]
+
+        return reordered_features
 
     def find_matching_ghe_id(self, feature_id):
         for ghe in self.ghe_parameters["ghe_specific_params"]:
@@ -131,7 +156,7 @@ class Network:
                 feature_type = "ENERGYTRANSFERSTATION"
                 # add building directory ID to scenario path; look for dir named
                 # '_export_modelica_loads' for the building_loads.csv
-                new_path = self.scenario_directory_path / feature["properties"]["id"]
+                new_path = self.scenario_directory_path / feature["id"]
                 for directory in new_path.iterdir():
                     if directory.is_dir() and "_export_modelica_loads" in directory.name:
                         new_path = new_path / directory.name / "building_loads.csv"
@@ -549,6 +574,9 @@ def run_sizer_from_cli_worker(
     # get network list from geojson
     connected_features = network.get_connected_features()
     logger.debug(f"Features in district loop: {connected_features}\n")
+
+    reordered_features = network.reorder_connected_features(connected_features)
+    logger.debug(f"Features in loop order: {reordered_features}\n")
 
     # convert geojson type "Building","District System" to "ENERGYTRANSFERSTATION",
     # "GROUNDHEATEXCHANGER" and add properties
