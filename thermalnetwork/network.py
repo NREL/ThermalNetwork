@@ -21,6 +21,15 @@ logger = logging.getLogger(__name__)
 
 class Network:
     def __init__(self) -> None:
+        """A thermal network.
+
+        :param des_method: Design method (upstream or proportional).
+        :param components_data: List of component data.
+        :param network: List of components.
+        :param ghe_parameters: Parameters for the ground heat exchanger.
+        :param geojson_data: GeoJSON data object containing features.
+        :param scenario_directory_path: Path to the URBANopt scenario directory.
+        """
         self.des_method = None
         self.components_data: list[dict] = []
         self.network: list[BaseComponent] = []
@@ -41,16 +50,14 @@ class Network:
                 return start_feature_id
         return None
 
-    def get_connected_features(self, geojson_data):
+    def get_connected_features(self):
         """
         Retrieves a list of connected features from a GeoJSON data object.
 
-        :param geojson_data: GeoJSON data object containing features.
         :return: List of connected features with additional information.
         """
-        features = geojson_data["features"]
+        features = self.geojson_data["features"]
         connectors = [feature for feature in features if feature["properties"]["type"] == "ThermalConnector"]
-        # logger.debug(f"{connectors=}")
         connected_features = []
 
         # get the id of the building or ds from the thermaljunction that has is_ghe_start_loop: True
@@ -59,7 +66,6 @@ class Network:
         # Start with the first connector
         start_feature_id = connectors[0]["properties"]["startFeatureId"]
         connected_features.append(start_feature_id)
-        # logger.debug(f"{connected_features=}")
 
         while True:
             next_feature_id = None
@@ -74,50 +80,27 @@ class Network:
                     break
             else:
                 break
-        # logger.debug(f"{connected_features=}")
 
         # Filter and return the building and district system features
         connected_objects = []
-        for feature in features:
-            feature_id = feature["properties"]["id"]
-            if feature_id in connected_features and feature["properties"]["type"] in ["Building", "District System"]:
-                connected_objects.append(
-                    {
-                        "id": feature_id,
-                        "type": feature["properties"]["type"],
-                        "name": feature["properties"].get("name", ""),
-                        "district_system_type": feature["properties"].get("district_system_type", ""),
-                        "properties": {k: v for k, v in feature["properties"].items() if k not in [":type", ":name"]},
-                        "is_ghe_start_loop": True if feature_id == startloop_feature_id else None,
-                    }
-                )
+        for con_feature in connected_features:
+            for feature in features:
+                feature_id = feature["properties"]["id"]
+                if feature_id == con_feature and feature["properties"]["type"] in ["Building", "District System"]:
+                    connected_objects.append(
+                        {
+                            "id": feature_id,
+                            "type": feature["properties"]["type"],
+                            "name": feature["properties"].get("name", ""),
+                            "district_system_type": feature["properties"].get("district_system_type", ""),
+                            "properties": {
+                                k: v for k, v in feature["properties"].items() if k not in [":type", ":name"]
+                            },
+                            "is_ghe_start_loop": True if feature_id == startloop_feature_id else None,
+                        }
+                    )
 
         return connected_objects
-
-    @staticmethod
-    def reorder_connected_features(features):
-        """
-        Reorders a list of connected features so that the feature with
-        'is_ghe_start_loop' set to True is at the beginning.
-
-        :param features: List of connected features.
-        :return: Reordered list of connected features.
-        :raises ValueError: If no feature with 'is_ghe_start_loop' set to True is found.
-        """
-        start_loop_index = None
-
-        for i, feature in enumerate(features):
-            if feature.get("is_ghe_start_loop"):
-                start_loop_index = i
-                break
-
-        if start_loop_index is None:
-            raise ValueError("No feature with 'is_ghe_start_loop' set to True was found in the list.")
-
-        # Reorder the features list to start with the feature having 'startloop' set to 'true'
-        reordered_features = features[start_loop_index:] + features[:start_loop_index]
-
-        return reordered_features
 
     def find_matching_ghe_id(self, feature_id):
         for ghe in self.ghe_parameters["ghe_specific_params"]:
@@ -547,8 +530,8 @@ def run_sizer_from_cli_worker(
     # logger.debug(f"Feature :: {feature['properties']['type']}: {feature['properties']['id']}")
 
     # load all input data
-    sys_param_version: int = ghe_parameters_data["version"]
-    if version("thermalnetwork") != sys_param_version:
+    sys_param_version: str = ghe_parameters_data["version"]
+    if version("thermalnetwork")[:3] != sys_param_version[:3]:  # Just major & minor, ignore patch version
         logger.warning(
             "Mismatched ThermalNetwork versions. Could be a problem. "
             f"The system_parameter.json version is {sys_param_version}, but the ThermalNetwork version is "
@@ -564,15 +547,12 @@ def run_sizer_from_cli_worker(
     network.scenario_directory_path = scenario_directory_path
 
     # get network list from geojson
-    connected_features = network.get_connected_features(geojson_data)
+    connected_features = network.get_connected_features()
     logger.debug(f"Features in district loop: {connected_features}\n")
-
-    reordered_features = network.reorder_connected_features(connected_features)
-    logger.debug(f"Features in loop order: {reordered_features}\n")
 
     # convert geojson type "Building","District System" to "ENERGYTRANSFERSTATION",
     # "GROUNDHEATEXCHANGER" and add properties
-    network_data: list[dict] = network.convert_features(reordered_features)
+    network_data: list[dict] = network.convert_features(connected_features)
     # print(f"Network data: {network_data}\n")
     # network_data: list[dict] = data["network"]
     # component_data: list[dict] = data["components"]
