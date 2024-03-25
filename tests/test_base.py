@@ -40,11 +40,11 @@ class BaseCase(unittest.TestCase):
         ).resolve()
 
         self.system_parameter_path_13_buildings_upstream_ghe = (
-            self.scenario_directory_path_2_ghe / "ghe_dir" / "sys_params_upstream.json"
+            self.scenario_directory_path_13_buildings / "ghe_dir" / "sys_params_upstream.json"
         ).resolve()
 
         self.system_parameter_path_13_buildings_proportional_ghe = (
-            self.scenario_directory_path_2_ghe / "ghe_dir" / "sys_params_proportional.json"
+            self.scenario_directory_path_13_buildings / "ghe_dir" / "sys_params_proportional.json"
         ).resolve()
 
         # -- Output paths
