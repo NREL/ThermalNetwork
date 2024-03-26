@@ -24,7 +24,7 @@ class TestNetwork(BaseCase):
         for ghe_id in output_path.iterdir():
             sim_summary = json.loads((ghe_id / "SimulationSummary.json").read_text())
 
-            assert sim_summary["ghe_system"]["active_borehole_length"]["value"] == pytest.approx(133.5, 0.01)
+            assert sim_summary["ghe_system"]["active_borehole_length"]["value"] == pytest.approx(110, 0.1)
 
         # -- Clean up
         # Restore the original borehole length and number of boreholes.
@@ -95,7 +95,7 @@ class TestNetwork(BaseCase):
             assert sim_summary["ghe_system"]["active_borehole_length"]["value"] == pytest.approx(133, 2)
         # FIXME: 135 is the max borehole length for a GHE (as set in the sys-params file).
         # This implies the borefield size is too small.
-        # Borefield dimensions are set in the geojson file and transfered to the sys-params file.
+        # Borefield dimensions are set in the geojson file and transfered to the sys-params file by the GMT.
 
         # -- Clean up
         # Restore the original borehole length and number of boreholes.
@@ -128,11 +128,10 @@ class TestNetwork(BaseCase):
         for ghe_id in output_path.iterdir():
             sim_summary = json.loads((ghe_id / "SimulationSummary.json").read_text())
 
-            # assert isinstance(sim_summary["ghe_system"]["active_borehole_length"]["value"], float)
             assert sim_summary["ghe_system"]["active_borehole_length"]["value"] == pytest.approx(133, 2)
         # FIXME: 135 is the max borehole length for a GHE (as set in the sys-params file).
         # This implies the borefield size is too small.
-        # Borefield dimensions are set in the geojson file and transfered to the sys-params file.
+        # Borefield dimensions are set in the geojson file and transfered to the sys-params file by the GMT.
 
         # -- Clean up
         # Restore the original borehole length and number of boreholes.

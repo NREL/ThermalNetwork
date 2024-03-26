@@ -37,14 +37,14 @@ class Network:
         self.geojson_data: dict = {}
         self.scenario_directory_path: Path = Path()
 
-    def find_startloop_feature_id(self, features):
+    def find_startloop_feature_id(self):
         """
         Finds the feature ID of a feature with the 'is_ghe_start_loop' property set to True in a list of features.
 
         :param features: List of features to search for the start loop feature.
         :return: The feature ID of the start loop feature, or None if not found.
         """
-        for feature in features:
+        for feature in self.geojson_data["features"]:
             if feature["properties"].get("is_ghe_start_loop"):
                 start_feature_id = feature["properties"].get("buildingId") or feature["properties"].get("DSId")
                 return start_feature_id
@@ -57,27 +57,37 @@ class Network:
         :return: List of connected features with additional information.
         """
         features = self.geojson_data["features"]
-        connectors = [feature for feature in features if feature["properties"]["type"] == "ThermalConnector"]
-        connected_features = []
+        startloop_feature_id = self.find_startloop_feature_id()
+        # List thermal connections
+        connectors = [
+            feature for feature in self.geojson_data["features"] if feature["properties"]["type"] == "ThermalConnector"
+        ]
 
-        # get the id of the building or ds from the thermaljunction that has is_ghe_start_loop: True
-        startloop_feature_id = self.find_startloop_feature_id(features)
-
-        # Start with the first connector
-        start_feature_id = connectors[0]["properties"]["startFeatureId"]
-        connected_features.append(start_feature_id)
-
+        # Find the feature that has been labelled as the start of the loop
+        # TODO: Update the UI to allow the user to select the start loop feature.
+        connected_features = [
+            feature["properties"].get("buildingId") or feature["properties"].get("DSId")
+            for feature in self.geojson_data["features"]
+            if feature["properties"].get("is_ghe_start_loop")
+        ]
+        # Warn that starting from something that isn't a building makes UPSTREAM results undesirable.
+        for feature in self.geojson_data["features"]:
+            if feature["properties"]["id"] == [connected_features[0]] and feature["properties"]["type"] != "Building":
+                logger.warning(
+                    f"Feature {feature[connected_features[0]]} is not a building which may have undesirable results "
+                    "when using the UPSTREAM sizing method."
+                )
+        # complete the list of feature ids that have thermal connections (building or district system)
         while True:
             next_feature_id = None
             for connector in connectors:
                 if connector["properties"]["startFeatureId"] == connected_features[-1]:
                     next_feature_id = connector["properties"]["endFeatureId"]
                     break
-
             if next_feature_id:
-                connected_features.append(next_feature_id)
-                if next_feature_id == start_feature_id:
+                if next_feature_id == connected_features[0]:
                     break
+                connected_features.append(next_feature_id)
             else:
                 break
 
@@ -92,15 +102,42 @@ class Network:
                             "id": feature_id,
                             "type": feature["properties"]["type"],
                             "name": feature["properties"].get("name", ""),
-                            "district_system_type": feature["properties"].get("district_system_type", ""),
+                            "district_system_type": feature["properties"].get("district_system_type"),
                             "properties": {
-                                k: v for k, v in feature["properties"].items() if k not in [":type", ":name"]
+                                k: v
+                                for k, v in feature["properties"].items()
+                                if k not in ["type", "name", "id", "district_system_type"]
                             },
-                            "is_ghe_start_loop": True if feature_id == startloop_feature_id else None,
+                            "is_ghe_start_loop": feature_id == startloop_feature_id,
                         }
                     )
 
         return connected_objects
+
+    @staticmethod
+    def reorder_connected_features(features):
+        """
+        Reorders a list of connected features so that the feature with
+        'is_ghe_start_loop' set to True is at the beginning.
+
+        :param features: List of connected features.
+        :return: Reordered list of connected features.
+        :raises ValueError: If no feature with 'is_ghe_start_loop' set to True is found.
+        """
+        start_loop_index = None
+
+        for i, feature in enumerate(features):
+            if feature.get("is_ghe_start_loop"):
+                start_loop_index = i
+                break
+
+        if start_loop_index is None:
+            raise ValueError("No feature with 'is_ghe_start_loop' set to True was found in the list.")
+
+        # Reorder the features list to start with the feature having 'startloop' set to 'true'
+        reordered_features = features[start_loop_index:] + features[:start_loop_index]
+
+        return reordered_features
 
     def find_matching_ghe_id(self, feature_id):
         for ghe in self.ghe_parameters["ghe_specific_params"]:
@@ -131,7 +168,7 @@ class Network:
                 feature_type = "ENERGYTRANSFERSTATION"
                 # add building directory ID to scenario path; look for dir named
                 # '_export_modelica_loads' for the building_loads.csv
-                new_path = self.scenario_directory_path / feature["properties"]["id"]
+                new_path = self.scenario_directory_path / feature["id"]
                 for directory in new_path.iterdir():
                     if directory.is_dir() and "_export_modelica_loads" in directory.name:
                         new_path = new_path / directory.name / "building_loads.csv"
@@ -549,6 +586,9 @@ def run_sizer_from_cli_worker(
     # get network list from geojson
     connected_features = network.get_connected_features()
     logger.debug(f"Features in district loop: {connected_features}\n")
+
+    reordered_features = network.reorder_connected_features(connected_features)
+    logger.debug(f"Features in loop order: {reordered_features}\n")
 
     # convert geojson type "Building","District System" to "ENERGYTRANSFERSTATION",
     # "GROUNDHEATEXCHANGER" and add properties
