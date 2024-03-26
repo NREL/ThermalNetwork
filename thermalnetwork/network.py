@@ -75,9 +75,9 @@ class Network:
                     break
 
             if next_feature_id:
-                connected_features.append(next_feature_id)
                 if next_feature_id == start_feature_id:
                     break
+                connected_features.append(next_feature_id)
             else:
                 break
 
