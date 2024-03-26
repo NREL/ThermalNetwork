@@ -37,14 +37,14 @@ class Network:
         self.geojson_data: dict = {}
         self.scenario_directory_path: Path = Path()
 
-    def find_startloop_feature_id(self, features):
+    def find_startloop_feature_id(self):
         """
         Finds the feature ID of a feature with the 'is_ghe_start_loop' property set to True in a list of features.
 
         :param features: List of features to search for the start loop feature.
         :return: The feature ID of the start loop feature, or None if not found.
         """
-        for feature in features:
+        for feature in self.geojson_data["features"]:
             if feature["properties"].get("is_ghe_start_loop"):
                 start_feature_id = feature["properties"].get("buildingId") or feature["properties"].get("DSId")
                 return start_feature_id
@@ -57,7 +57,7 @@ class Network:
         :return: List of connected features with additional information.
         """
         features = self.geojson_data["features"]
-        startloop_feature_id = self.find_startloop_feature_id(self.geojson_data["features"])
+        startloop_feature_id = self.find_startloop_feature_id()
         # List thermal connections
         connectors = [
             feature for feature in self.geojson_data["features"] if feature["properties"]["type"] == "ThermalConnector"
