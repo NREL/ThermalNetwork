@@ -92,11 +92,13 @@ class Network:
                             "id": feature_id,
                             "type": feature["properties"]["type"],
                             "name": feature["properties"].get("name", ""),
-                            "district_system_type": feature["properties"].get("district_system_type", ""),
+                            "district_system_type": feature["properties"].get("district_system_type"),
                             "properties": {
-                                k: v for k, v in feature["properties"].items() if k not in ["type", "name", "id"]
+                                k: v
+                                for k, v in feature["properties"].items()
+                                if k not in ["type", "name", "id", "district_system_type"]
                             },
-                            "is_ghe_start_loop": True if feature_id == startloop_feature_id else None,
+                            "is_ghe_start_loop": feature_id == startloop_feature_id,
                         }
                     )
 
