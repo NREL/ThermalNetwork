@@ -66,7 +66,7 @@ class Network:
         # Find the feature that has been labelled as the start of the loop
         # TODO: Update the UI to allow the user to select the start loop feature.
         connected_features = [
-            feature["properties"]["buildingId"] or feature["properties"]["DSId"]
+            feature["properties"].get("buildingId") or feature["properties"].get("DSId")
             for feature in self.geojson_data["features"]
             if feature["properties"].get("is_ghe_start_loop")
         ]
