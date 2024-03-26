@@ -57,25 +57,35 @@ class Network:
         :return: List of connected features with additional information.
         """
         features = self.geojson_data["features"]
-        connectors = [feature for feature in features if feature["properties"]["type"] == "ThermalConnector"]
-        connected_features = []
+        startloop_feature_id = self.find_startloop_feature_id(self.geojson_data["features"])
+        # List thermal connections
+        connectors = [
+            feature for feature in self.geojson_data["features"] if feature["properties"]["type"] == "ThermalConnector"
+        ]
 
-        # get the id of the building or ds from the thermaljunction that has is_ghe_start_loop: True
-        startloop_feature_id = self.find_startloop_feature_id(features)
-
-        # Start with the first connector
-        start_feature_id = connectors[0]["properties"]["startFeatureId"]
-        connected_features.append(start_feature_id)
-
+        # Find the feature that has been labelled as the start of the loop
+        # TODO: Update the UI to allow the user to select the start loop feature.
+        connected_features = [
+            feature["properties"]["buildingId"] or feature["properties"]["DSId"]
+            for feature in self.geojson_data["features"]
+            if feature["properties"].get("is_ghe_start_loop")
+        ]
+        # Warn that starting from something that isn't a building makes UPSTREAM results undesirable.
+        for feature in self.geojson_data["features"]:
+            if feature["properties"]["id"] == [connected_features[0]] and feature["properties"]["type"] != "Building":
+                logger.warning(
+                    f"Feature {feature[connected_features[0]]} is not a building which may have undesirable results "
+                    "when using the UPSTREAM sizing method."
+                )
+        # complete the list of feature ids that have thermal connections (building or district system)
         while True:
             next_feature_id = None
             for connector in connectors:
                 if connector["properties"]["startFeatureId"] == connected_features[-1]:
                     next_feature_id = connector["properties"]["endFeatureId"]
                     break
-
             if next_feature_id:
-                if next_feature_id == start_feature_id:
+                if next_feature_id == connected_features[0]:
                     break
                 connected_features.append(next_feature_id)
             else:
