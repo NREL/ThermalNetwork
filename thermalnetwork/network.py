@@ -21,6 +21,15 @@ logger = logging.getLogger(__name__)
 
 class Network:
     def __init__(self) -> None:
+        """A thermal network.
+
+        :param des_method: Design method (upstream or proportional).
+        :param components_data: List of component data.
+        :param network: List of components.
+        :param ghe_parameters: Parameters for the ground heat exchanger.
+        :param geojson_data: GeoJSON data object containing features.
+        :param scenario_directory_path: Path to the URBANopt scenario directory.
+        """
         self.des_method = None
         self.components_data: list[dict] = []
         self.network: list[BaseComponent] = []
@@ -28,66 +37,80 @@ class Network:
         self.geojson_data: dict = {}
         self.scenario_directory_path: Path = Path()
 
-    def find_startloop_feature_id(self, features):
+    def find_startloop_feature_id(self):
         """
         Finds the feature ID of a feature with the 'is_ghe_start_loop' property set to True in a list of features.
 
         :param features: List of features to search for the start loop feature.
         :return: The feature ID of the start loop feature, or None if not found.
         """
-        for feature in features:
+        for feature in self.geojson_data["features"]:
             if feature["properties"].get("is_ghe_start_loop"):
                 start_feature_id = feature["properties"].get("buildingId") or feature["properties"].get("DSId")
                 return start_feature_id
         return None
 
-    def get_connected_features(self, geojson_data):
+    def get_connected_features(self):
         """
         Retrieves a list of connected features from a GeoJSON data object.
 
-        :param geojson_data: GeoJSON data object containing features.
         :return: List of connected features with additional information.
         """
-        features = geojson_data["features"]
-        connectors = [feature for feature in features if feature["properties"]["type"] == "ThermalConnector"]
-        connected_features = []
+        features = self.geojson_data["features"]
+        startloop_feature_id = self.find_startloop_feature_id()
+        # List thermal connections
+        connectors = [
+            feature for feature in self.geojson_data["features"] if feature["properties"]["type"] == "ThermalConnector"
+        ]
 
-        # get the id of the building or ds from the thermaljunction that has is_ghe_start_loop: True
-        startloop_feature_id = self.find_startloop_feature_id(features)
-
-        # Start with the first connector
-        start_feature_id = connectors[0]["properties"]["startFeatureId"]
-        connected_features.append(start_feature_id)
-
+        # Find the feature that has been labelled as the start of the loop
+        # TODO: Update the UI to allow the user to select the start loop feature.
+        connected_features = [
+            feature["properties"].get("buildingId") or feature["properties"].get("DSId")
+            for feature in self.geojson_data["features"]
+            if feature["properties"].get("is_ghe_start_loop")
+        ]
+        # Warn that starting from something that isn't a building makes UPSTREAM results undesirable.
+        for feature in self.geojson_data["features"]:
+            if feature["properties"]["id"] == [connected_features[0]] and feature["properties"]["type"] != "Building":
+                logger.warning(
+                    f"Feature {feature[connected_features[0]]} is not a building which may have undesirable results "
+                    "when using the UPSTREAM sizing method."
+                )
+        # complete the list of feature ids that have thermal connections (building or district system)
         while True:
             next_feature_id = None
             for connector in connectors:
                 if connector["properties"]["startFeatureId"] == connected_features[-1]:
                     next_feature_id = connector["properties"]["endFeatureId"]
                     break
-
             if next_feature_id:
-                connected_features.append(next_feature_id)
-                if next_feature_id == start_feature_id:
+                if next_feature_id == connected_features[0]:
                     break
+                connected_features.append(next_feature_id)
             else:
                 break
 
         # Filter and return the building and district system features
         connected_objects = []
-        for feature in features:
-            feature_id = feature["properties"]["id"]
-            if feature_id in connected_features and feature["properties"]["type"] in ["Building", "District System"]:
-                connected_objects.append(
-                    {
-                        "id": feature_id,
-                        "type": feature["properties"]["type"],
-                        "name": feature["properties"].get("name", ""),
-                        "district_system_type": feature["properties"].get("district_system_type", ""),
-                        "properties": {k: v for k, v in feature["properties"].items() if k not in [":type", ":name"]},
-                        "is_ghe_start_loop": True if feature_id == startloop_feature_id else None,
-                    }
-                )
+        for con_feature in connected_features:
+            for feature in features:
+                feature_id = feature["properties"]["id"]
+                if feature_id == con_feature and feature["properties"]["type"] in ["Building", "District System"]:
+                    connected_objects.append(
+                        {
+                            "id": feature_id,
+                            "type": feature["properties"]["type"],
+                            "name": feature["properties"].get("name", ""),
+                            "district_system_type": feature["properties"].get("district_system_type"),
+                            "properties": {
+                                k: v
+                                for k, v in feature["properties"].items()
+                                if k not in ["type", "name", "id", "district_system_type"]
+                            },
+                            "is_ghe_start_loop": feature_id == startloop_feature_id,
+                        }
+                    )
 
         return connected_objects
 
@@ -141,12 +164,11 @@ class Network:
 
         # Convert the features from geojson list
         for feature in json_data:
-            feature_type = feature["type"]
-            if feature_type == "Building":
+            if feature["type"] == "Building":
                 feature_type = "ENERGYTRANSFERSTATION"
                 # add building directory ID to scenario path; look for dir named
                 # '_export_modelica_loads' for the building_loads.csv
-                new_path = self.scenario_directory_path / feature["properties"]["id"]
+                new_path = self.scenario_directory_path / feature["id"]
                 for directory in new_path.iterdir():
                     if directory.is_dir() and "_export_modelica_loads" in directory.name:
                         new_path = new_path / directory.name / "building_loads.csv"
@@ -162,7 +184,7 @@ class Network:
                     "fan": "simple fan",
                     "space_loads_file": new_path,
                 }
-            elif feature_type == "District System" and feature["district_system_type"] == "Ground Heat Exchanger":
+            elif feature["type"] == "District System" and feature["district_system_type"] == "Ground Heat Exchanger":
                 feature_type = "GROUNDHEATEXCHANGER"
                 # get ghe parameters for 'ghe_specific_params' key of system_parameters.json
                 matching_ghe = self.find_matching_ghe_id(feature["id"])
@@ -501,8 +523,8 @@ def run_sizer_from_cli_worker(
         logger.warning(f"No input file found at {geojson_file_path}, aborting.")
         return 1
 
-    geojson_data = json.loads(geojson_file_path.read_text())
-    # print(f"geojson_data: {geojson_data}")
+    geojson_data: dict = json.loads(geojson_file_path.read_text())
+    # logger.debug(f"{geojson_data=}")
 
     # Check if the file exists
     if not system_parameter_path.exists():
@@ -510,6 +532,7 @@ def run_sizer_from_cli_worker(
         return 1
 
     system_parameters_data = json.loads(system_parameter_path.read_text())
+    ghe_parameters_data: dict = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]
 
     # Downselect the buildings in the geojson that are in the system parameters file
 
@@ -517,6 +540,8 @@ def run_sizer_from_cli_worker(
     building_id_list = []
     for building in system_parameters_data["buildings"]:
         building_id_list.append(building["geojson_id"])
+
+    # logger.debug(f"{building_id_list=}")
 
     # Select the buildings in the geojson that are in the system parameters file
     building_features = [
@@ -534,25 +559,32 @@ def run_sizer_from_cli_worker(
     # This has the effect of removing buildings that are not in the system parameters file
     geojson_data["features"].extend(building_features)
 
+    # print("Building features:")
+    # for feature in geojson_data["features"]:
+    #     if feature["properties"]["type"] == "Building":
+    #         print(feature["properties"])
+    #         print("")
+    # logger.debug(f"Feature :: {feature['properties']['type']}: {feature['properties']['id']}")
+
     # load all input data
-    sys_param_version: int = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]["version"]
-    if version("thermalnetwork") != sys_param_version:
+    sys_param_version: str = ghe_parameters_data["version"]
+    if version("thermalnetwork")[:3] != sys_param_version[:3]:  # Just major & minor, ignore patch version
         logger.warning(
             "Mismatched ThermalNetwork versions. Could be a problem. "
             f"The system_parameter.json version is {sys_param_version}, but the ThermalNetwork version is "
             f"{version('thermalnetwork')}."
         )
 
-    ghe_design_data: dict = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]["design"]
-    logger.info(f"{ghe_design_data=}")
+    ghe_design_data: dict = ghe_parameters_data["design"]
+    logger.debug(f"{ghe_design_data=}")
     # instantiate a new Network object
     network = Network()
     network.geojson_data = geojson_data
-    network.ghe_parameters = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]
+    network.ghe_parameters = ghe_parameters_data
     network.scenario_directory_path = scenario_directory_path
 
     # get network list from geojson
-    connected_features = network.get_connected_features(geojson_data)
+    connected_features = network.get_connected_features()
     logger.debug(f"Features in district loop: {connected_features}\n")
 
     reordered_features = network.reorder_connected_features(connected_features)
@@ -560,7 +592,7 @@ def run_sizer_from_cli_worker(
 
     # convert geojson type "Building","District System" to "ENERGYTRANSFERSTATION",
     # "GROUNDHEATEXCHANGER" and add properties
-    network_data: list[dict] = network.convert_features(reordered_features)
+    network_data: list[dict] = network.convert_features(connected_features)
     # print(f"Network data: {network_data}\n")
     # network_data: list[dict] = data["network"]
     # component_data: list[dict] = data["components"]

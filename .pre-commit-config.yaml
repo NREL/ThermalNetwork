@@ -4,7 +4,7 @@ repos:
     hooks:
       - id: check-ast
       - id: check-added-large-files
-        args: ['--maxkb=2000']
+        args: ['--maxkb=5000']
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: check-toml
@@ -25,16 +25,12 @@ repos:
       # - id: check-useless-excludes # Ensure the exclude syntax is correct
       # - id: check-hooks-apply # Fails if a hook doesn't apply to any file
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.3.0
+    rev: v0.3.4
     hooks:
-      # Run the Ruff linter
+      # Run the linter
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
         types_or: [python, pyi, jupyter]
-  # Run the Ruff formatter
-  # https://docs.astral.sh/ruff/integrations/#pre-commit
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.3.0
-    hooks:
+      # Run the formatter
       - id: ruff-format
         types_or: [python, pyi, jupyter]
