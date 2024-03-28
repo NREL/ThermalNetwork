@@ -31,8 +31,8 @@ classifiers = [
 dependencies = [
   'click ~= 8.1',
   'ghedesigner ~= 1.4',
-  'pandas ~= 2.1',
-  "rich ~= 13.6",
+  'pandas ~= 2.0',
+  "rich ~= 13.0",
 ]
 
 [project.optional-dependencies]
