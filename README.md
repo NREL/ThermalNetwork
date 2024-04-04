@@ -19,12 +19,14 @@ This package has a command-line interface, intended to be used via URBANopt. To 
         - [pyenv](https://github.com/pyenv/pyenv) and [the virtualenv plugin](https://github.com/pyenv/pyenv-virtualenv) work together nicely for Linux/Mac machines
         - [virtualenv](https://virtualenv.pypa.io/en/latest/)
         - [miniconda](https://docs.conda.io/projects/miniconda/en/latest/)
+        - [rye](https://rye-up.com/)
 
 Once you have set up your environment:
 - Update pip and setuptools: `pip install -U pip setuptools`
 - Install the respository with developer dependencies: `pip install -e .[dev]`
 - Activate pre-commit (only once, after making a new venv): `pre-commit install`
     - Runs automatically on your staged changes before every commit
+    - Includes linting and formatting via [ruff](https://docs.astral.sh/ruff/)
 - To check the whole repo, run `pre-commit run --all-files`
     - Settings and documentation links for pre-commit and ruff are in .pre-commit-config.yaml and pyproject.toml
     - Pre-commit will run automatically during CI, linting and formatting the entire repository.
@@ -33,11 +35,11 @@ Once you have set up your environment:
 
 Once you are set up as a developer, run `pytest` from the root dir. Increase verbosity with `-v` and `-vv`.
 
-Test coverage will be reported to stdout.
+Test coverage results will be saved to _htmlcov/index.html_.
 
-Test files are in _thermalnetwork/tests/_
+Test files are in _tests/_
 
-Test output will be written to _thermalnetwork/tests/test_output/_
+Test output will be written to _tests/test_output/_
 
 # Releasing
 

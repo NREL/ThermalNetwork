@@ -511,7 +511,7 @@
   "district_system": {
     "fifth_generation": {
       "ghe_parameters": {
-        "version": "0.2.4",
+        "version": "0.2.5",
         "ghe_dir": "../ccc/run/baseline_scenario/ghe_dir",
         "fluid": {
           "fluid_name": "Water",
