@@ -27,7 +27,7 @@ repos:
         args: [--py39-plus]
   # https://docs.astral.sh/ruff/integrations/#pre-commit
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.3.7
+    rev: v0.4.0
     hooks:
       # Run the linter
       - id: ruff
