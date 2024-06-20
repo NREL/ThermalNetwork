@@ -243,7 +243,9 @@ class Network:
                 return 1
         return 0
 
-    def set_components(self, comp_data_list: list[dict], throw: bool = True):
+    def set_components(self, comp_data_list: list[dict], sys_param_district_data: dict = {}, throw: bool = True):
+        # TODO: determine what level of sys-param data to use
+        # TODO: replace all hard-coded values with sys-param data
         # Add ets pump
         obj = {
             "id": "",
@@ -270,7 +272,15 @@ class Network:
         self.components_data.append(obj)
 
         # Add WAHP
-        obj = {"id": "", "name": "small wahp", "type": "HEATPUMP", "properties": {"cop_c": 3.0, "cop_h": 3.0}}
+        obj = {
+            "id": "",
+            "name": "small wahp",
+            "type": "HEATPUMP",
+            "properties": {
+                "cop_c": sys_param_district_data["wahp"]["cop_c"],
+                "cop_h": sys_param_district_data["wahp"]["cop_h"],
+            },
+        }
         obj["name"] = str(obj["name"]).strip().upper()
         self.components_data.append(obj)
 
@@ -600,7 +610,9 @@ def run_sizer_from_cli_worker(
     # begin populating structures in preparation for sizing
     errors = 0
     errors += network.set_design(des_method_str=ghe_design_data["method"], throw=True)
-    errors += network.set_components(network_data, throw=True)
+    errors += network.set_components(
+        network_data, system_parameters_data["district_system"]["fifth_generation"], throw=True
+    )
     # print(f"components_data: {network.components_data}\n")
     # pprint(network.components_data)
 
