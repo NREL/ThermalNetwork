@@ -146,7 +146,7 @@
           }
         ]
       },
-      "wahp": {
+      "water_to_air_heat_pump": {
         "cop_c": 3.0,
         "cop_h": 3.0
       }

@@ -277,8 +277,8 @@ class Network:
             "name": "small wahp",
             "type": "HEATPUMP",
             "properties": {
-                "cop_c": sys_param_district_data["wahp"]["cop_c"],
-                "cop_h": sys_param_district_data["wahp"]["cop_h"],
+                "cop_c": sys_param_district_data["water_to_air_heat_pump"]["cop_c"],
+                "cop_h": sys_param_district_data["water_to_air_heat_pump"]["cop_h"],
             },
         }
         obj["name"] = str(obj["name"]).strip().upper()
