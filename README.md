@@ -27,7 +27,7 @@ This package has a command-line interface, intended to be used via URBANopt. To 
 
 Once you have set up your environment:
 - Update pip and setuptools: `pip install -U pip setuptools`
-- Install the respository with developer dependencies: `pip install -e .[dev]`
+- Install the repository with developer dependencies: `pip install -e .[dev]`
 - Activate pre-commit (only once, after making a new venv): `pre-commit install`
     - Runs automatically on your staged changes before every commit
     - Includes linting and formatting via [ruff](https://docs.astral.sh/ruff/)
