@@ -24,6 +24,10 @@ repos:
     # hooks:
       # - id: check-useless-excludes # Ensure the exclude syntax is correct
       # - id: check-hooks-apply # Fails if a hook doesn't apply to any file
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.22.9
+    hooks:
+      - id: typos
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.5.0
     hooks:
@@ -34,7 +38,3 @@ repos:
       # Run the formatter
       - id: ruff-format
         types_or: [python, pyi, jupyter]
-  - repo: https://github.com/crate-ci/typos
-    rev: v1.22.9
-    hooks:
-      - id: typos
