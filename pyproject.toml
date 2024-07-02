@@ -41,6 +41,7 @@ dev = [
     "pytest-cov ~= 4.1",
     "pre-commit ~= 3.5",
     "jupyterlab ~= 4.0",
+    "mkdocs-material ~= 9.5"
 ]
 
 [project.urls]

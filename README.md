@@ -6,6 +6,10 @@ A library for sizing multiple ground heat exchangers distributed around a single
 
 `pip install ThermalNetwork`
 
+# Documentation
+
+Available at https://nrel.github.io/ThermalNetwork/
+
 # Usage
 
 This package has a command-line interface, intended to be used via URBANopt. To access the CLI directly, after installing call `thermalnetwork --help` for all the commands.

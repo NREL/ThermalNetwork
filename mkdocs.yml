@@ -1,0 +1,9 @@
+# https://www.mkdocs.org/user-guide/configuration/
+# https://squidfunk.github.io/mkdocs-material/creating-your-site/#advanced-configuration
+
+site_name: ThermalNetwork
+repo_url: https://github.com/NREL/ThermalNetwork
+# site_url: https://NREL.github.io/ThermalNetwork
+
+theme:
+  name: material
