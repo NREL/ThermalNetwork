@@ -18,18 +18,21 @@ repos:
       - id: check-executables-have-shebangs
       - id: check-merge-conflict
       - id: debug-statements
-      # - id: detect-aws-credentials
       - id: detect-private-key
   # - repo: meta
     # hooks:
       # - id: check-useless-excludes # Ensure the exclude syntax is correct
       # - id: check-hooks-apply # Fails if a hook doesn't apply to any file
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.22.9
+    hooks:
+      - id: typos
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.4
+    rev: v0.5.0
     hooks:
       # Run the linter
       - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
+        args: [--fix, --exit-non-zero-on-fix, --output-format=full]
         types_or: [python, pyi, jupyter]
       # Run the formatter
       - id: ruff-format
