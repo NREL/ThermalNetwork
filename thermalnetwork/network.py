@@ -20,7 +20,9 @@ logger = logging.getLogger(__name__)
 
 
 class Network:
-    def __init__(self, system_parameters_data: dict) -> None:
+    def __init__(
+        self, system_parameters_data: dict, geojson_data: dict, ghe_parameters_data: dict, scenario_directory_path: Path
+    ) -> None:
         """A thermal network.
 
         :param des_method: Design method (upstream or proportional).
@@ -34,9 +36,9 @@ class Network:
         self.components_data: list[dict] = []
         self.network: list[BaseComponent] = []
         self.system_parameters_data = system_parameters_data
-        self.ghe_parameters: dict = {}
-        self.geojson_data: dict = {}
-        self.scenario_directory_path: Path = Path()
+        self.ghe_parameters = ghe_parameters_data
+        self.geojson_data = geojson_data
+        self.scenario_directory_path = scenario_directory_path
 
     def find_startloop_feature_id(self):
         """
@@ -592,10 +594,7 @@ def run_sizer_from_cli_worker(
     ghe_design_data: dict = ghe_parameters_data["design"]
     logger.debug(f"{ghe_design_data=}")
     # instantiate a new Network object
-    network = Network(system_parameters_data)
-    network.geojson_data = geojson_data
-    network.ghe_parameters = ghe_parameters_data
-    network.scenario_directory_path = scenario_directory_path
+    network = Network(system_parameters_data, geojson_data, ghe_parameters_data, scenario_directory_path)
 
     # get network list from geojson
     connected_features = network.get_connected_features()
@@ -678,7 +677,7 @@ def run_sizer_from_cli(system_parameter_file, scenario_directory, geojson_file, 
     system_parameter_path = Path(system_parameter_file).resolve()
     scenario_directory_path = Path(scenario_directory).resolve()
     geojson_file_path = Path(geojson_file).resolve()
-    output_directory_path = Path(output_directory)
+    output_directory_path = Path(output_directory).resolve()
     logger.debug(f"{system_parameter_path=}")
     logger.debug(f"{scenario_directory_path=}")
     logger.debug(f"{geojson_file_path=}")
