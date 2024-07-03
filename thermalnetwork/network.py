@@ -63,6 +63,11 @@ class Network:
             feature for feature in self.geojson_data["features"] if feature["properties"]["type"] == "ThermalConnector"
         ]
 
+        if len(connectors) == 0:
+            raise ValueError(
+                "No thermal connectors (pipes) were found in the GeoJSON data which are required for a thermal network."
+            )
+
         # Find the feature that has been labelled as the start of the loop
         # TODO: Update the UI to allow the user to select the start loop feature.
         connected_features = [
@@ -96,7 +101,7 @@ class Network:
         for con_feature in connected_features:
             for feature in features:
                 feature_id = feature["properties"]["id"]
-                if feature_id == con_feature and feature["properties"]["type"] in ["Building", "District System"]:
+                if (feature_id == con_feature) and (feature["properties"]["type"] in ["Building", "District System"]):
                     connected_objects.append(
                         {
                             "id": feature_id,
@@ -595,31 +600,59 @@ def run_sizer_from_cli_worker(
 
     num_ghes = len([x for x in reordered_features if x["district_system_type"]])
     bldg_groups_by_num = {x: {} for x in range(num_ghes)}
+    ghe_groups_by_num = {x: {} for x in range(num_ghes)}
 
     # populate bldg_groups_by_num dict with info for GMT diagramming
     seen_id_list = []
-    for bldg_group, _ in bldg_groups_by_num.items():
-        lst_bldg_ids_in_group = []
+    for bldg_group in bldg_groups_by_num:
+        list_bldg_ids_in_group = []
+        list_ghe_ids_in_group = []
         for feature in reordered_features:
             if feature["id"] in seen_id_list:
                 continue
             elif feature["district_system_type"]:
+                list_ghe_ids_in_group.append(feature["id"])
+                bldg_groups_by_num[bldg_group]["list_ghe_ids_in_group"] = list_ghe_ids_in_group
                 seen_id_list.append(feature["id"])
                 break
-            lst_bldg_ids_in_group.append(feature["id"])
-            bldg_groups_by_num[bldg_group]["lst_bldg_ids_in_group"] = lst_bldg_ids_in_group
+            list_bldg_ids_in_group.append(feature["id"])
+            bldg_groups_by_num[bldg_group]["list_bldg_ids_in_group"] = list_bldg_ids_in_group
             seen_id_list.append(feature["id"])  # Add ID to seen list (so we don't add it again)
-        bldg_groups_by_num[bldg_group]["num_bldgs_in_group"] = len(lst_bldg_ids_in_group)
+        bldg_groups_by_num[bldg_group]["num_bldgs_in_group"] = len(list_bldg_ids_in_group)
         bldg_groups_by_num[bldg_group]["ghe_group_in"] = bldg_group
         # Adding by 1 is safe because the features are already in loop order
         bldg_groups_by_num[bldg_group]["ghe_group_out"] = bldg_group + 1 if bldg_group < num_ghes - 1 else 0
 
+    seen_id_list = []
+    for ghe_group in ghe_groups_by_num:
+        list_ghe_ids_in_group = []
+        for feature in reordered_features:
+            if feature["id"] in seen_id_list:
+                continue
+            if feature["district_system_type"]:
+                list_ghe_ids_in_group.append(feature["id"])
+                seen_id_list.append(feature["id"])
+                break
+        ghe_groups_by_num[ghe_group]["list_ghe_ids_in_group"] = list_ghe_ids_in_group
+        ghe_groups_by_num[ghe_group]["num_ghes_in_group"] = len(list_ghe_ids_in_group)
+        ghe_groups_by_num[ghe_group]["building_group_in"] = ghe_group
+        # Adding by 1 is safe because the features are already in loop order
+        ghe_groups_by_num[ghe_group]["building_group_out"] = ghe_group + 1 if ghe_group < num_ghes - 1 else 0
+
+    # raise SystemExit(f"number of building groups: {len(bldg_groups_by_num)}")
+
     # save loop order to file next to sys-params for temporary use by the GMT
-    loop_order_filepath: Path = system_parameter_path.parent / "loop_order.json"
+    loop_order_filepath: Path = system_parameter_path.parent / "loop_order1.json"
     with open(loop_order_filepath, "w") as loop_order_file:
         json.dump(bldg_groups_by_num, loop_order_file, indent=2)
         # Add a trailing newline to the file
         loop_order_file.write("\n")
+
+    ghe_order_filepath: Path = system_parameter_path.parent / "ghe_order1.json"
+    with open(ghe_order_filepath, "w") as ghe_order_file:
+        json.dump(ghe_groups_by_num, ghe_order_file, indent=2)
+        # Add a trailing newline to the file
+        ghe_order_file.write("\n")
 
     # convert geojson type "Building","District System" to "ENERGYTRANSFERSTATION",
     # "GROUNDHEATEXCHANGER" and add properties
