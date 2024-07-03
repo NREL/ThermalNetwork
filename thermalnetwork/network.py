@@ -311,15 +311,7 @@ class Network:
             "id": "",
             "name": "small wahp",
             "type": "HEATPUMP",
-            "properties": {
-                # FIXME: hard-coded first building, not using individual building data
-                "cop_c": self.system_parameters_data["buildings"][0]["fifth_gen_ets_parameters"][
-                    "cop_heat_pump_cooling"
-                ],
-                "cop_h": self.system_parameters_data["buildings"][0]["fifth_gen_ets_parameters"][
-                    "cop_heat_pump_heating"
-                ],
-            },
+            "properties": {},
         }
         obj["name"] = str(obj["name"]).strip().upper()
         self.components_data.append(obj)
@@ -345,11 +337,12 @@ class Network:
             if comp["name"] == name and comp_type.name == comp["type"]:
                 return comp
 
-    def add_ets_to_network(self, name: str):
+    def add_ets_to_network(self, name: str, component_id: str):
         """
         Adds an Energy Transfer Station (ETS) to the network.
 
         :param name: The name of the ETS to be added.
+        :param component_id: The component ID which is the geojson feature (building) associated with the ETS.
         :return: Zero if successful, nonzero if failure.
 
         This function first retrieves the ETS data by its name and type.
@@ -364,21 +357,34 @@ class Network:
         logger.debug(f"ets_data: {ets_data}")
         props = ets_data["properties"]
         logger.debug(f"props: {props}")
-        hp_name = str(props["heat_pump"]).strip().upper()
-        hp_data = self.get_component(hp_name, ComponentType.HEATPUMP)
-        props["heat_pump"] = hp_data
 
-        load_pump_name = str(props["load_side_pump"]).strip().upper()
-        load_pump_data = self.get_component(load_pump_name, ComponentType.PUMP)
-        props["load_side_pump"] = load_pump_data
+        # Read sys param for user-defined values
+        sys_param_buildings_data = self.system_parameters_data["buildings"]
+        for building in sys_param_buildings_data:
+            if building["geojson_id"] == component_id:
+                hp_name = str(props["heat_pump"]).strip().upper()
+                hp_data = self.get_component(hp_name, ComponentType.HEATPUMP)
+                props["heat_pump"] = hp_data
+                props["heat_pump"]["properties"]["cop_c"] = building["fifth_gen_ets_parameters"][
+                    "cop_heat_pump_cooling"
+                ]
+                props["heat_pump"]["properties"]["cop_h"] = building["fifth_gen_ets_parameters"][
+                    "cop_heat_pump_heating"
+                ]
 
-        src_pump_name = str(props["source_side_pump"]).strip().upper()
-        src_pump_data = self.get_component(src_pump_name, ComponentType.PUMP)
-        props["source_side_pump"] = src_pump_data
+                load_pump_name = str(props["load_side_pump"]).strip().upper()
+                load_pump_data = self.get_component(load_pump_name, ComponentType.PUMP)
+                props["load_side_pump"] = load_pump_data
 
-        fan_name = str(props["fan"]).strip().upper()
-        fan_data = self.get_component(fan_name, ComponentType.FAN)
-        props["fan"] = fan_data
+                src_pump_name = str(props["source_side_pump"]).strip().upper()
+                src_pump_data = self.get_component(src_pump_name, ComponentType.PUMP)
+                props["source_side_pump"] = src_pump_data
+
+                fan_name = str(props["fan"]).strip().upper()
+                fan_data = self.get_component(fan_name, ComponentType.FAN)
+                props["fan"] = fan_data
+
+                break
 
         ets_data["properties"] = props
         logger.debug(f"final ets_data: {ets_data}")
@@ -387,6 +393,7 @@ class Network:
         # check size of space loads
         logger.debug(f"length of spaceloads: {len(ets.space_loads)}")
         logger.debug(f"space_loads_file: {props['space_loads_file']}")
+        # TODO: test this
         if len(ets.space_loads) != 8760:
             self.make_loads_hourly(ets_data["properties"], ets)
 
@@ -430,7 +437,7 @@ class Network:
         space_loads_df = pd.concat([space_loads_df, new_data])
         # interpolate data to hourly
         space_loads_df = space_loads_df.resample("H").interpolate(method="linear")
-        # keep only8760
+        # keep only 8760
         space_loads_df = space_loads_df.iloc[:8760]
         ets.space_loads = space_loads_df["TotalSensibleLoad"]
         logger.warning(f"NEW length of spaceloads: {len(ets.space_loads)}")
@@ -769,8 +776,9 @@ def run_sizer_from_cli_worker(
     for component in network_data:
         comp_name = str(component["name"]).strip().upper()
         comp_type_str = str(component["type"]).strip().upper()
+        component_id = str(component["id"]).strip()
         if comp_type_str == ComponentType.ENERGYTRANSFERSTATION.name:
-            errors += network.add_ets_to_network(comp_name)
+            errors += network.add_ets_to_network(comp_name, component_id)
         elif comp_type_str == ComponentType.GROUNDHEATEXCHANGER.name:
             errors += network.add_ghe_to_network(comp_name)
         elif comp_type_str == ComponentType.PUMP.name:
