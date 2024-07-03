@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class Network:
-    def __init__(self) -> None:
+    def __init__(self, system_parameters_data: dict) -> None:
         """A thermal network.
 
         :param des_method: Design method (upstream or proportional).
@@ -33,6 +33,7 @@ class Network:
         self.des_method = None
         self.components_data: list[dict] = []
         self.network: list[BaseComponent] = []
+        self.system_parameters_data = system_parameters_data
         self.ghe_parameters: dict = {}
         self.geojson_data: dict = {}
         self.scenario_directory_path: Path = Path()
@@ -56,7 +57,6 @@ class Network:
 
         :return: List of connected features with additional information.
         """
-        features = self.geojson_data["features"]
         startloop_feature_id = self.find_startloop_feature_id()
         # List thermal connections
         connectors = [
@@ -94,7 +94,7 @@ class Network:
         # Filter and return the building and district system features
         connected_objects = []
         for con_feature in connected_features:
-            for feature in features:
+            for feature in self.geojson_data["features"]:
                 feature_id = feature["properties"]["id"]
                 if feature_id == con_feature and feature["properties"]["type"] in ["Building", "District System"]:
                     connected_objects.append(
@@ -243,8 +243,7 @@ class Network:
                 return 1
         return 0
 
-    def set_components(self, comp_data_list: list[dict], sys_param_district_data: dict = {}, throw: bool = True):
-        # TODO: determine what level of sys-param data to use
+    def set_components(self, comp_data_list: list[dict], throw: bool = True):
         # TODO: replace all hard-coded values with sys-param data
         # Add ets pump
         obj = {
@@ -277,8 +276,13 @@ class Network:
             "name": "small wahp",
             "type": "HEATPUMP",
             "properties": {
-                "cop_c": sys_param_district_data["water_to_air_heat_pump"]["cop_c"],
-                "cop_h": sys_param_district_data["water_to_air_heat_pump"]["cop_h"],
+                # FIXME: hard-coded first building, not using individual building data
+                "cop_c": self.system_parameters_data["buildings"][0]["fifth_gen_ets_parameters"][
+                    "cop_heat_pump_cooling"
+                ],
+                "cop_h": self.system_parameters_data["buildings"][0]["fifth_gen_ets_parameters"][
+                    "cop_heat_pump_heating"
+                ],
             },
         }
         obj["name"] = str(obj["name"]).strip().upper()
@@ -588,7 +592,7 @@ def run_sizer_from_cli_worker(
     ghe_design_data: dict = ghe_parameters_data["design"]
     logger.debug(f"{ghe_design_data=}")
     # instantiate a new Network object
-    network = Network()
+    network = Network(system_parameters_data)
     network.geojson_data = geojson_data
     network.ghe_parameters = ghe_parameters_data
     network.scenario_directory_path = scenario_directory_path
@@ -603,16 +607,14 @@ def run_sizer_from_cli_worker(
     # convert geojson type "Building","District System" to "ENERGYTRANSFERSTATION",
     # "GROUNDHEATEXCHANGER" and add properties
     network_data: list[dict] = network.convert_features(connected_features)
-    # print(f"Network data: {network_data}\n")
+    # logger.debug(f"{network_data=}\n")
     # network_data: list[dict] = data["network"]
     # component_data: list[dict] = data["components"]
 
     # begin populating structures in preparation for sizing
     errors = 0
     errors += network.set_design(des_method_str=ghe_design_data["method"], throw=True)
-    errors += network.set_components(
-        network_data, system_parameters_data["district_system"]["fifth_generation"], throw=True
-    )
+    errors += network.set_components(network_data, throw=True)
     # print(f"components_data: {network.components_data}\n")
     # pprint(network.components_data)
 
