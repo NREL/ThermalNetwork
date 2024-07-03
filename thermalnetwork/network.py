@@ -142,12 +142,27 @@ class Network:
         return reordered_features
 
     def find_matching_ghe_id(self, feature_id):
+        """
+        Find the GHE parameters for a specific GHE ID
+
+        :param feature_id: The ID of the feature to search for.
+        :return: The feature ID of the start loop feature, or None if not found.
+        """
+
         for ghe in self.ghe_parameters["ghe_specific_params"]:
             if ghe["ghe_id"] == feature_id:
                 return ghe
         return None  # if no match found, return None
 
     def convert_features(self, json_data):
+        """
+        Converts the features from geojson list into a format that can be used by the thermal network.
+
+        :param json_data: A list of geojson features.
+        :return: A list of converted features, each containing an id, name, type, and properties.
+        :rtype: list
+        """
+
         converted_features = []
 
         # Add pump as the first element
@@ -216,7 +231,7 @@ class Network:
 
     def set_design(self, des_method_str: str, throw: bool = True) -> int:
         """
-        Sets up the design method.
+        Designate the network design method.
 
         :param des_method_str: design method string
         :param throw: by default, function will raise an exception on error.
@@ -238,6 +253,16 @@ class Network:
         return 0
 
     def check_for_existing_component(self, name: str, comp_type_str: str, throw: bool = True):
+        """
+        Checks if a component with the given name and type already exists in the network.
+
+        :param name: The name of the component to check for.
+        :param comp_type_str: The type of the component to check for.
+        :param throw: A boolean indicating whether an error should be thrown if the component already exists.
+            Defaults to True.
+        :return: Zero if the component does not exist, nonzero if it does.
+        """
+
         for comp in self.components_data:
             if comp["name"] == name and comp["type"] == comp_type_str:
                 if throw:
@@ -246,6 +271,15 @@ class Network:
         return 0
 
     def set_components(self, comp_data_list: list[dict], throw: bool = True):
+        """
+        Sets up the components of the thermal network.
+
+        :param comp_data_list: list of dictionaries containing component data.
+        :param throw: by default, function will raise an exception on error.
+                        override to "False" to not raise exception
+        :returns: zero if successful, nonzero if failure
+        """
+
         # TODO: replace all hard-coded values with sys-param data
         # Add ets pump
         obj = {
@@ -298,12 +332,33 @@ class Network:
         return 0
 
     def get_component(self, name: str, comp_type: ComponentType):
+        """
+        Retrieves a component by name and type from a list of component_data dicts.
+
+        :param name: The name of the component to search for.
+        :param comp_type: The type of the component to search for.
+        :return: A dictionary containing the properties of the component if found, otherwise None.
+        """
+
         for comp in self.components_data:
             # print(f"comp: {comp}\n")
             if comp["name"] == name and comp_type.name == comp["type"]:
                 return comp
 
     def add_ets_to_network(self, name: str):
+        """
+        Adds an Energy Transfer Station (ETS) to the network.
+
+        :param name: The name of the ETS to be added.
+        :return: Zero if successful, nonzero if failure.
+
+        This function first retrieves the ETS data by its name and type.
+        It then modifies the ETS data to include the appropriate heat pump, load pump, source pump, and fan components.
+        After updating the ETS data, it creates a new ETS object and adds it to the network.
+
+        Returns zero if the ETS is successfully added to the network, or a nonzero value if there is an error.
+        """
+
         name_uc = name.strip().upper()
         ets_data = self.get_component(name_uc, ComponentType.ENERGYTRANSFERSTATION)
         logger.debug(f"ets_data: {ets_data}")
@@ -333,26 +388,65 @@ class Network:
         logger.debug(f"length of spaceloads: {len(ets.space_loads)}")
         logger.debug(f"space_loads_file: {props['space_loads_file']}")
         if len(ets.space_loads) != 8760:
-            space_loads_df = pd.read_csv(props["space_loads_file"])
-            space_loads_df["Date Time"] = pd.to_datetime(space_loads_df["Date Time"])
-            space_loads_df = space_loads_df.set_index("Date Time")
-            # Find the last date in the DataFrame and add one day so interpolation will get the last day
-            new_date = space_loads_df.index[-1] + pd.Timedelta(days=1)
-            # add duplicate entry at end of dataframe
-            new_data = pd.DataFrame(
-                space_loads_df.iloc[-1].to_numpy().reshape(1, -1), index=[new_date], columns=space_loads_df.columns
-            )
-            space_loads_df = pd.concat([space_loads_df, new_data])
-            # interpolate data to hourly
-            space_loads_df = space_loads_df.resample("H").interpolate(method="linear")
-            # keep only8760
-            space_loads_df = space_loads_df.iloc[:8760]
-            ets.space_loads = space_loads_df["TotalSensibleLoad"]
-            logger.warning(f"NEW length of spaceloads: {len(ets.space_loads)}")
+            self.make_loads_hourly(ets_data["properties"], ets)
+
+            # space_loads_df = pd.read_csv(props["space_loads_file"])
+            # space_loads_df["Date Time"] = pd.to_datetime(space_loads_df["Date Time"])
+            # space_loads_df = space_loads_df.set_index("Date Time")
+            # # Find the last date in the DataFrame and add one day so interpolation will get the last day
+            # new_date = space_loads_df.index[-1] + pd.Timedelta(days=1)
+            # # add duplicate entry at end of dataframe
+            # new_data = pd.DataFrame(
+            #     space_loads_df.iloc[-1].to_numpy().reshape(1, -1), index=[new_date], columns=space_loads_df.columns
+            # )
+            # space_loads_df = pd.concat([space_loads_df, new_data])
+            # # interpolate data to hourly
+            # space_loads_df = space_loads_df.resample("H").interpolate(method="linear")
+            # # keep only8760
+            # space_loads_df = space_loads_df.iloc[:8760]
+            # ets.space_loads = space_loads_df["TotalSensibleLoad"]
+            # logger.warning(f"NEW length of spaceloads: {len(ets.space_loads)}")
         self.network.append(ets)
         return 0
 
+    def make_loads_hourly(self, properties: dict, ets: ETS):
+        """
+        This function interpolates the space loads to hourly values.
+
+        :param properties: A dictionary containing the properties of the ETS, including the space loads file path.
+        :param ets: An Energy Transfer Station object.
+        :return: ETS object with updated space loads.
+        """
+
+        space_loads_df = pd.read_csv(properties["space_loads_file"])
+        space_loads_df["Date Time"] = pd.to_datetime(space_loads_df["Date Time"])
+        space_loads_df = space_loads_df.set_index("Date Time")
+        # Find the last date in the DataFrame and add one day so interpolation will get the last day
+        new_date = space_loads_df.index[-1] + pd.Timedelta(days=1)
+        # add duplicate entry at end of dataframe
+        new_data = pd.DataFrame(
+            space_loads_df.iloc[-1].to_numpy().reshape(1, -1), index=[new_date], columns=space_loads_df.columns
+        )
+        space_loads_df = pd.concat([space_loads_df, new_data])
+        # interpolate data to hourly
+        space_loads_df = space_loads_df.resample("H").interpolate(method="linear")
+        # keep only8760
+        space_loads_df = space_loads_df.iloc[:8760]
+        ets.space_loads = space_loads_df["TotalSensibleLoad"]
+        logger.warning(f"NEW length of spaceloads: {len(ets.space_loads)}")
+        return ets
+
     def add_ghe_to_network(self, name: str):
+        """
+        Adds a Ground Heat Exchanger (GHE) to the network.
+
+        :param name: The name of the GHE to be added.
+        :return: Zero if successful, nonzero if failure.
+
+        This function first retrieves the GHE data by its name and type from the list of components in the network.
+        It then creates a new GHE object and adds it to the network.
+        """
+
         name_uc = name.strip().upper()
         ghe_data = self.get_component(name_uc, ComponentType.GROUNDHEATEXCHANGER)
         # print(f"ghe_data: {ghe_data}\n")
@@ -361,6 +455,16 @@ class Network:
         return 0
 
     def add_pump_to_network(self, name: str):
+        """
+        Adds a Pump to the network.
+
+        :param name: The name of the Pump to be added.
+        :return: Zero if successful, nonzero if failure.
+
+        This function first retrieves the Pump data by its name and type from the list of components in the network.
+        It then creates a new Pump object and adds it to the network.
+        """
+
         name_uc = name.strip().upper()
         pump_data = self.get_component(name_uc, ComponentType.PUMP)
         pump = Pump(pump_data)
@@ -368,6 +472,16 @@ class Network:
         return 0
 
     def set_component_network_loads(self):
+        """
+        This method sets the network loads for each component in the network.
+
+        For each component in the network, this method checks if the component type is an Energy Transfer Station (ETS).
+        If it is, the method calls the set_network_loads method of the component.
+        If the component type is a Pump, the method sets the network loads to 8760 (the number of hours in a year).
+
+        If a component does not have network loads set, it will not affect the overall sizing process.
+        """
+
         # len_loads = []
 
         # for comp in self.network:
@@ -387,7 +501,17 @@ class Network:
     def size_area_proportional(self, output_path: Path):
         """
         Sizing method for area proportional approach.
+
+        This method sizes the network components based on the area proportional approach.
+        It first finds all objects between each groundheatexchanger, sums the loads,
+        finds all GHE and their sizes, and then divides the loads by the GHE sizes.
+        Finally, it re-sizes each GHE based on the load per area.
+
+        :param output_path: The path to the output directory where the sized GHEs will be saved.
+
+        :return: None
         """
+
         logger.info("Sizing with: size_area_proportional")
         # find all objects between each groundheatexchanger
         #  sum loads
@@ -445,7 +569,16 @@ class Network:
     def size_to_upstream_equipment(self, output_path: Path):
         """
         Sizing method for upstream equipment approach.
+
+        This method sizes the network components based on the upstream equipment approach.
+        It first finds all loads between each groundheatexchanger, then re-sizes each GHE
+        based on the building loads each GHE is required to serve.
+
+        :param output_path: The path to the output directory where the sized GHEs will be saved.
+
+        :return: None
         """
+
         logger.info("Sizing with: size_to_upstream_equipment")
         # find all objects between each groundheatexchanger
         # size to those buildings
@@ -504,6 +637,22 @@ class Network:
         return 0
 
     def update_sys_params(self, system_parameter_path: Path, output_directory_path: Path) -> None:
+        """
+        Update the existing system parameters with the new GHEDesigner output data.
+
+        :param system_parameter_path: Path to the existing System Parameter file.
+        :param output_directory_path: Path to the output directory containing the GHEDesigner output files.
+
+        This function loads the existing system parameters from the specified file,
+        updates the GHE-specific parameters with the new data from the GHEDesigner output,
+        and saves the updated system parameters back to the same file.
+        The GHE-specific parameters include the length of the boreholes and the number of boreholes.
+
+        The function does not return any value, as it updates the system parameters file in place.
+
+        :return: None
+        """
+
         # Load the existing system parameters
         sys_params: dict = json.loads(system_parameter_path.read_text())
         ghe_params: list = sys_params["district_system"]["fifth_generation"]["ghe_parameters"]["ghe_specific_params"]
