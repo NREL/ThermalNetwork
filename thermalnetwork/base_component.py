@@ -1,5 +1,3 @@
-from typing import Optional
-
 from thermalnetwork.enums import ComponentType
 
 
@@ -10,5 +8,5 @@ class BaseComponent:
         self.space_loads: list[float] = []
         self.network_loads: list[float] = []
 
-    def set_network_loads(self, num_loads: Optional[int] = None):
+    def set_network_loads(self, num_loads: int | None = None):
         pass
