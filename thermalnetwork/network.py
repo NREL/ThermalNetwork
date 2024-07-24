@@ -448,7 +448,7 @@ class Network:
             if i == 0:  # first GHE
                 devices_before_ghe = self.network[:ghe_index]
             else:
-                devices_before_ghe = self.network[ghe_indexes[i - 1] + 1 : ghe_index]
+                devices_before_ghe = self.network[ghe_indexes[i - 1] + 1: ghe_index]
             logger.info(f"Devices before GHE at index {ghe_index}: {devices_before_ghe}")
 
             # Initialize an array to store the summed network loads for each hour of the year
@@ -507,7 +507,7 @@ class Network:
 
 
 def run_sizer_from_cli_worker(
-    system_parameter_path: Path, scenario_directory_path: Path, geojson_file_path: Path, output_directory_path: Path
+        system_parameter_path: Path, scenario_directory_path: Path, geojson_file_path: Path, output_directory_path: Path
 ) -> int:
     """
     Sizing worker function. Worker is called by tests, and thus not wrapped by `click`.
