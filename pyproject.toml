@@ -63,7 +63,7 @@ readme = {file = "README.md", content-type = "text/markdown"}
 # https://docs.pytest.org/en/6.2.x/customize.html#pyproject-toml
 [tool.pytest.ini_options]
 minversion = "6.0"
-testpaths = "tests"
+testpaths = "thermalnetwork/tests"
 # Manually add these flags to `pytest` when running locally for coverage details.
 addopts = ["--cov=thermalnetwork", "--cov-report=html"]
 
@@ -79,7 +79,7 @@ extend-select = ["RUF", "E", "F", "I", "UP", "N", "S", "BLE", "A", "C4", "T10", 
 ignore = ["PLR0913", "PLR2004", "PLR0402", "COM812", "COM819", "SIM108", "ARG002", "ISC001"] # except for these specific errors
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["S101", "S607", "S603"] # assert statements are allowed in tests, and paths are safe
+"thermalnetwork/tests/*" = ["S101", "S607", "S603"] # assert statements are allowed in tests, and paths are safe
 
 # https://docs.astral.sh/ruff/formatter/#configuration
 [tool.ruff.format]
