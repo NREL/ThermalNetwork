@@ -28,7 +28,7 @@ class TestNetwork(BaseCase):
 
         # -- Clean up
         # Restore the original borehole length and number of boreholes.
-        sys_param_1_ghe = json.loads(self.system_parameter_path_1_ghe).read_text()
+        sys_param_1_ghe = json.loads(self.system_parameter_path_1_ghe.read_text())
         one_ghe_specific_params = sys_param_1_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
             "ghe_specific_params"
         ]
@@ -99,7 +99,7 @@ class TestNetwork(BaseCase):
 
         # -- Clean up
         # Restore the original borehole length and number of boreholes.
-        sys_param_ghe = json.loads(self.system_parameter_path_13_buildings_upstream_ghe).read_text()
+        sys_param_ghe = json.loads(self.system_parameter_path_13_buildings_upstream_ghe.read_text())
         upstream_ghe_specific_params = sys_param_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
             "ghe_specific_params"
         ]
@@ -135,7 +135,7 @@ class TestNetwork(BaseCase):
 
         # -- Clean up
         # Restore the original borehole length and number of boreholes.
-        sys_param_ghe = json.loads((self.system_parameter_path_13_buildings_proportional_ghe).read_text())
+        sys_param_ghe = json.loads(self.system_parameter_path_13_buildings_proportional_ghe.read_text())
         proportional_ghe_specific_params = sys_param_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
             "ghe_specific_params"
         ]
@@ -146,6 +146,7 @@ class TestNetwork(BaseCase):
             json.dump(sys_param_ghe, sys_param_file, indent=2)
             # Restore the trailing newline
             sys_param_file.write("\n")
+
 
 #    def test_network_two_ghe_no_load(self):
 #        geojson_file_path = self.demos_path / 'sdk_output_skeleton' / 'example_project_combine_GHE_2.json'
