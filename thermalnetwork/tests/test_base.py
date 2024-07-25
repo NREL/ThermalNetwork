@@ -8,7 +8,7 @@ class BaseCase(unittest.TestCase):
         here = Path(__file__).parent
 
         # -- Input paths
-        self.demos_path = here.parent / "demos"
+        self.demos_path = here.parent.parent / "demos"
 
         self.geojson_file_path_1_ghe = (self.demos_path / "sdk_output_skeleton_1_ghe" / "network.geojson").resolve()
         self.scenario_directory_path_1_ghe = (
@@ -52,7 +52,7 @@ class BaseCase(unittest.TestCase):
         self.test_outputs_path.mkdir(exist_ok=True)
 
         # Save the original borehole length and number of boreholes, so they can be restored after the tests run.
-        sys_param_1_ghe = json.loads((self.system_parameter_path_1_ghe).read_text())
+        sys_param_1_ghe = json.loads(self.system_parameter_path_1_ghe.read_text())
         one_ghe_specific_params = sys_param_1_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
             "ghe_specific_params"
         ]
