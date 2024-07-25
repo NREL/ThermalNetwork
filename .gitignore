@@ -136,7 +136,7 @@ dmypy.json
 .vscode/
 
 # Test output files
-tests/test_outputs
+thermalnetwork/tests/test_outputs
 
 output/
 tmp/
