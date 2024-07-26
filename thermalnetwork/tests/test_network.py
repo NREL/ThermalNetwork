@@ -40,6 +40,10 @@ class TestNetwork(BaseCase):
             # Restore the trailing newline
             sys_param_file.write("\n")
 
+        # Remove the loop order files
+        (self.system_parameter_path_1_ghe.parent / "loop_order.json").unlink()
+        (self.system_parameter_path_1_ghe.parent / "ghe_order.json").unlink()
+
     def test_network_two_ghe_area_proportional(self):
         # -- Set up
         output_path = self.test_outputs_path / "two_ghe"
@@ -74,6 +78,10 @@ class TestNetwork(BaseCase):
             json.dump(sys_param_2_ghe, sys_param_file, indent=2)
             # Restore the trailing newline
             sys_param_file.write("\n")
+
+        # Remove the loop order files
+        (self.system_parameter_path_2_ghe.parent / "loop_order.json").unlink()
+        (self.system_parameter_path_2_ghe.parent / "ghe_order.json").unlink()
 
     def test_network_ghe_upstream(self):
         # -- Set up
@@ -111,6 +119,10 @@ class TestNetwork(BaseCase):
             # Restore the trailing newline
             sys_param_file.write("\n")
 
+        # Remove the loop order files
+        (self.system_parameter_path_13_buildings_upstream_ghe.parent / "loop_order.json").unlink()
+        (self.system_parameter_path_13_buildings_upstream_ghe.parent / "ghe_order.json").unlink()
+
     def test_network_ghe_proportional(self):
         # -- Set up
         output_path = self.test_outputs_path / "proportional_ghe"
@@ -146,6 +158,10 @@ class TestNetwork(BaseCase):
             json.dump(sys_param_ghe, sys_param_file, indent=2)
             # Restore the trailing newline
             sys_param_file.write("\n")
+
+        # Remove the loop order files
+        (self.system_parameter_path_13_buildings_proportional_ghe.parent / "loop_order.json").unlink()
+        (self.system_parameter_path_13_buildings_proportional_ghe.parent / "ghe_order.json").unlink()
 
 
 #    def test_network_two_ghe_no_load(self):
