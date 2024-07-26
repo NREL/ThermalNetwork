@@ -1,5 +1,5 @@
-from tests.test_base import BaseCase
 from thermalnetwork.ground_heat_exchanger import GHE
+from thermalnetwork.tests.test_base import BaseCase
 
 
 class TestGHE(BaseCase):

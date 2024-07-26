@@ -101,6 +101,6 @@ class GHE(BaseComponent):
     def get_atlanta_loads(self) -> list[float]:
         # read in the csv file and convert the loads to a list of length 8760
         current_file_directory = Path(os.path.dirname(os.path.abspath(__file__)))
-        glhe_json_data = current_file_directory / "Atlanta_loads/Atlanta_Office_Building_Loads.csv"
+        glhe_json_data = current_file_directory / "test_data" / "Atlanta_Office_Building_Loads.csv"
         raw_lines = glhe_json_data.read_text().split("\n")
         return [float(x) for x in raw_lines[1:] if x.strip() != ""]

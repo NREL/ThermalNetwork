@@ -2,8 +2,8 @@ import json
 
 import pytest
 
-from tests.test_base import BaseCase
 from thermalnetwork.network import run_sizer_from_cli_worker
+from thermalnetwork.tests.test_base import BaseCase
 
 
 class TestNetwork(BaseCase):
@@ -28,7 +28,7 @@ class TestNetwork(BaseCase):
 
         # -- Clean up
         # Restore the original borehole length and number of boreholes.
-        sys_param_1_ghe = json.loads((self.system_parameter_path_1_ghe).read_text())
+        sys_param_1_ghe = json.loads(self.system_parameter_path_1_ghe.read_text())
         one_ghe_specific_params = sys_param_1_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
             "ghe_specific_params"
         ]
@@ -63,7 +63,7 @@ class TestNetwork(BaseCase):
 
         # -- Clean up
         # Restore the original borehole length and number of boreholes.
-        sys_param_2_ghe = json.loads((self.system_parameter_path_2_ghe).read_text())
+        sys_param_2_ghe = json.loads(self.system_parameter_path_2_ghe.read_text())
         two_ghe_specific_params = sys_param_2_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
             "ghe_specific_params"
         ]
@@ -99,7 +99,7 @@ class TestNetwork(BaseCase):
 
         # -- Clean up
         # Restore the original borehole length and number of boreholes.
-        sys_param_ghe = json.loads((self.system_parameter_path_13_buildings_upstream_ghe).read_text())
+        sys_param_ghe = json.loads(self.system_parameter_path_13_buildings_upstream_ghe.read_text())
         upstream_ghe_specific_params = sys_param_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
             "ghe_specific_params"
         ]
@@ -135,7 +135,7 @@ class TestNetwork(BaseCase):
 
         # -- Clean up
         # Restore the original borehole length and number of boreholes.
-        sys_param_ghe = json.loads((self.system_parameter_path_13_buildings_proportional_ghe).read_text())
+        sys_param_ghe = json.loads(self.system_parameter_path_13_buildings_proportional_ghe.read_text())
         proportional_ghe_specific_params = sys_param_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
             "ghe_specific_params"
         ]
