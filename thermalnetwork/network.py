@@ -393,32 +393,15 @@ class Network:
         # check size of space loads
         logger.debug(f"length of spaceloads: {len(ets.space_loads)}")
         logger.debug(f"space_loads_file: {props['space_loads_file']}")
-        # TODO: test this
         if len(ets.space_loads) != 8760:
             self.make_loads_hourly(ets_data["properties"], ets)
-
-            # space_loads_df = pd.read_csv(props["space_loads_file"])
-            # space_loads_df["Date Time"] = pd.to_datetime(space_loads_df["Date Time"])
-            # space_loads_df = space_loads_df.set_index("Date Time")
-            # # Find the last date in the DataFrame and add one day so interpolation will get the last day
-            # new_date = space_loads_df.index[-1] + pd.Timedelta(days=1)
-            # # add duplicate entry at end of dataframe
-            # new_data = pd.DataFrame(
-            #     space_loads_df.iloc[-1].to_numpy().reshape(1, -1), index=[new_date], columns=space_loads_df.columns
-            # )
-            # space_loads_df = pd.concat([space_loads_df, new_data])
-            # # interpolate data to hourly
-            # space_loads_df = space_loads_df.resample("H").interpolate(method="linear")
-            # # keep only8760
-            # space_loads_df = space_loads_df.iloc[:8760]
-            # ets.space_loads = space_loads_df["TotalSensibleLoad"]
-            # logger.warning(f"NEW length of spaceloads: {len(ets.space_loads)}")
         self.network.append(ets)
         return 0
 
     def make_loads_hourly(self, properties: dict, ets: ETS):
+        # TODO: test this method
         """
-        This function interpolates the space loads to hourly values.
+        This method interpolates the space loads to hourly values.
 
         :param properties: A dictionary containing the properties of the ETS, including the space loads file path.
         :param ets: An Energy Transfer Station object.
