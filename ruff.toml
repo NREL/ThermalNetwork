@@ -74,7 +74,7 @@ max-statements = 84
 max-branches = 18
 
 [lint.per-file-ignores]
-"tests/*" = ["S101", "S607", "S603"] # assert statements are allowed in tests, and paths are safe
+"thermalnetwork/tests/*" = ["S101", "S607", "S603"] # assert statements are allowed in tests, and paths are safe
 
 # https://docs.astral.sh/ruff/formatter/#configuration
 [format]
