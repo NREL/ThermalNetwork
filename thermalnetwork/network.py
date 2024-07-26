@@ -642,13 +642,13 @@ def run_sizer_from_cli_worker(
     # raise SystemExit(f"number of building groups: {len(bldg_groups_by_num)}")
 
     # save loop order to file next to sys-params for temporary use by the GMT
-    loop_order_filepath: Path = system_parameter_path.parent / "loop_order1.json"
+    loop_order_filepath: Path = system_parameter_path.parent / "loop_order.json"
     with open(loop_order_filepath, "w") as loop_order_file:
         json.dump(bldg_groups_by_num, loop_order_file, indent=2)
         # Add a trailing newline to the file
         loop_order_file.write("\n")
 
-    ghe_order_filepath: Path = system_parameter_path.parent / "ghe_order1.json"
+    ghe_order_filepath: Path = system_parameter_path.parent / "ghe_order.json"
     with open(ghe_order_filepath, "w") as ghe_order_file:
         json.dump(ghe_groups_by_num, ghe_order_file, indent=2)
         # Add a trailing newline to the file
