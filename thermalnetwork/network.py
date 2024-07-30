@@ -639,16 +639,14 @@ def run_sizer_from_cli_worker(
         # Adding by 1 is safe because the features are already in loop order
         ghe_groups_by_num[ghe_group]["building_group_out"] = ghe_group + 1 if ghe_group < num_ghes - 1 else 0
 
-    # raise SystemExit(f"number of building groups: {len(bldg_groups_by_num)}")
-
     # save loop order to file next to sys-params for temporary use by the GMT
-    loop_order_filepath: Path = system_parameter_path.parent / "loop_order.json"
+    loop_order_filepath = output_directory_path.resolve() / "_loop_order.json"
     with open(loop_order_filepath, "w") as loop_order_file:
         json.dump(bldg_groups_by_num, loop_order_file, indent=2)
         # Add a trailing newline to the file
         loop_order_file.write("\n")
 
-    ghe_order_filepath: Path = system_parameter_path.parent / "ghe_order.json"
+    ghe_order_filepath = output_directory_path.resolve() / "_ghe_order.json"
     with open(ghe_order_filepath, "w") as ghe_order_file:
         json.dump(ghe_groups_by_num, ghe_order_file, indent=2)
         # Add a trailing newline to the file
