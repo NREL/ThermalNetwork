@@ -42,10 +42,6 @@ class TestNetwork(BaseCase):
             # Restore the trailing newline
             sys_param_file.write("\n")
 
-        # Remove the loop order files
-        (output_path / "_loop_order.json").unlink()
-        (output_path / "_ghe_order.json").unlink()
-
     def test_network_two_ghe_area_proportional(self):
         # -- Set up
         output_path = self.test_outputs_path / "two_ghe"
@@ -83,10 +79,6 @@ class TestNetwork(BaseCase):
             # Restore the trailing newline
             sys_param_file.write("\n")
 
-        # Remove the loop order files
-        (output_path / "_loop_order.json").unlink()
-        (output_path / "_ghe_order.json").unlink()
-
     def test_network_ghe_upstream(self):
         # -- Set up
         output_path = self.test_outputs_path / "upstream_ghe"
@@ -102,6 +94,7 @@ class TestNetwork(BaseCase):
 
         # -- Check
         expected_depth_of_boreholes = pytest.approx(133, 2)
+        # Check that the borehole length is correct.
         # FIXME: 135 is the max borehole length for a GHE (as set in the sys-params file).
         # This implies the borefield size is too small.
         # Borefield dimensions are set in the geojson file and transferred to the sys-params file by the GMT.
@@ -111,12 +104,22 @@ class TestNetwork(BaseCase):
 
                 assert sim_summary["ghe_system"]["active_borehole_length"]["value"] == expected_depth_of_boreholes
 
-        # -- Clean up
-        # Restore the original borehole length and number of boreholes.
+        # Read sys-param file
         sys_param_ghe = json.loads(self.system_parameter_path_13_buildings_upstream_ghe.read_text())
         upstream_ghe_specific_params = sys_param_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
             "ghe_specific_params"
         ]
+        # Read loop order file
+        loop_order_path = self.system_parameter_path_13_buildings_upstream_ghe.parent / "_loop_order.json"
+        loop_order = json.loads(loop_order_path.read_text())
+
+        # Check that all GHEs in the loop order file are present in the sys-params file.
+        ghe_list = [ghe["ghe_id"] for ghe in upstream_ghe_specific_params]
+        for ghe in loop_order:
+            assert ghe["list_ghe_ids_in_group"][0] in ghe_list
+
+        # -- Clean up
+        # Restore the original borehole length and number of boreholes.
         for ghe in upstream_ghe_specific_params:
             ghe["borehole"]["length_of_boreholes"] = self.original_borehole_length
             ghe["borehole"]["number_of_boreholes"] = self.original_num_boreholes
@@ -124,10 +127,6 @@ class TestNetwork(BaseCase):
             json.dump(sys_param_ghe, sys_param_file, indent=2)
             # Restore the trailing newline
             sys_param_file.write("\n")
-
-        # Remove the loop order files
-        (output_path / "_loop_order.json").unlink()
-        (output_path / "_ghe_order.json").unlink()
 
     def test_network_ghe_proportional(self):
         # -- Set up
@@ -166,10 +165,6 @@ class TestNetwork(BaseCase):
             json.dump(sys_param_ghe, sys_param_file, indent=2)
             # Restore the trailing newline
             sys_param_file.write("\n")
-
-        # Remove the loop order files
-        (output_path / "_loop_order.json").unlink()
-        (output_path / "_ghe_order.json").unlink()
 
 
 #    def test_network_two_ghe_no_load(self):
