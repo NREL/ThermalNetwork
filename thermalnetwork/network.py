@@ -599,58 +599,30 @@ def run_sizer_from_cli_worker(
     logger.debug(f"Features in loop order: {reordered_features}\n")
 
     num_ghes = len([x for x in reordered_features if x["district_system_type"]])
-    bldg_groups_by_num = {x: {} for x in range(num_ghes)}
-    ghe_groups_by_num = {x: {} for x in range(num_ghes)}
+    bldg_groups_per_ghe = []
 
-    # populate bldg_groups_by_num dict with info for GMT diagramming
+    # populate bldg_groups_per_ghe list with info for GMT diagramming
     seen_id_list = []
-    for bldg_group in bldg_groups_by_num:
-        list_bldg_ids_in_group = []
-        list_ghe_ids_in_group = []
+    for _ in range(num_ghes):
+        loop_info = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}
         for feature in reordered_features:
             if feature["id"] in seen_id_list:
                 continue
             elif feature["district_system_type"]:
-                list_ghe_ids_in_group.append(feature["id"])
-                bldg_groups_by_num[bldg_group]["list_ghe_ids_in_group"] = list_ghe_ids_in_group
+                loop_info["list_ghe_ids_in_group"].append(feature["id"])
                 seen_id_list.append(feature["id"])
                 break
-            list_bldg_ids_in_group.append(feature["id"])
-            bldg_groups_by_num[bldg_group]["list_bldg_ids_in_group"] = list_bldg_ids_in_group
+            loop_info["list_bldg_ids_in_group"].append(feature["id"])
             seen_id_list.append(feature["id"])  # Add ID to seen list (so we don't add it again)
-        bldg_groups_by_num[bldg_group]["num_bldgs_in_group"] = len(list_bldg_ids_in_group)
-        bldg_groups_by_num[bldg_group]["ghe_group_in"] = bldg_group
-        # Adding by 1 is safe because the features are already in loop order
-        bldg_groups_by_num[bldg_group]["ghe_group_out"] = bldg_group + 1 if bldg_group < num_ghes - 1 else 0
-
-    seen_id_list = []
-    for ghe_group in ghe_groups_by_num:
-        list_ghe_ids_in_group = []
-        for feature in reordered_features:
-            if feature["id"] in seen_id_list:
-                continue
-            if feature["district_system_type"]:
-                list_ghe_ids_in_group.append(feature["id"])
-                seen_id_list.append(feature["id"])
-                break
-        ghe_groups_by_num[ghe_group]["list_ghe_ids_in_group"] = list_ghe_ids_in_group
-        ghe_groups_by_num[ghe_group]["num_ghes_in_group"] = len(list_ghe_ids_in_group)
-        ghe_groups_by_num[ghe_group]["building_group_in"] = ghe_group
-        # Adding by 1 is safe because the features are already in loop order
-        ghe_groups_by_num[ghe_group]["building_group_out"] = ghe_group + 1 if ghe_group < num_ghes - 1 else 0
+        bldg_groups_per_ghe.append(loop_info)
 
     # save loop order to file next to sys-params for temporary use by the GMT
-    loop_order_filepath = output_directory_path.resolve() / "_loop_order.json"
+    # Prepending an underscore to emphasize these as temporary files
+    loop_order_filepath = system_parameter_path.parent.resolve() / "_loop_order.json"
     with open(loop_order_filepath, "w") as loop_order_file:
-        json.dump(bldg_groups_by_num, loop_order_file, indent=2)
+        json.dump(bldg_groups_per_ghe, loop_order_file, indent=2)
         # Add a trailing newline to the file
         loop_order_file.write("\n")
-
-    ghe_order_filepath = output_directory_path.resolve() / "_ghe_order.json"
-    with open(ghe_order_filepath, "w") as ghe_order_file:
-        json.dump(ghe_groups_by_num, ghe_order_file, indent=2)
-        # Add a trailing newline to the file
-        ghe_order_file.write("\n")
 
     # convert geojson type "Building","District System" to "ENERGYTRANSFERSTATION",
     # "GROUNDHEATEXCHANGER" and add properties
