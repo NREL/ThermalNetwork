@@ -63,6 +63,11 @@ class Network:
             feature for feature in self.geojson_data["features"] if feature["properties"]["type"] == "ThermalConnector"
         ]
 
+        if len(connectors) == 0:
+            raise ValueError(
+                "No thermal connectors (pipes) were found in the GeoJSON data which are required for a thermal network."
+            )
+
         # Find the feature that has been labelled as the start of the loop
         # TODO: Update the UI to allow the user to select the start loop feature.
         connected_features = [
@@ -96,7 +101,7 @@ class Network:
         for con_feature in connected_features:
             for feature in features:
                 feature_id = feature["properties"]["id"]
-                if feature_id == con_feature and feature["properties"]["type"] in ["Building", "District System"]:
+                if (feature_id == con_feature) and (feature["properties"]["type"] in ["Building", "District System"]):
                     connected_objects.append(
                         {
                             "id": feature_id,
@@ -492,6 +497,9 @@ class Network:
         sys_params: dict = json.loads(system_parameter_path.read_text())
         ghe_params: list = sys_params["district_system"]["fifth_generation"]["ghe_parameters"]["ghe_specific_params"]
         for ghe_id in output_directory_path.iterdir():
+            # each ghe_id is a directory
+            if not ghe_id.is_dir():
+                continue
             summary_data_path = ghe_id / "SimulationSummary.json"
             # Get the new data from the GHEDesigner output
             ghe_data: dict = json.loads(summary_data_path.read_text())["ghe_system"]
@@ -589,6 +597,32 @@ def run_sizer_from_cli_worker(
 
     reordered_features = network.reorder_connected_features(connected_features)
     logger.debug(f"Features in loop order: {reordered_features}\n")
+
+    num_ghes = len([x for x in reordered_features if x["district_system_type"]])
+    bldg_groups_per_ghe = []
+
+    # populate bldg_groups_per_ghe list with info for GMT diagramming
+    seen_id_list = []
+    for _ in range(num_ghes):
+        loop_info = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}
+        for feature in reordered_features:
+            if feature["id"] in seen_id_list:
+                continue
+            elif feature["district_system_type"]:
+                loop_info["list_ghe_ids_in_group"].append(feature["id"])
+                seen_id_list.append(feature["id"])
+                break
+            loop_info["list_bldg_ids_in_group"].append(feature["id"])
+            seen_id_list.append(feature["id"])  # Add ID to seen list (so we don't add it again)
+        bldg_groups_per_ghe.append(loop_info)
+
+    # save loop order to file next to sys-params for temporary use by the GMT
+    # Prepending an underscore to emphasize these as temporary files
+    loop_order_filepath = system_parameter_path.parent.resolve() / "_loop_order.json"
+    with open(loop_order_filepath, "w") as loop_order_file:
+        json.dump(bldg_groups_per_ghe, loop_order_file, indent=2)
+        # Add a trailing newline to the file
+        loop_order_file.write("\n")
 
     # convert geojson type "Building","District System" to "ENERGYTRANSFERSTATION",
     # "GROUNDHEATEXCHANGER" and add properties

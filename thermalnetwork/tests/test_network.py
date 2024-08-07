@@ -21,10 +21,12 @@ class TestNetwork(BaseCase):
         )
 
         # -- Check
+        expected_depth_of_boreholes = pytest.approx(110, 0.1)
         for ghe_id in output_path.iterdir():
-            sim_summary = json.loads((ghe_id / "SimulationSummary.json").read_text())
+            if ghe_id.is_dir():
+                sim_summary = json.loads((ghe_id / "SimulationSummary.json").read_text())
 
-            assert sim_summary["ghe_system"]["active_borehole_length"]["value"] == pytest.approx(110, 0.1)
+                assert sim_summary["ghe_system"]["active_borehole_length"]["value"] == expected_depth_of_boreholes
 
         # -- Clean up
         # Restore the original borehole length and number of boreholes.
@@ -54,12 +56,14 @@ class TestNetwork(BaseCase):
         )
 
         # -- Check
+        expected_depth_of_boreholes = 60
+        # FIXME: 60 is the minimum borehole length for a GHE (as set by sys-param file), which implies the loads
+        # were not correctly sent to GHED.
         for ghe_id in output_path.iterdir():
-            sim_summary = json.loads((ghe_id / "SimulationSummary.json").read_text())
+            if ghe_id.is_dir():
+                sim_summary = json.loads((ghe_id / "SimulationSummary.json").read_text())
 
-            assert sim_summary["ghe_system"]["active_borehole_length"]["value"] == 60
-            # FIXME: 60 is the minimum borehole length for a GHE, which implies the loads were not correctly sent
-            # to GHED.
+                assert sim_summary["ghe_system"]["active_borehole_length"]["value"] == expected_depth_of_boreholes
 
         # -- Clean up
         # Restore the original borehole length and number of boreholes.
@@ -89,20 +93,33 @@ class TestNetwork(BaseCase):
         )
 
         # -- Check
-        for ghe_id in output_path.iterdir():
-            sim_summary = json.loads((ghe_id / "SimulationSummary.json").read_text())
-
-            assert sim_summary["ghe_system"]["active_borehole_length"]["value"] == pytest.approx(133, 2)
+        expected_depth_of_boreholes = pytest.approx(133, 2)
+        # Check that the borehole length is correct.
         # FIXME: 135 is the max borehole length for a GHE (as set in the sys-params file).
         # This implies the borefield size is too small.
         # Borefield dimensions are set in the geojson file and transferred to the sys-params file by the GMT.
+        for ghe_id in output_path.iterdir():
+            if ghe_id.is_dir():
+                sim_summary = json.loads((ghe_id / "SimulationSummary.json").read_text())
 
-        # -- Clean up
-        # Restore the original borehole length and number of boreholes.
+                assert sim_summary["ghe_system"]["active_borehole_length"]["value"] == expected_depth_of_boreholes
+
+        # Read sys-param file
         sys_param_ghe = json.loads(self.system_parameter_path_13_buildings_upstream_ghe.read_text())
         upstream_ghe_specific_params = sys_param_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
             "ghe_specific_params"
         ]
+        # Read loop order file
+        loop_order_path = self.system_parameter_path_13_buildings_upstream_ghe.parent / "_loop_order.json"
+        loop_order = json.loads(loop_order_path.read_text())
+
+        # Check that all GHEs in the loop order file are present in the sys-params file.
+        ghe_list = [ghe["ghe_id"] for ghe in upstream_ghe_specific_params]
+        for ghe in loop_order:
+            assert ghe["list_ghe_ids_in_group"][0] in ghe_list
+
+        # -- Clean up
+        # Restore the original borehole length and number of boreholes.
         for ghe in upstream_ghe_specific_params:
             ghe["borehole"]["length_of_boreholes"] = self.original_borehole_length
             ghe["borehole"]["number_of_boreholes"] = self.original_num_boreholes
@@ -125,13 +142,15 @@ class TestNetwork(BaseCase):
         )
 
         # -- Check
-        for ghe_id in output_path.iterdir():
-            sim_summary = json.loads((ghe_id / "SimulationSummary.json").read_text())
-
-            assert sim_summary["ghe_system"]["active_borehole_length"]["value"] == pytest.approx(133, 2)
+        expected_depth_of_boreholes = pytest.approx(133, 2)
         # FIXME: 135 is the max borehole length for a GHE (as set in the sys-params file).
         # This implies the borefield size is too small.
         # Borefield dimensions are set in the geojson file and transferred to the sys-params file by the GMT.
+        for ghe_id in output_path.iterdir():
+            if ghe_id.is_dir():
+                sim_summary = json.loads((ghe_id / "SimulationSummary.json").read_text())
+
+                assert sim_summary["ghe_system"]["active_borehole_length"]["value"] == expected_depth_of_boreholes
 
         # -- Clean up
         # Restore the original borehole length and number of boreholes.
