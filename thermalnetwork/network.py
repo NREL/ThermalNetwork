@@ -220,7 +220,8 @@ class Network:
                 properties = {
                     "fluid": self.ghe_parameters["fluid"],
                     "grout": self.ghe_parameters["grout"],
-                    "soil": self.ghe_parameters["soil"],
+                    # soil properties are not exclusive to ghe, they are up one level in the system_parameters.json
+                    "soil": self.system_parameters_data["district_system"]["fifth_generation"]["soil"],
                     "pipe": self.ghe_parameters["pipe"],
                     "borehole": matching_ghe["borehole"],
                     "simulation": self.ghe_parameters["simulation"],
