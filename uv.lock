@@ -2504,7 +2504,7 @@ dev = [
     { name = "jupyterlab", specifier = "~=4.0" },
     { name = "mkdocs-material", specifier = "~=9.5" },
     { name = "pre-commit", specifier = "~=3.7" },
-    { name = "pytest", specifier = ">=6.0" },
+    { name = "pytest", specifier = "~=8.0" },
     { name = "pytest-cov", specifier = "~=5.0" },
 ]
 
