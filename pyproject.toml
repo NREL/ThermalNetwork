@@ -1,18 +1,22 @@
 [build-system]
-requires = [
-    "setuptools >= 67",
-    "setuptools_scm >= 8",
-    "wheel",
-]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["thermalnetwork"]
+
+[project.urls]
+"Homepage" = "https://github.com/NREL/ThermalNetwork"
+"Bug Tracker" = "https://github.com/NREL/ThermalNetwork/issues"
 
 # https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
 [project]
 name = "ThermalNetwork"
-dynamic = [
-    "readme",
-    "version",
-    ]
+version = "0.2.5"
+readme = "README.md"
 authors = [
   { name="Matt Mitchell", email="mitchute@gmail.com" },
   { name="Nathan Moore", email="nathan.moore@nrel.gov" },
@@ -35,30 +39,18 @@ dependencies = [
   "rich ~= 13.0",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "pytest >= 6.0",
+[tool.uv]
+package = true
+dev-dependencies = [
+    "pytest ~= 8.0",
     "pytest-cov ~= 5.0",
     "pre-commit ~= 3.7",
     "jupyterlab ~= 4.0",
     "mkdocs-material ~= 9.5"
 ]
 
-[project.urls]
-"Homepage" = "https://github.com/NREL/ThermalNetwork"
-"Bug Tracker" = "https://github.com/NREL/ThermalNetwork/issues"
-
-# https://setuptools.pypa.io/en/latest/userguide/package_discovery.html
-[tool.setuptools.packages.find]
-# Must include a MANIFEST.in file in our repo: https://setuptools.pypa.io/en/latest/userguide/datafiles.html
-
-# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html#dynamic-metadata
-[tool.setuptools.dynamic]
-readme = {file = "README.md", content-type = "text/markdown"}
-
-# https://setuptools-scm.readthedocs.io/
-# Presence of this command tells it to find the version from GitHub
-[tool.setuptools_scm]
+# https://docs.astral.sh/uv/concepts/dependencies/#optional-dependencies
+# [project.optional-dependencies]
 
 # https://docs.pytest.org/en/6.2.x/customize.html#pyproject-toml
 [tool.pytest.ini_options]
