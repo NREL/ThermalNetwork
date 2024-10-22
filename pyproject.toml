@@ -23,6 +23,7 @@ authors = [
 ]
 description = "A thermal network solver for GHE sizing."
 requires-python = ">=3.9,<3.13"
+# a sub-dependency requires scipy==1.13.1, and 1.14.1 is required to support Python 3.13
 classifiers = [
         "Development Status :: 4 - Beta",
         "Topic :: Scientific/Engineering",
