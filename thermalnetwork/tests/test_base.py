@@ -1,11 +1,15 @@
 import json
-import unittest
 from pathlib import Path
+from unittest import TestCase
+
+from click.testing import CliRunner
 
 
-class BaseCase(unittest.TestCase):
+class BaseCase(TestCase):
     def setUp(self) -> None:
         here = Path(__file__).parent
+
+        self.runner = CliRunner()
 
         # -- Input paths
         self.demos_path = here.parent.parent / "demos"
