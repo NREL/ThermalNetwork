@@ -816,10 +816,14 @@ def run_sizer_from_cli_worker(
 
 
 @click.command(name="ThermalNetworkCommandLine")
-@click.option("-y", "--system-parameter-file", type=click.Path(exists=True), help="Path to System Parameter file")
-@click.option("-s", "--scenario-directory", type=click.Path(exists=True), help="Path to scenario directory")
-@click.option("-f", "--geojson-file", type=click.Path(exists=True), help="Path to GeoJSON file")
-@click.option("-o", "--output-directory", type=click.Path(), help="Path to output directory")
+@click.option(
+    "-y", "--system-parameter-file", type=click.Path(exists=True, path_type=Path), help="Path to System Parameter file"
+)
+@click.option(
+    "-s", "--scenario-directory", type=click.Path(exists=True, path_type=Path), help="Path to scenario directory"
+)
+@click.option("-f", "--geojson-file", type=click.Path(exists=True, path_type=Path), help="Path to GeoJSON file")
+@click.option("-o", "--output-directory", type=click.Path(path_type=Path), help="Path to output directory")
 @click.version_option(version("thermalnetwork"))
 def run_sizer_from_cli(system_parameter_file, scenario_directory, geojson_file, output_directory):
     """
@@ -834,11 +838,6 @@ def run_sizer_from_cli(system_parameter_file, scenario_directory, geojson_file, 
     :param output_directory: path to output directory
     """
 
-    logger.debug(f"{system_parameter_file=}")
-    logger.debug(f"{scenario_directory=}")
-    logger.debug(f"{geojson_file=}")
-    logger.debug(f"{output_directory=}")
-
     # if validate:
     #    try:
     #        validate_input_file(input_path)
@@ -849,23 +848,16 @@ def run_sizer_from_cli(system_parameter_file, scenario_directory, geojson_file, 
     #        return 1
     # calling the worker function here
 
-    system_parameter_path = Path(system_parameter_file).resolve()
-    scenario_directory_path = Path(scenario_directory).resolve()
-    geojson_file_path = Path(geojson_file).resolve()
-    output_directory_path = Path(output_directory).resolve()
-    logger.debug(f"{system_parameter_path=}")
-    logger.debug(f"{scenario_directory_path=}")
-    logger.debug(f"{geojson_file_path=}")
-    logger.debug(f"{output_directory_path=}")
+    logger.debug(f"{system_parameter_file=}")
+    logger.debug(f"{scenario_directory=}")
+    logger.debug(f"{geojson_file=}")
+    logger.debug(f"{output_directory=}")
 
-    if not output_directory_path.exists():
+    if not output_directory.exists():
         logger.info("Output path does not exist. attempting to create")
-        output_directory_path.mkdir(parents=True, exist_ok=True)
+        output_directory.mkdir(parents=True, exist_ok=True)
 
-    output_directory_path = output_directory_path.resolve()
-    return run_sizer_from_cli_worker(
-        system_parameter_path, scenario_directory_path, geojson_file_path, output_directory_path
-    )
+    return run_sizer_from_cli_worker(system_parameter_file, scenario_directory, geojson_file, output_directory)
 
 
 if __name__ == "__main__":
