@@ -23,6 +23,10 @@ class BaseCase(TestCase):
             self.scenario_directory_path_1_ghe / "ghe_dir" / "sys_params.json"
         ).resolve()
 
+        self.system_parameter_path_1_ghe_geometry = (
+            self.scenario_directory_path_1_ghe / "ghe_dir" / "sys_params_detailed_geo.json"
+        ).resolve()
+
         self.geojson_file_path_2_ghe = (
             self.demos_path / "sdk_output_skeleton_2_ghe_sequential" / "network.geojson"
         ).resolve()

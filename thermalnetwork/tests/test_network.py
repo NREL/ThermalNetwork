@@ -143,9 +143,6 @@ class TestNetwork(BaseCase):
 
         # -- Check
         expected_depth_of_boreholes = pytest.approx(133, 2)
-        # FIXME: 135 is the max borehole length for a GHE (as set in the sys-params file).
-        # This implies the borefield size is too small.
-        # Borefield dimensions are set in the geojson file and transferred to the sys-params file by the GMT.
         for ghe_id in output_path.iterdir():
             if ghe_id.is_dir():
                 sim_summary = json.loads((ghe_id / "SimulationSummary.json").read_text())
@@ -162,6 +159,44 @@ class TestNetwork(BaseCase):
             ghe["borehole"]["length_of_boreholes"] = self.original_borehole_length
             ghe["borehole"]["number_of_boreholes"] = self.original_num_boreholes
         with open(self.system_parameter_path_13_buildings_proportional_ghe, "w") as sys_param_file:
+            json.dump(sys_param_ghe, sys_param_file, indent=2)
+            # Restore the trailing newline
+            sys_param_file.write("\n")
+
+    def test_network_one_ghe_detailed(self):
+        # -- Set up
+        output_path = self.test_outputs_path / "one_ghe_detailed_geo"
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        # -- Run
+        run_sizer_from_cli_worker(
+            self.system_parameter_path_1_ghe_geometry,
+            self.scenario_directory_path_1_ghe,
+            self.geojson_file_path_1_ghe,
+            output_path,
+        )
+
+        # -- Check
+        expected_depth_of_boreholes = pytest.approx(133, 2)
+        # FIXME: 135 is the max borehole length for a GHE (as set in the sys-params file).
+        # This implies the borefield size is too small.
+        # Borefield dimensions are set in the geojson file and transferred to the sys-params file by the GMT.
+        for ghe_id in output_path.iterdir():
+            if ghe_id.is_dir():
+                sim_summary = json.loads((ghe_id / "SimulationSummary.json").read_text())
+
+                assert sim_summary["ghe_system"]["active_borehole_length"]["value"] == expected_depth_of_boreholes
+
+        # -- Clean up
+        # Restore the original borehole length and number of boreholes.
+        sys_param_ghe = json.loads(self.system_parameter_path_1_ghe_geometry.read_text())
+        proportional_ghe_specific_params = sys_param_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
+            "ghe_specific_params"
+        ]
+        for ghe in proportional_ghe_specific_params:
+            ghe["borehole"]["length_of_boreholes"] = self.original_borehole_length
+            ghe["borehole"]["number_of_boreholes"] = self.original_num_boreholes
+        with open(self.system_parameter_path_1_ghe_geometry, "w") as sys_param_file:
             json.dump(sys_param_ghe, sys_param_file, indent=2)
             # Restore the trailing newline
             sys_param_file.write("\n")

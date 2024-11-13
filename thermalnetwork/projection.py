@@ -65,9 +65,9 @@ def lon_lat_to_polygon(polygon_lon_lat_coords, origin_lon_lat=None,
     # Unpack or auto-calculate the conversion factors
     if not conversion_factors:
         meters_to_lon, meters_to_lat = meters_to_long_lat_factors(origin_lon_lat)
-        lon_to_meters, lat_to_meters = 1.0 / meters_to_lon, 1.0 / meters_to_lat
     else:
-        lon_to_meters, lat_to_meters = conversion_factors
+        meters_to_lon, meters_to_lat = conversion_factors
+    lon_to_meters, lat_to_meters = 1.0 / meters_to_lon, 1.0 / meters_to_lat
 
     # Get the (X, Y) values for the polygon in meters
     return [((pt[0] - origin_lon_lat[0]) / lon_to_meters,
@@ -121,6 +121,22 @@ def lower_left_point(polygon):
         if point[1] < min_pt[1]:
             min_pt[1] = point[1]
     return min_pt
+
+
+def upper_right_point(polygon):
+    """
+    Get (X, Y) values for the upper right corner of the bounding rectangle for a polygon.
+
+    :param polygon: An array of (X, Y) values in any units system.
+    :return: X and Y coordinates for the upper right point around the polygon.
+    """
+    max_pt = [polygon[0][0], polygon[0][1]]
+    for point in polygon[1:]:
+        if point[0] > max_pt[0]:
+            max_pt[0] = point[0]
+        if point[1] > max_pt[1]:
+            max_pt[1] = point[1]
+    return max_pt
 
 
 def polygon_area(polygon):

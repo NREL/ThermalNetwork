@@ -9,6 +9,7 @@ from rich.logging import RichHandler
 
 from thermalnetwork.base_component import BaseComponent
 from thermalnetwork.enums import ComponentType
+from thermalnetwork.projection import polygon_area
 
 logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger(__name__)
@@ -23,7 +24,20 @@ class GHE(BaseComponent):
         #    self.json_data = json.load(f)
         # compute Area
         self.id = data["id"]
-        self.area = self.json_data["geometric_constraints"]["length"] * self.json_data["geometric_constraints"]["width"]
+        if "polygons" in self.json_data["geometric_constraints"]:
+            bound_area = polygon_area(self.json_data["geometric_constraints"]["polygons"][0])
+            if bound_area < 0:  # clockwise polygon; reverse for GHE Designer
+                self.json_data["geometric_constraints"]["polygons"][0].reverse()
+            self.area = abs(bound_area)
+            for i, hole_poly in enumerate(self.json_data["geometric_constraints"]["polygons"][1:]):
+                hole_area = polygon_area(hole_poly)
+                if hole_area < 0:  # clockwise polygon; reverse for GHE Designer
+                    self.json_data["geometric_constraints"]["polygons"][i + 1].reverse()
+                self.area -= abs(hole_area)
+        else:
+            length = self.json_data["geometric_constraints"]["length"]
+            width = self.json_data["geometric_constraints"]["width"]
+            self.area = length * width
 
     def ghe_size(self, total_space_loads, output_path: Path) -> float:
         logger.info(f"GHE_SIZE with total_space_loads: {total_space_loads}")
@@ -59,12 +73,21 @@ class GHE(BaseComponent):
             max_boreholes=2500,
         )
         ghe.set_ground_loads_from_hourly_list(self.json_data["loads"]["ground_loads"])
-        ghe.set_geometry_constraints_rectangle(
-            length=self.json_data["geometric_constraints"]["length"],
-            width=self.json_data["geometric_constraints"]["width"],
-            b_min=self.json_data["geometric_constraints"]["b_min"],
-            b_max=self.json_data["geometric_constraints"]["b_max"],
-        )
+        if "polygons" in self.json_data["geometric_constraints"]:
+            ghe.set_geometry_constraints_bi_rectangle_constrained(
+                property_boundary=self.json_data["geometric_constraints"]["polygons"][0],
+                no_go_boundaries=self.json_data["geometric_constraints"]["polygons"][1:],
+                b_min=self.json_data["geometric_constraints"]["b_min"],
+                b_max_x=self.json_data["geometric_constraints"]["b_max"],
+                b_max_y=self.json_data["geometric_constraints"]["b_max"],
+            )
+        else:
+            ghe.set_geometry_constraints_rectangle(
+                length=self.json_data["geometric_constraints"]["length"],
+                width=self.json_data["geometric_constraints"]["width"],
+                b_min=self.json_data["geometric_constraints"]["b_min"],
+                b_max=self.json_data["geometric_constraints"]["b_max"],
+            )
         ghe.set_design(
             flow_rate=self.json_data["design"]["flow_rate"], flow_type_str=self.json_data["design"]["flow_type"]
         )
