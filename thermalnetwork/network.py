@@ -14,6 +14,8 @@ from thermalnetwork.energy_transfer_station import ETS
 from thermalnetwork.enums import ComponentType, DesignType
 from thermalnetwork.ground_heat_exchanger import GHE
 from thermalnetwork.pump import Pump
+from thermalnetwork.projection import lower_left_point, upper_right_point, \
+    meters_to_long_lat_factors, lon_lat_to_polygon
 
 logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger(__name__)
@@ -115,6 +117,7 @@ class Network:
                                 for k, v in feature["properties"].items()
                                 if k not in ["type", "name", "id", "district_system_type"]
                             },
+                            "geometry": feature["geometry"],
                             "is_ghe_start_loop": feature_id == startloop_feature_id,
                         }
                     )
@@ -208,15 +211,30 @@ class Network:
                 }
             elif feature["type"] == "District System" and feature["district_system_type"] == "Ground Heat Exchanger":
                 feature_type = "GROUNDHEATEXCHANGER"
+                geometric_constraints = self.ghe_parameters["geometric_constraints"]
                 # get ghe parameters for 'ghe_specific_params' key of system_parameters.json
                 matching_ghe = self.find_matching_ghe_id(feature["id"])
-                # matching_ghe.pop('ground_loads', None)
                 logger.debug(f"matching_ghe: {matching_ghe}\n")
-                length = matching_ghe["ghe_geometric_params"]["length_of_ghe"]
-                width = matching_ghe["ghe_geometric_params"]["width_of_ghe"]
-                geometric_constraints = self.ghe_parameters["geometric_constraints"]
-                geometric_constraints["length"] = length
-                geometric_constraints["width"] = width
+                if "ghe_geometric_params" not in matching_ghe:
+                    # convert detailed geometry coordinates to meters
+                    lat_long_polys = feature["geometry"]["coordinates"]
+                    origin_lon_lat = lower_left_point(lat_long_polys[0])
+                    convert_facs = meters_to_long_lat_factors(origin_lon_lat)
+                    ghe_polygons = []
+                    for poly in lat_long_polys:
+                        coords = lon_lat_to_polygon(poly, origin_lon_lat, convert_facs)
+                        ghe_polygons.append(coords)
+                    # set geometric constraints to be dictated by the polygons
+                    geometric_constraints["polygons"] = ghe_polygons
+                    min_pt = lower_left_point(ghe_polygons[0])
+                    max_pt = upper_right_point(ghe_polygons[0])
+                    geometric_constraints["length"] = max_pt[0] - min_pt[0]
+                    geometric_constraints["width"] = max_pt[1] - min_pt[1]
+                else:  # use the old ghe_geometric_params
+                    length = matching_ghe["ghe_geometric_params"]["length_of_ghe"]
+                    width = matching_ghe["ghe_geometric_params"]["width_of_ghe"]
+                    geometric_constraints["length"] = length
+                    geometric_constraints["width"] = width
                 properties = {
                     "fluid": self.ghe_parameters["fluid"],
                     "grout": self.ghe_parameters["grout"],
