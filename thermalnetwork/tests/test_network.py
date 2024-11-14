@@ -190,10 +190,10 @@ class TestNetwork(BaseCase):
         # -- Clean up
         # Restore the original borehole length and number of boreholes.
         sys_param_ghe = json.loads(self.system_parameter_path_1_ghe_geometry.read_text())
-        proportional_ghe_specific_params = sys_param_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
+        ghe_specific_params = sys_param_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
             "ghe_specific_params"
         ]
-        for ghe in proportional_ghe_specific_params:
+        for ghe in ghe_specific_params:
             ghe["borehole"]["length_of_boreholes"] = self.original_borehole_length
             ghe["borehole"]["number_of_boreholes"] = self.original_num_boreholes
         with open(self.system_parameter_path_1_ghe_geometry, "w") as sys_param_file:
