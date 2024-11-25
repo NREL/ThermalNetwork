@@ -1,8 +1,7 @@
 # coding=utf-8
 import pytest
 
-from thermalnetwork.projection import meters_to_long_lat_factors, \
-    polygon_to_lon_lat, lon_lat_to_polygon, polygon_area
+from thermalnetwork.projection import meters_to_long_lat_factors, polygon_to_lon_lat, lon_lat_to_polygon, polygon_area
 
 
 def test_meters_to_long_lat_factors():
@@ -10,11 +9,9 @@ def test_meters_to_long_lat_factors():
     assert meters_to_long_lat_factors((0, 0))[0] == pytest.approx(111319.9, rel=1e-5)
     assert meters_to_long_lat_factors((0, 0))[1] == pytest.approx(111319.9, rel=1e-5)
 
-    assert meters_to_long_lat_factors((0, 45))[0] < \
-        meters_to_long_lat_factors((0, 45))[1] < 111319.9
+    assert meters_to_long_lat_factors((0, 45))[0] < meters_to_long_lat_factors((0, 45))[1] < 111319.9
 
-    assert meters_to_long_lat_factors((0, 89))[0] < \
-        meters_to_long_lat_factors((0, 89))[1] < 111319.9
+    assert meters_to_long_lat_factors((0, 89))[0] < meters_to_long_lat_factors((0, 89))[1] < 111319.9
 
 
 def test_lon_lat_to_polygon():
@@ -24,10 +21,10 @@ def test_lon_lat_to_polygon():
         (-70.0, 42.0),
         (-69.99997578750273, 42.0),
         (-69.99997578750273, 42.00001799339205),
-        (-70.0, 42.00001799339205)]
+        (-70.0, 42.00001799339205),
+    ]
 
-    polygon = lon_lat_to_polygon(
-        polygon_lon_lat_coords, origin_lon_lat=(-70.0, 42.0))
+    polygon = lon_lat_to_polygon(polygon_lon_lat_coords, origin_lon_lat=(-70.0, 42.0))
 
     test_polygon = [(0, 0), (2, 0), (2, 2), (0, 2)]
 

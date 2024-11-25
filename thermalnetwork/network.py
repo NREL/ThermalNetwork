@@ -14,8 +14,12 @@ from thermalnetwork.energy_transfer_station import ETS
 from thermalnetwork.enums import ComponentType, DesignType
 from thermalnetwork.ground_heat_exchanger import GHE
 from thermalnetwork.pump import Pump
-from thermalnetwork.projection import lower_left_point, upper_right_point, \
-    meters_to_long_lat_factors, lon_lat_to_polygon
+from thermalnetwork.projection import (
+    lower_left_point,
+    upper_right_point,
+    meters_to_long_lat_factors,
+    lon_lat_to_polygon,
+)
 
 logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger(__name__)
@@ -735,8 +739,10 @@ def run_sizer_from_cli_worker(
     ]
 
     if len(building_features) == 0:
-        logger.error("No buildings found. Ensure the GeoJSON \"Feature\" \"id\" keys match the system \n"
-                     "parameter file \"geojson_id\" key values for the respective buildings.")
+        logger.error(
+            'No buildings found. Ensure the GeoJSON "Feature" "id" keys match the system \n'
+            'parameter file "geojson_id" key values for the respective buildings.'
+        )
 
     # Rebuild the geojson data using only the buildings in the system parameters file
     # Put in everything that isn't a building
