@@ -56,9 +56,7 @@ class TestNetwork(BaseCase):
         )
 
         # -- Check
-        expected_depth_of_boreholes = 60
-        # FIXME: 60 is the minimum borehole length for a GHE (as set by sys-param file), which implies the loads
-        # were not correctly sent to GHED.
+        expected_depth_of_boreholes = pytest.approx(130, 1)
         for ghe_id in output_path.iterdir():
             if ghe_id.is_dir():
                 sim_summary = json.loads((ghe_id / "SimulationSummary.json").read_text())
