@@ -1,7 +1,6 @@
-# coding=utf-8
 import pytest
 
-from thermalnetwork.projection import meters_to_long_lat_factors, polygon_to_lon_lat, lon_lat_to_polygon, polygon_area
+from thermalnetwork.projection import lon_lat_to_polygon, meters_to_long_lat_factors, polygon_area, polygon_to_lon_lat
 
 
 def test_meters_to_long_lat_factors():

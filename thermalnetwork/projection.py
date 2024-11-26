@@ -114,10 +114,8 @@ def lower_left_point(polygon):
     """
     min_pt = [polygon[0][0], polygon[0][1]]
     for point in polygon[1:]:
-        if point[0] < min_pt[0]:
-            min_pt[0] = point[0]
-        if point[1] < min_pt[1]:
-            min_pt[1] = point[1]
+        min_pt[0] = min(point[0], min_pt[0])
+        min_pt[1] = min(point[1], min_pt[1])
     return min_pt
 
 
@@ -130,10 +128,8 @@ def upper_right_point(polygon):
     """
     max_pt = [polygon[0][0], polygon[0][1]]
     for point in polygon[1:]:
-        if point[0] > max_pt[0]:
-            max_pt[0] = point[0]
-        if point[1] > max_pt[1]:
-            max_pt[1] = point[1]
+        max_pt[0] = max(point[0], max_pt[0])
+        max_pt[1] = max(point[1], max_pt[1])
     return max_pt
 
 
