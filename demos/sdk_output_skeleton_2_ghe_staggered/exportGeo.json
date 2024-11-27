@@ -1,0 +1,430 @@
+{
+  "type": "FeatureCollection",
+  "project": {
+    "id": "7c33a001-bccb-413e-ac87-67558b5d4b07",
+    "name": "New Project",
+    "surface_elevation": null,
+    "import_surrounding_buildings_as_shading": null,
+    "weather_filename": "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
+    "tariff_filename": null,
+    "climate_zone": "6A",
+    "cec_climate_zone": null,
+    "begin_date": "2017-01-01T07:00:00.000Z",
+    "end_date": "2017-12-31T07:00:00.000Z",
+    "timesteps_per_hour": 1,
+    "default_template": "90.1-2013",
+    "only_lv_customers": null,
+    "underground_cables_ratio": null,
+    "max_number_of_lv_nodes_per_building": null,
+    "siteColor": "#fcec83",
+    "buildingColor": "#117733",
+    "districtSystemColor": "#0072B2",
+    "thJunctionColor": "#af002c",
+    "thConnectorColor": "#f42156",
+    "eJunctionColor": "#11c4c4",
+    "eConnectorColor": "#03f1e8"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "53340c2c-ab20-40db-aba1-11ac607c52a7",
+        "name": "Site Origin",
+        "type": "Site Origin",
+        "begin_date": "2017-01-01T07:00:00.000Z",
+        "end_date": "2017-12-31T07:00:00.000Z",
+        "cec_climate_zone": null,
+        "climate_zone": "6A",
+        "default_template": "90.1-2013",
+        "import_surrounding_buildings_as_shading": null,
+        "surface_elevation": null,
+        "tariff_filename": null,
+        "timesteps_per_hour": 1,
+        "weather_filename": "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
+        "only_lv_customers": null,
+        "underground_cables_ratio": null,
+        "max_number_of_lv_nodes_per_building": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-78.84948467732347, 42.81677154451123]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "8",
+        "name": "Hospital 1",
+        "type": "Building",
+        "building_type": "Outpatient health care",
+        "system_type": "VAV district chilled water with district hot water reheat",
+        "number_of_stories": 10,
+        "detailed_model_filename": "8.osm"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-78.84973966335251, 42.8154441454509],
+            [-78.85049562542395, 42.81525669280299],
+            [-78.85078257620685, 42.81588131780643],
+            [-78.8505086568277, 42.81594736368234],
+            [-78.85041233812638, 42.815732413845666],
+            [-78.84991755499783, 42.81585689105046],
+            [-78.84973966335251, 42.8154441454509]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "9",
+        "name": "Hospital 2",
+        "type": "Building",
+        "building_type": "Inpatient health care",
+        "number_of_stories": 3,
+        "detailed_model_filename": "9.osm"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-78.85083627755732, 42.81600678613279],
+            [-78.85056039001891, 42.816076133580566],
+            [-78.85072568130569, 42.816450649528036],
+            [-78.84940134236577, 42.81677160705479],
+            [-78.84958014898304, 42.81716858994267],
+            [-78.8507262115271, 42.816890840117026],
+            [-78.8508565789851, 42.81719595796099],
+            [-78.85132137101688, 42.81708331517635],
+            [-78.85083627755732, 42.81600678613279]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "10",
+        "name": "Mixed use 2",
+        "type": "Building",
+        "building_type": "Mixed use",
+        "floor_area": 1278384,
+        "footprint_area": 159798,
+        "number_of_stories": 8,
+        "mixed_type_1": "Strip shopping mall",
+        "mixed_type_1_percentage": 25,
+        "mixed_type_2": "Food service",
+        "mixed_type_2_percentage": 25,
+        "mixed_type_3": "Office",
+        "mixed_type_3_percentage": 15,
+        "mixed_type_4": "Lodging",
+        "mixed_type_4_percentage": 35
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-78.85115264550463, 42.81786093060211],
+            [-78.85163483958878, 42.81774467026972],
+            [-78.85246596719499, 42.819583261120755],
+            [-78.85082390085432, 42.819979162017745],
+            [-78.85060552295334, 42.81947573727234],
+            [-78.85174564783776, 42.81920483484765],
+            [-78.85115264550463, 42.81786093060211]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "dd69549c-ecfc-4245-96dc-5b6127f34f46",
+        "geometryType": "Rectangle",
+        "name": "New District System_1",
+        "type": "District System",
+        "district_system_type": "Ground Heat Exchanger",
+        "footprint_area": 128302,
+        "footprint_perimeter": 1455,
+        "floor_area": 128302
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-78.85403977359493, 42.81807386711816],
+            [-78.8535331235525, 42.81695894709998],
+            [-78.85247458344057, 42.81721776905695],
+            [-78.852981233483, 42.81833268440852],
+            [-78.85403977359493, 42.81807386711816]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "47fd01d3-3d72-46c0-85f2-a12854783764",
+        "geometryType": "Rectangle",
+        "name": "New District System_2",
+        "type": "District System",
+        "district_system_type": "Ground Heat Exchanger",
+        "footprint_area": 104693,
+        "footprint_perimeter": 1332,
+        "floor_area": 104693
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-78.85273990319104, 42.81588851783172],
+            [-78.85224049713851, 42.81481606407624],
+            [-78.85134704694869, 42.81503993895839],
+            [-78.85184645300123, 42.81611238883147],
+            [-78.85273990319104, 42.81588851783172]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "a115e9cc-7fad-4c23-b985-681fc79cdb34",
+        "type": "ThermalJunction",
+        "DSId": "47fd01d3-3d72-46c0-85f2-a12854783764",
+        "is_ghe_start_loop": "true"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-78.85150024809045, 42.815368932833884]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "e886d230-1a9c-4f83-851d-8cdd346cf14a",
+        "type": "ThermalJunction",
+        "buildingId": "8"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-78.85064241581746, 42.81557622208012]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "type": "ThermalConnector",
+        "id": "f15d2804-f324-4a75-8d45-d17bc5638d61",
+        "startJunctionId": "a115e9cc-7fad-4c23-b985-681fc79cdb34",
+        "endJunctionId": "e886d230-1a9c-4f83-851d-8cdd346cf14a",
+        "startFeatureId": "47fd01d3-3d72-46c0-85f2-a12854783764",
+        "endFeatureId": "8",
+        "total_length": 242,
+        "connector_type": "OnePipe",
+        "fluid_temperature_type": "Ambient",
+        "flow_direction": "Supply"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-78.85150024809045, 42.815368932833884],
+          [-78.85064241581746, 42.81557622208012]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "cdbc7a87-e9ec-450d-9f0e-b8434debec2c",
+        "type": "ThermalJunction",
+        "buildingId": "8"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-78.85063288452245, 42.81591741061899]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "c64a6937-6cbd-40e7-a6b4-8f36d3072631",
+        "type": "ThermalJunction",
+        "buildingId": "9"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-78.85068715612303, 42.81604426949865]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "type": "ThermalConnector",
+        "id": "4d7c9d15-4cd8-4a6a-8350-15693963086f",
+        "startJunctionId": "cdbc7a87-e9ec-450d-9f0e-b8434debec2c",
+        "endJunctionId": "c64a6937-6cbd-40e7-a6b4-8f36d3072631",
+        "startFeatureId": "8",
+        "endFeatureId": "9",
+        "total_length": 49,
+        "connector_type": "OnePipe",
+        "fluid_temperature_type": "Ambient",
+        "flow_direction": "Supply"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-78.85063288452245, 42.81591741061899],
+          [-78.85068715612303, 42.81604426949865]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "b8c912d8-ae9d-4a9b-b6e4-7bb8293c89f2",
+        "type": "ThermalJunction",
+        "buildingId": "9"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-78.85132137101688, 42.81708331517632]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "1135ddf6-1885-46f6-9966-3f4f0d8c6451",
+        "type": "ThermalJunction",
+        "DSId": "dd69549c-ecfc-4245-96dc-5b6127f34f46"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-78.85247458344057, 42.81721776905694]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "type": "ThermalConnector",
+        "id": "af2d63f3-1567-419a-a166-0f9cc788a680",
+        "startJunctionId": "b8c912d8-ae9d-4a9b-b6e4-7bb8293c89f2",
+        "endJunctionId": "1135ddf6-1885-46f6-9966-3f4f0d8c6451",
+        "startFeatureId": "9",
+        "endFeatureId": "dd69549c-ecfc-4245-96dc-5b6127f34f46",
+        "total_length": 312,
+        "connector_type": "OnePipe",
+        "fluid_temperature_type": "Ambient",
+        "flow_direction": "Supply"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-78.85132137101688, 42.81708331517632],
+          [-78.85247458344057, 42.81721776905694]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "28946ad9-acc0-4b1f-9a22-4ea6270b3fd6",
+        "type": "ThermalJunction",
+        "DSId": "dd69549c-ecfc-4245-96dc-5b6127f34f46"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-78.85298123348304, 42.818332684408524]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "7d26d3a0-fa46-47cd-bd9c-7008764c12f8",
+        "type": "ThermalJunction",
+        "buildingId": "10"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-78.85198706088161, 42.81852384832783]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "type": "ThermalConnector",
+        "id": "7eb6261a-6240-447b-89bb-36953b974261",
+        "startJunctionId": "28946ad9-acc0-4b1f-9a22-4ea6270b3fd6",
+        "endJunctionId": "7d26d3a0-fa46-47cd-bd9c-7008764c12f8",
+        "startFeatureId": "dd69549c-ecfc-4245-96dc-5b6127f34f46",
+        "endFeatureId": "10",
+        "total_length": 275,
+        "connector_type": "OnePipe",
+        "fluid_temperature_type": "Ambient",
+        "flow_direction": "Supply"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-78.85298123348304, 42.818332684408524],
+          [-78.85198706088161, 42.81852384832783]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "75e4863c-3a73-4792-87af-7353fa0de9fd",
+        "type": "ThermalJunction",
+        "buildingId": "10"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-78.85163483958878, 42.817744670269704]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "2e95a00f-87ad-40f5-b772-3b4d67294045",
+        "type": "ThermalJunction",
+        "DSId": "47fd01d3-3d72-46c0-85f2-a12854783764"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-78.85184645300123, 42.81611238883149]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "type": "ThermalConnector",
+        "id": "eb5952f0-be79-41af-a318-8313b4b04fa1",
+        "startJunctionId": "75e4863c-3a73-4792-87af-7353fa0de9fd",
+        "endJunctionId": "2e95a00f-87ad-40f5-b772-3b4d67294045",
+        "startFeatureId": "10",
+        "endFeatureId": "47fd01d3-3d72-46c0-85f2-a12854783764",
+        "total_length": 598,
+        "connector_type": "OnePipe",
+        "fluid_temperature_type": "Ambient",
+        "flow_direction": "Supply"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-78.85163483958878, 42.817744670269704],
+          [-78.85184645300123, 42.81611238883149]
+        ]
+      }
+    }
+  ],
+  "mappers": [],
+  "scenarios": [
+    {
+      "id": "b08a0f21-3ac9-4920-a98c-6b7043ff308c",
+      "name": "New Scenario",
+      "feature_mappings": []
+    }
+  ]
+}
