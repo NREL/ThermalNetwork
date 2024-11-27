@@ -39,6 +39,18 @@ class BaseCase(TestCase):
             self.scenario_directory_path_2_ghe / "ghe_dir" / "sys_params.json"
         ).resolve()
 
+        self.geojson_file_path_2_ghe_staggered = (
+            self.demos_path / "sdk_output_skeleton_2_ghe_staggered" / "exportGeo.json"
+        ).resolve()
+
+        self.scenario_directory_path_2_ghe_staggered = (
+            self.demos_path / "sdk_output_skeleton_2_ghe_staggered" / "run" / "baseline_scenario"
+        ).resolve()
+
+        self.system_parameter_path_2_ghe_staggered = (
+            self.scenario_directory_path_2_ghe_staggered / "ghe_dir" / "sys_params.json"
+        ).resolve()
+
         self.geojson_file_path_13_buildings = (
             self.demos_path / "sdk_output_skeleton_13_buildings" / "exportGeo.json"
         ).resolve()

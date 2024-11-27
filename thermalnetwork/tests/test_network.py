@@ -126,6 +126,55 @@ class TestNetwork(BaseCase):
             # Restore the trailing newline
             sys_param_file.write("\n")
 
+    def test_network_ghe_staggered(self):
+        # -- Set up
+        output_path = self.test_outputs_path / "upstream_ghe"
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        # -- Run
+        run_sizer_from_cli_worker(
+            self.system_parameter_path_2_ghe_staggered,
+            self.scenario_directory_path_2_ghe_staggered,
+            self.geojson_file_path_2_ghe_staggered,
+            output_path,
+        )
+
+        # -- Check
+        expected_depth_of_boreholes = pytest.approx(133, 2)
+        # Check that the borehole length is correct.
+        # FIXME: 135 is the max borehole length for a GHE (as set in the sys-params file).
+        # This implies the borefield size is too small.
+        # Borefield dimensions are set in the geojson file and transferred to the sys-params file by the GMT.
+        for ghe_id in output_path.iterdir():
+            if ghe_id.is_dir():
+                sim_summary = json.loads((ghe_id / "SimulationSummary.json").read_text())
+
+                assert sim_summary["ghe_system"]["active_borehole_length"]["value"] == expected_depth_of_boreholes
+
+        # Read sys-param file
+        sys_param_ghe = json.loads(self.system_parameter_path_2_ghe_staggered.read_text())
+        upstream_ghe_specific_params = sys_param_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
+            "ghe_specific_params"
+        ]
+        # Read loop order file
+        loop_order_path = self.system_parameter_path_2_ghe_staggered.parent / "_loop_order.json"
+        loop_order = json.loads(loop_order_path.read_text())
+
+        # Check that all GHEs in the loop order file are present in the sys-params file.
+        ghe_list = [ghe["ghe_id"] for ghe in upstream_ghe_specific_params]
+        for ghe in loop_order:
+            assert ghe["list_ghe_ids_in_group"][0] in ghe_list
+
+        # -- Clean up
+        # Restore the original borehole length and number of boreholes.
+        for ghe in upstream_ghe_specific_params:
+            ghe["borehole"]["length_of_boreholes"] = self.original_borehole_length
+            ghe["borehole"]["number_of_boreholes"] = self.original_num_boreholes
+        with open(self.system_parameter_path_2_ghe_staggered, "w") as sys_param_file:
+            json.dump(sys_param_ghe, sys_param_file, indent=2)
+            # Restore the trailing newline
+            sys_param_file.write("\n")
+
     def test_network_ghe_proportional(self):
         # -- Set up
         output_path = self.test_outputs_path / "proportional_ghe"
