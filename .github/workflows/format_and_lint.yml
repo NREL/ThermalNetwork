@@ -1,13 +1,13 @@
 name: Format & Lint
 
-on: [ push ]
+on: [push]
 
 jobs:
   ruff:
     strategy:
       matrix:
-        python-version: ['3.9', '3.12']
-        os: ['ubuntu-latest', 'windows-latest']
+        python-version: ["3.9", "3.13"]
+        os: ["ubuntu-latest", "windows-latest"]
 
     runs-on: ${{ matrix.os }}
     steps:
