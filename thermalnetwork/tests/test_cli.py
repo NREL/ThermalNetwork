@@ -3,7 +3,6 @@ from thermalnetwork.tests.test_base import BaseCase
 
 
 class TestCLI(BaseCase):
-
     def test_cli(self):
         output_path = self.test_outputs_path.resolve() / "cli_test"
 
@@ -28,7 +27,7 @@ class TestCLI(BaseCase):
 
         # If this file exists, the cli command ran successfully
         assert (
-                self.test_outputs_path / "cli_test" / "8c369df2-18e9-439a-8c25-875851c5aaf0" / "SimulationSummary.json"
+            self.test_outputs_path / "cli_test" / "8c369df2-18e9-439a-8c25-875851c5aaf0" / "SimulationSummary.json"
         ).exists()
 
         expected_outputs = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 75, "depth": 106.6}}
