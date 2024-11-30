@@ -53,8 +53,8 @@ class TestNetwork(BaseCase):
         )
 
         expected_outputs = {
-            "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 23, "depth": 130.1},
-            "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 23, "depth": 130.1},
+            "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 25, "depth": 131.5},
+            "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 20, "depth": 133.7},
         }
 
         self.check_outputs(output_path, expected_outputs)
@@ -96,8 +96,8 @@ class TestNetwork(BaseCase):
 
         expected_outputs = {
             "344421ab-b416-403e-bd22-7b8af7b581a2": {"num_bh": 2380, "depth": 135.0},
-            "8410c9a9-d52e-4c68-b7bc-4affae974481": {"num_bh": 108, "depth": 126.5},
-            "3eb26af6-a1f7-4daa-8372-ec016ca185a4": {"num_bh": 2380, "depth": 135},
+            "8410c9a9-d52e-4c68-b7bc-4affae974481": {"num_bh": 144, "depth": 111.0},
+            "3eb26af6-a1f7-4daa-8372-ec016ca185a4": {"num_bh": 2451, "depth": 135.0},
         }
 
         self.check_outputs(output_path, expected_outputs)
@@ -117,9 +117,9 @@ class TestNetwork(BaseCase):
         )
 
         expected_outputs = {
-            "344421ab-b416-403e-bd22-7b8af7b581a2": {"num_bh": 1984, "depth": 132.1},
-            "8410c9a9-d52e-4c68-b7bc-4affae974481": {"num_bh": 1984, "depth": 132.1},
-            "3eb26af6-a1f7-4daa-8372-ec016ca185a4": {"num_bh": 1984, "depth": 132.1},
+            "344421ab-b416-403e-bd22-7b8af7b581a2": {"num_bh": 2380, "depth": 135.0},
+            "8410c9a9-d52e-4c68-b7bc-4affae974481": {"num_bh": 2475, "depth": 135.0},
+            "3eb26af6-a1f7-4daa-8372-ec016ca185a4": {"num_bh": 1530, "depth": 134.1},
         }
 
         self.check_outputs(output_path, expected_outputs)

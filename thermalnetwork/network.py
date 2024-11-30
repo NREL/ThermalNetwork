@@ -1,5 +1,6 @@
 import json
 import logging
+from copy import deepcopy
 from importlib.metadata import version
 from pathlib import Path
 from sys import exit
@@ -215,7 +216,7 @@ class Network:
                 }
             elif feature["type"] == "District System" and feature["district_system_type"] == "Ground Heat Exchanger":
                 feature_type = "GROUNDHEATEXCHANGER"
-                geometric_constraints = self.ghe_parameters["geometric_constraints"]
+                geometric_constraints = deepcopy(self.ghe_parameters["geometric_constraints"])
                 # get ghe parameters for 'ghe_specific_params' key of system_parameters.json
                 matching_ghe = self.find_matching_ghe_id(feature["id"])
                 logger.debug(f"matching_ghe: {matching_ghe}\n")

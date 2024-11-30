@@ -96,11 +96,15 @@ class BaseCase(TestCase):
         sys_param = json.loads(sys_param_path.read_text())
         ghe_specific_params = sys_param["district_system"]["fifth_generation"]["ghe_parameters"]["ghe_specific_params"]
 
-        for ghe in ghe_specific_params:
-            ghe["borehole"]["length_of_boreholes"] = self.original_borehole_length
-            ghe["borehole"]["number_of_boreholes"] = self.original_num_boreholes
+        for idx, _ in enumerate(ghe_specific_params):
+            sys_param["district_system"]["fifth_generation"]["ghe_parameters"]["ghe_specific_params"][idx]["borehole"][
+                "length_of_boreholes"
+            ] = self.original_borehole_length
+            sys_param["district_system"]["fifth_generation"]["ghe_parameters"]["ghe_specific_params"][idx]["borehole"][
+                "number_of_boreholes"
+            ] = self.original_num_boreholes
 
-        with open(self.system_parameter_path_1_ghe, "w") as f:
+        with open(sys_param_path, "w") as f:
             json.dump(sys_param, f, indent=2)
             # Restore the trailing newline
             f.write("\n")
