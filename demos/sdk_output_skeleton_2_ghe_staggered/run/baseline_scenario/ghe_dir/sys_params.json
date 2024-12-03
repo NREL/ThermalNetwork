@@ -5,14 +5,14 @@
       "load_model": "time_series",
       "load_model_parameters": {
         "time_series": {
-          "filepath": "C:\\urbanopt-cli\\ghe\\run\\baseline_scenario\\8\\021_export_modelica_loads\\modelica.mos",
+          "filepath": "/Users/nmoore/github/ThermalNetwork/demos/sdk_output_skeleton_2_ghe_staggered/run/baseline_scenario/8/021_export_modelica_loads/modelica.mos",
           "delta_temp_air_cooling": 10,
           "delta_temp_air_heating": 18,
           "has_liquid_cooling": true,
           "has_liquid_heating": true,
           "has_electric_cooling": false,
           "has_electric_heating": false,
-          "max_electrical_load": 7864980000,
+          "max_electrical_load": 1212000000,
           "temp_chw_return": 12,
           "temp_chw_supply": 7,
           "temp_hw_return": 35,
@@ -21,7 +21,7 @@
           "temp_setpoint_heating": 20
         }
       },
-     "ets_model": "Fifth Gen Heat Pump",
+      "ets_model": "Fifth Gen Heat Pump",
       "fifth_gen_ets_parameters": {
         "supply_water_temperature_building": 15,
         "chilled_water_supply_temp": 5,
@@ -42,14 +42,14 @@
       "load_model": "time_series",
       "load_model_parameters": {
         "time_series": {
-          "filepath": "C:\\urbanopt-cli\\ghe\\run\\baseline_scenario\\9\\021_export_modelica_loads\\modelica.mos",
+          "filepath": "/Users/nmoore/github/ThermalNetwork/demos/sdk_output_skeleton_2_ghe_staggered/run/baseline_scenario/9/021_export_modelica_loads/modelica.mos",
           "delta_temp_air_cooling": 10,
           "delta_temp_air_heating": 18,
           "has_liquid_cooling": true,
           "has_liquid_heating": true,
           "has_electric_cooling": false,
           "has_electric_heating": false,
-          "max_electrical_load": 4968750000,
+          "max_electrical_load": 43828400,
           "temp_chw_return": 12,
           "temp_chw_supply": 7,
           "temp_hw_return": 35,
@@ -58,7 +58,7 @@
           "temp_setpoint_heating": 20
         }
       },
-     "ets_model": "Fifth Gen Heat Pump",
+      "ets_model": "Fifth Gen Heat Pump",
       "fifth_gen_ets_parameters": {
         "supply_water_temperature_building": 15,
         "chilled_water_supply_temp": 5,
@@ -77,28 +77,24 @@
   ],
   "district_system": {
     "fifth_generation": {
-      "soil": {
-        "conductivity": 2.0,
-        "rho_cp": 2343493,
-        "undisturbed_temp": 18.3
-      },
       "horizontal_piping_parameters": {
         "hydraulic_diameter": 0.089,
         "insulation_thickness": 0.2,
         "insulation_conductivity": 2.3,
         "diameter_ratio": 11,
-        "roughness": 1e-06,
+        "roughness": 1e-6,
         "rho_cp": 2139000,
         "number_of_segments": 1,
         "buried_depth": 1.5
       },
-      "central_pump_parameters": {
-        "pump_design_head": 60000,
-        "pump_flow_rate": 0.01
+      "soil": {
+        "conductivity": 2.0,
+        "rho_cp": 2343493,
+        "undisturbed_temp": 18.3
       },
       "ghe_parameters": {
-        "version": "0.2.5",
-        "ghe_dir": "ghe\\run\\baseline_scenario\\ghe_dir",
+        "version": "0.3.0",
+        "ghe_dir": "/Users/nmoore/github/ThermalNetwork/demos/sdk_output_skeleton_2_ghe_staggered/run/baseline_scenario/ghe_dir",
         "fluid": {
           "fluid_name": "Water",
           "concentration_percent": 0.0,
@@ -112,7 +108,7 @@
           "inner_diameter": 0.0216,
           "outer_diameter": 0.0266,
           "shank_spacing": 0.0323,
-          "roughness": 1e-06,
+          "roughness": 1e-6,
           "conductivity": 0.4,
           "rho_cp": 1542000,
           "arrangement": "singleutube"
@@ -128,7 +124,7 @@
           "method": "rectangle"
         },
         "design": {
-          "method": "AREAPROPORTIONAL",
+          "method": "UPSTREAM",
           "flow_rate": 0.2,
           "flow_type": "borehole",
           "max_eft": 35.0,
@@ -136,7 +132,7 @@
         },
         "ghe_specific_params": [
           {
-            "ghe_id": "eace1290-86fc-48fb-adb4-7f606883d170",
+            "ghe_id": "dd69549c-ecfc-4245-96dc-5b6127f34f46",
             "ghe_geometric_params": {
               "length_of_ghe": 205.03526485623328,
               "width_of_ghe": 162.46473514376672
@@ -149,7 +145,7 @@
             }
           },
           {
-            "ghe_id": "32497483-d8d2-4016-bd0d-9277db34a542",
+            "ghe_id": "47fd01d3-3d72-46c0-85f2-a12854783764",
             "ghe_geometric_params": {
               "length_of_ghe": 203.27050983124843,
               "width_of_ghe": 169.72949016875157
@@ -162,8 +158,22 @@
             }
           }
         ]
+      },
+      "central_pump_parameters": {
+        "pump_design_head": 200000,
+        "pump_flow_rate": 0.01
       }
     }
   },
-  "weather": "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.mos"
+  "weather": "/Users/nmoore/github/ThermalNetwork/demos/sdk_output_skeleton_2_ghe_staggered/run/baseline_scenario/ghe_dir/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.mos",
+  "electrical_grid": {},
+  "photovoltaic_panels": [],
+  "wind_turbines": [],
+  "combined_heat_and_power_systems": [],
+  "capacitor_banks": [],
+  "substations": [],
+  "transformers": [],
+  "power_converters": [],
+  "distribution_lines": [],
+  "battery_banks": []
 }

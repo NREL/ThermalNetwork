@@ -65,6 +65,7 @@ ignore = [
     # "S607",    # start-process-with-partial-path
     # "S701",    # jinja2-autoescape-false
     "SIM108",  # if-else-block-instead-of-if-exp
+    "PT009",   # pytest-unittest-assertion
 ]
 
 [lint.pylint]

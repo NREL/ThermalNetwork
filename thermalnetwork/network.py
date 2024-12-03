@@ -1,5 +1,6 @@
 import json
 import logging
+from copy import deepcopy
 from importlib.metadata import version
 from pathlib import Path
 from sys import exit
@@ -13,9 +14,13 @@ from thermalnetwork.base_component import BaseComponent
 from thermalnetwork.energy_transfer_station import ETS
 from thermalnetwork.enums import ComponentType, DesignType
 from thermalnetwork.ground_heat_exchanger import GHE
+from thermalnetwork.projection import (
+    lon_lat_to_polygon,
+    lower_left_point,
+    meters_to_long_lat_factors,
+    upper_right_point,
+)
 from thermalnetwork.pump import Pump
-from thermalnetwork.projection import lower_left_point, upper_right_point, \
-    meters_to_long_lat_factors, lon_lat_to_polygon
 
 logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger(__name__)
@@ -211,7 +216,7 @@ class Network:
                 }
             elif feature["type"] == "District System" and feature["district_system_type"] == "Ground Heat Exchanger":
                 feature_type = "GROUNDHEATEXCHANGER"
-                geometric_constraints = self.ghe_parameters["geometric_constraints"]
+                geometric_constraints = deepcopy(self.ghe_parameters["geometric_constraints"])
                 # get ghe parameters for 'ghe_specific_params' key of system_parameters.json
                 matching_ghe = self.find_matching_ghe_id(feature["id"])
                 logger.debug(f"matching_ghe: {matching_ghe}\n")
@@ -670,15 +675,17 @@ class Network:
         # Load the existing system parameters
         sys_params: dict = json.loads(system_parameter_path.read_text())
         ghe_params: list = sys_params["district_system"]["fifth_generation"]["ghe_parameters"]["ghe_specific_params"]
-        for ghe_id in output_directory_path.iterdir():
-            # each ghe_id is a directory
-            if not ghe_id.is_dir():
-                continue
-            summary_data_path = ghe_id / "SimulationSummary.json"
+        for ghe in ghe_params:
+            ghe_id = ghe["ghe_id"]
+            summary_data_path = output_directory_path / ghe_id / "SimulationSummary.json"
+
+            if not summary_data_path.exists():
+                logger.error(f"Error sizing GHE: {ghe_id}")
+
             # Get the new data from the GHEDesigner output
             ghe_data: dict = json.loads(summary_data_path.read_text())["ghe_system"]
             for ghe_sys_params in ghe_params:
-                if ghe_sys_params["ghe_id"] == ghe_id.stem:
+                if ghe_sys_params["ghe_id"] == ghe_id:
                     # Update system parameters dict with the new values
                     ghe_sys_params["borehole"]["length_of_boreholes"] = ghe_data["active_borehole_length"]["value"]
                     ghe_sys_params["borehole"]["number_of_boreholes"] = ghe_data["number_of_boreholes"]
@@ -731,6 +738,12 @@ def run_sizer_from_cli_worker(
         for feature in geojson_data["features"]
         if feature["properties"]["type"] == "Building" and feature["properties"]["id"] in building_id_list
     ]
+
+    if len(building_features) == 0:
+        logger.error(
+            'No buildings found. Ensure the GeoJSON "Feature" "id" keys match the system \n'
+            'parameter file "geojson_id" key values for the respective buildings.'
+        )
 
     # Rebuild the geojson data using only the buildings in the system parameters file
     # Put in everything that isn't a building
