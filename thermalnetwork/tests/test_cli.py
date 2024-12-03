@@ -26,9 +26,7 @@ class TestCLI(BaseCase):
         assert res.exit_code == 0
 
         # If this file exists, the cli command ran successfully
-        assert (
-            self.test_outputs_path / "cli_test" / "8c369df2-18e9-439a-8c25-875851c5aaf0" / "SimulationSummary.json"
-        ).exists()
+        assert (output_path / "8c369df2-18e9-439a-8c25-875851c5aaf0" / "SimulationSummary.json").exists()
 
         expected_outputs = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 75, "depth": 106.6}}
 
