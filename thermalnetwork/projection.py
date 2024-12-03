@@ -1,4 +1,5 @@
 """Utilities for converting (longitude, latitude) to (X, Y) coordinates in meters."""
+
 import math
 
 
@@ -24,9 +25,7 @@ def meters_to_long_lat_factors(origin_lon_lat=(0, 0)):
     lat = math.radians(origin_lon_lat[1])
 
     # compute the conversion values
-    d = math.sqrt(
-        (equator_rad ** 2 * math.sin(lat) ** 2) + (pole_rad ** 2 * math.cos(lat) ** 2)
-    )
+    d = math.sqrt((equator_rad**2 * math.sin(lat) ** 2) + (pole_rad**2 * math.cos(lat) ** 2))
     r = (equator_rad * pole_rad) / d  # radius of the earth at the latitude
     meters_to_lat = (math.pi * r * 2) / 360.0  # meters in one degree of latitude
     meters_to_lon = meters_to_lat * math.cos(lat)  # meters in one degree of longitude
@@ -34,8 +33,7 @@ def meters_to_long_lat_factors(origin_lon_lat=(0, 0)):
     return meters_to_lon, meters_to_lat
 
 
-def lon_lat_to_polygon(polygon_lon_lat_coords, origin_lon_lat=None,
-                       conversion_factors=None):
+def lon_lat_to_polygon(polygon_lon_lat_coords, origin_lon_lat=None, conversion_factors=None):
     """
     Convert an array of (longitude, latitude) to (X, Y) coordinates in meters.
 
@@ -70,9 +68,10 @@ def lon_lat_to_polygon(polygon_lon_lat_coords, origin_lon_lat=None,
     lon_to_meters, lat_to_meters = 1.0 / meters_to_lon, 1.0 / meters_to_lat
 
     # Get the (X, Y) values for the polygon in meters
-    return [((pt[0] - origin_lon_lat[0]) / lon_to_meters,
-             (pt[1] - origin_lon_lat[1]) / lat_to_meters)
-            for pt in polygon_lon_lat_coords]
+    return [
+        ((pt[0] - origin_lon_lat[0]) / lon_to_meters, (pt[1] - origin_lon_lat[1]) / lat_to_meters)
+        for pt in polygon_lon_lat_coords
+    ]
 
 
 def polygon_to_lon_lat(polygon, origin_lon_lat=(0, 0), conversion_factors=None):
@@ -103,8 +102,7 @@ def polygon_to_lon_lat(polygon, origin_lon_lat=(0, 0), conversion_factors=None):
         meters_to_lon, meters_to_lat = conversion_factors
 
     # get the longitude, latitude values for the polygon
-    return [(origin_lon_lat[0] + pt[0] / meters_to_lon,
-             origin_lon_lat[1] + pt[1] / meters_to_lat) for pt in polygon]
+    return [(origin_lon_lat[0] + pt[0] / meters_to_lon, origin_lon_lat[1] + pt[1] / meters_to_lat) for pt in polygon]
 
 
 def lower_left_point(polygon):
@@ -116,10 +114,8 @@ def lower_left_point(polygon):
     """
     min_pt = [polygon[0][0], polygon[0][1]]
     for point in polygon[1:]:
-        if point[0] < min_pt[0]:
-            min_pt[0] = point[0]
-        if point[1] < min_pt[1]:
-            min_pt[1] = point[1]
+        min_pt[0] = min(point[0], min_pt[0])
+        min_pt[1] = min(point[1], min_pt[1])
     return min_pt
 
 
@@ -132,10 +128,8 @@ def upper_right_point(polygon):
     """
     max_pt = [polygon[0][0], polygon[0][1]]
     for point in polygon[1:]:
-        if point[0] > max_pt[0]:
-            max_pt[0] = point[0]
-        if point[1] > max_pt[1]:
-            max_pt[1] = point[1]
+        max_pt[0] = max(point[0], max_pt[0])
+        max_pt[1] = max(point[1], max_pt[1])
     return max_pt
 
 
