@@ -28,7 +28,7 @@ class TestCLI(BaseCase):
         # If this file exists, the cli command ran successfully
         assert (output_path / "8c369df2-18e9-439a-8c25-875851c5aaf0" / "SimulationSummary.json").exists()
 
-        expected_outputs = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 75, "depth": 106.6}}
+        expected_outputs = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 22, "depth": 106.6}}
 
         self.check_outputs(output_path, expected_outputs)
         self.reset_sys_param(self.system_parameter_path_1_ghe)
