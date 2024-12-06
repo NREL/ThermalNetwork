@@ -16,9 +16,12 @@ from thermalnetwork.enums import ComponentType, DesignType
 from thermalnetwork.ground_heat_exchanger import GHE
 from thermalnetwork.projection import (
     lon_lat_to_polygon,
-    lower_left_point,
     meters_to_long_lat_factors,
+)
+from thermalnetwork.geometry import (
+    lower_left_point,
     upper_right_point,
+    rotate_polygon_to_axes
 )
 from thermalnetwork.pump import Pump
 
@@ -229,6 +232,7 @@ class Network:
                     for poly in lat_long_polys:
                         coords = lon_lat_to_polygon(poly, origin_lon_lat, convert_facs)
                         ghe_polygons.append(coords)
+                    ghe_polygons = rotate_polygon_to_axes(ghe_polygons)
                     # set geometric constraints to be dictated by the polygons
                     geometric_constraints["polygons"] = ghe_polygons
                     min_pt = lower_left_point(ghe_polygons[0])
