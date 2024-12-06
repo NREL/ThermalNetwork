@@ -1,7 +1,6 @@
 name: Python Testing
 
-# https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#pull_request
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   pytest:
