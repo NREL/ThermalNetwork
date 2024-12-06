@@ -1,5 +1,7 @@
 """Utilities for converting (longitude, latitude) to (X, Y) coordinates in meters."""
+
 import math
+
 from thermalnetwork.geometry import lower_left_point
 
 

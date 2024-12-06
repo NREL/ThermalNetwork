@@ -13,15 +13,11 @@ from rich.logging import RichHandler
 from thermalnetwork.base_component import BaseComponent
 from thermalnetwork.energy_transfer_station import ETS
 from thermalnetwork.enums import ComponentType, DesignType
+from thermalnetwork.geometry import lower_left_point, rotate_polygon_to_axes, upper_right_point
 from thermalnetwork.ground_heat_exchanger import GHE
 from thermalnetwork.projection import (
     lon_lat_to_polygon,
     meters_to_long_lat_factors,
-)
-from thermalnetwork.geometry import (
-    lower_left_point,
-    upper_right_point,
-    rotate_polygon_to_axes
 )
 from thermalnetwork.pump import Pump
 

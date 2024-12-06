@@ -1,4 +1,5 @@
 """Utilities for performing geometric operations on polygons."""
+
 import math
 
 
@@ -51,6 +52,7 @@ def vector_angle(vector_1, vector_2):
     :param vector_2: (X, Y) values for the second vector.
     :return angle: The angle between the input vectors in degrees.
     """
+
     def magnitude(vec):
         return math.sqrt(vec[0] ** 2 + vec[1] ** 2)
 
@@ -76,6 +78,7 @@ def vector_angle_counterclockwise(vector_1, vector_2):
     :param vector_2: (X, Y) values for the second vector.
     :return angle: The counterclockwise angle between the input vectors in degrees.
     """
+
     def determinant(v1, v2):
         return v1[0] * v2[1] - v1[1] * v2[0]
 
@@ -113,6 +116,7 @@ def rotate_polygon_to_axes(polygon):
     :return rotated_polygon: The input polygon that has been rotated to align
         with XY axes.
     """
+
     def distance_to_point(pt1, pt2):
         vec = (pt1[0] - pt2[0], pt1[1] - pt2[1])
         return math.sqrt(vec[0] ** 2 + vec[1] ** 2)
@@ -129,7 +133,8 @@ def rotate_polygon_to_axes(polygon):
     for i, point in enumerate(bound_poly):
         dist = distance_to_point(min_pt, point)
         pt_dists.append((dist, i))
-    origin_i = [x for _, x in sorted(pt_dists, key=lambda pair: pair[0])][0]
+    sorted_i = [x for _, x in sorted(pt_dists, key=lambda pair: pair[0])]
+    origin_i = sorted_i[0]
     origin = bound_poly[origin_i]
     prev_pt = bound_poly[origin_i - 1]
     next_pt = bound_poly[origin_i + 1] if origin_i < len(bound_poly) - 1 else bound_poly[0]
