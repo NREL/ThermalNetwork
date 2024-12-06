@@ -1,14 +1,13 @@
 name: Python Testing
 
-on: [ push ]
+on: [pull_request]
 
 jobs:
   pytest:
-
     strategy:
       matrix:
-        python-version: ['3.9', '3.12']
-        os: ['ubuntu-latest', 'windows-latest']
+        python-version: ["3.9", "3.12"]
+        os: ["ubuntu-latest", "windows-latest"]
 
     runs-on: ${{ matrix.os}}
     steps:
