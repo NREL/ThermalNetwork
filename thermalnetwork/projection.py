@@ -1,6 +1,6 @@
 """Utilities for converting (longitude, latitude) to (X, Y) coordinates in meters."""
 import math
-from .geometry import lower_left_point
+from thermalnetwork.geometry import lower_left_point
 
 
 def meters_to_long_lat_factors(origin_lon_lat=(0, 0)):
