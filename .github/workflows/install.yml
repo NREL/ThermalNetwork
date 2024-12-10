@@ -1,14 +1,18 @@
 name: Test Install
 
-on: [ push ]
+# https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows
+on:
+  pull_request:
+  push:
+    branches:
+      - "main"
 
 jobs:
   install:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '3.10' ]
+        python-version: ["3.10"]
 
     steps:
       - uses: actions/checkout@v4
