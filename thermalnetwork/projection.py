@@ -2,6 +2,8 @@
 
 import math
 
+from thermalnetwork.geometry import lower_left_point
+
 
 def meters_to_long_lat_factors(origin_lon_lat=(0, 0)):
     """
@@ -103,44 +105,3 @@ def polygon_to_lon_lat(polygon, origin_lon_lat=(0, 0), conversion_factors=None):
 
     # get the longitude, latitude values for the polygon
     return [(origin_lon_lat[0] + pt[0] / meters_to_lon, origin_lon_lat[1] + pt[1] / meters_to_lat) for pt in polygon]
-
-
-def lower_left_point(polygon):
-    """
-    Get (X, Y) values for the lower left corner of the bounding rectangle for a polygon.
-
-    :param polygon: An array of (X, Y) values in any units system.
-    :return: X and Y coordinates for the lower left point around the polygon.
-    """
-    min_pt = [polygon[0][0], polygon[0][1]]
-    for point in polygon[1:]:
-        min_pt[0] = min(point[0], min_pt[0])
-        min_pt[1] = min(point[1], min_pt[1])
-    return min_pt
-
-
-def upper_right_point(polygon):
-    """
-    Get (X, Y) values for the upper right corner of the bounding rectangle for a polygon.
-
-    :param polygon: An array of (X, Y) values in any units system.
-    :return: X and Y coordinates for the upper right point around the polygon.
-    """
-    max_pt = [polygon[0][0], polygon[0][1]]
-    for point in polygon[1:]:
-        max_pt[0] = max(point[0], max_pt[0])
-        max_pt[1] = max(point[1], max_pt[1])
-    return max_pt
-
-
-def polygon_area(polygon):
-    """
-    Get the area of polygon.
-
-    :param polygon: An array of (X, Y) values in any units system.
-    :return area: A number for the area of the polygon.
-    """
-    area = 0
-    for i, pt in enumerate(polygon):
-        area += polygon[i - 1][0] * pt[1] - polygon[i - 1][1] * pt[0]
-    return area / 2
