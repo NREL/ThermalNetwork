@@ -1,7 +1,11 @@
 name: Format & Lint
 
-# https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#pull_request
-on: [pull_request]
+# https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows
+on:
+  pull_request:
+  push:
+    branches:
+      - "main"
 
 jobs:
   ruff:
