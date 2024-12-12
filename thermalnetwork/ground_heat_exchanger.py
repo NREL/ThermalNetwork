@@ -9,7 +9,7 @@ from rich.logging import RichHandler
 
 from thermalnetwork.base_component import BaseComponent
 from thermalnetwork.enums import ComponentType
-from thermalnetwork.projection import polygon_area
+from thermalnetwork.geometry import polygon_area
 
 logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger(__name__)
