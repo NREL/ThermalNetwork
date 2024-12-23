@@ -736,9 +736,8 @@ def run_sizer_from_cli_worker(
     sys_param_version: str = ghe_parameters_data["version"]
     if version("thermalnetwork")[:3] != sys_param_version[:3]:  # Just major & minor, ignore patch version
         logger.warning(
-            "Mismatched ThermalNetwork versions. Could be a problem. "
             f"The system_parameter.json version is {sys_param_version}, but the ThermalNetwork version is "
-            f"{version('thermalnetwork')}."
+            f"{version('thermalnetwork')}. Could be a problem."
         )
 
     ghe_design_data: dict = ghe_parameters_data["design"]
@@ -753,23 +752,25 @@ def run_sizer_from_cli_worker(
     reordered_features = network.reorder_connected_features(connected_features)
     logger.debug(f"Features in loop order: {reordered_features}\n")
 
-    num_ghes = len([x for x in reordered_features if x["district_system_type"]])
-    bldg_groups_per_ghe = []
+    def categorize_ids(data):
+        result = []
+        current_group = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}
 
-    # populate bldg_groups_per_ghe list with info for GMT diagramming
-    seen_id_list = []
-    for _ in range(num_ghes):
-        loop_info = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}
-        for feature in reordered_features:
-            if feature["id"] in seen_id_list:
-                continue
-            elif feature["district_system_type"]:
-                loop_info["list_ghe_ids_in_group"].append(feature["id"])
-                seen_id_list.append(feature["id"])
-                break
-            loop_info["list_bldg_ids_in_group"].append(feature["id"])
-            seen_id_list.append(feature["id"])  # Add ID to seen list (so we don't add it again)
-        bldg_groups_per_ghe.append(loop_info)
+        for item in data:
+            if item["district_system_type"] is not None:
+                if current_group["list_bldg_ids_in_group"] or current_group["list_ghe_ids_in_group"]:
+                    result.append(current_group)
+                    current_group = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}
+                current_group["list_ghe_ids_in_group"].append(item["id"])
+            else:
+                current_group["list_bldg_ids_in_group"].append(item["id"])
+
+        if current_group["list_bldg_ids_in_group"] or current_group["list_ghe_ids_in_group"]:
+            result.append(current_group)
+
+        return result
+
+    bldg_groups_per_ghe: list = categorize_ids(reordered_features)
 
     # save loop order to file next to sys-params for temporary use by the GMT
     # Prepending an underscore to emphasize these as temporary files
