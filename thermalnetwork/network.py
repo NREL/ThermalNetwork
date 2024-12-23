@@ -752,25 +752,20 @@ def run_sizer_from_cli_worker(
     reordered_features = network.reorder_connected_features(connected_features)
     logger.debug(f"Features in loop order: {reordered_features}\n")
 
-    def categorize_ids(data):
-        result = []
-        current_group = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}
+    bldg_groups_per_ghe = []
+    current_group = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}
 
-        for item in data:
-            if item["district_system_type"] is not None:
-                if current_group["list_bldg_ids_in_group"] or current_group["list_ghe_ids_in_group"]:
-                    result.append(current_group)
-                    current_group = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}
-                current_group["list_ghe_ids_in_group"].append(item["id"])
-            else:
-                current_group["list_bldg_ids_in_group"].append(item["id"])
+    for item in reordered_features:
+        if item["district_system_type"] is not None:
+            if current_group["list_bldg_ids_in_group"] or current_group["list_ghe_ids_in_group"]:
+                bldg_groups_per_ghe.append(current_group)
+                current_group = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}
+            current_group["list_ghe_ids_in_group"].append(item["id"])
+        else:
+            current_group["list_bldg_ids_in_group"].append(item["id"])
 
-        if current_group["list_bldg_ids_in_group"] or current_group["list_ghe_ids_in_group"]:
-            result.append(current_group)
-
-        return result
-
-    bldg_groups_per_ghe: list = categorize_ids(reordered_features)
+    if current_group["list_bldg_ids_in_group"] or current_group["list_ghe_ids_in_group"]:
+        bldg_groups_per_ghe.append(current_group)
 
     # save loop order to file next to sys-params for temporary use by the GMT
     # Prepending an underscore to emphasize these as temporary files
