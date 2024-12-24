@@ -12,7 +12,7 @@ name = "ThermalNetwork"
 dynamic = [
     "readme",
     "version",
-    ]
+]
 authors = [
   { name="Matt Mitchell", email="mitchute@gmail.com" },
   { name="Nathan Moore", email="nathan.moore@nrel.gov" },

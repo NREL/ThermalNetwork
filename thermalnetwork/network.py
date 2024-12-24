@@ -1,9 +1,9 @@
 import json
 import logging
+import sys
 from copy import deepcopy
 from importlib.metadata import version
 from pathlib import Path
-from sys import exit
 
 import click
 import numpy as np
@@ -892,4 +892,4 @@ def run_sizer_from_cli(system_parameter_file, scenario_directory, geojson_file, 
 
 
 if __name__ == "__main__":
-    exit(run_sizer_from_cli())
+    sys.exit(run_sizer_from_cli())
