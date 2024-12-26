@@ -753,19 +753,23 @@ def run_sizer_from_cli_worker(
     logger.debug(f"Features in loop order: {reordered_features}\n")
 
     bldg_groups_per_ghe = []
-    current_group = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}
+    feature_group = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}
 
-    for item in reordered_features:
-        if item["district_system_type"] is not None:
-            if current_group["list_bldg_ids_in_group"] or current_group["list_ghe_ids_in_group"]:
-                bldg_groups_per_ghe.append(current_group)
-                current_group = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}
-            current_group["list_ghe_ids_in_group"].append(item["id"])
+    for loop_feature in reordered_features:
+        # If a feature is a GHE, start a new group
+        if loop_feature["district_system_type"] is not None:
+            if feature_group["list_bldg_ids_in_group"] or feature_group["list_ghe_ids_in_group"]:
+                bldg_groups_per_ghe.append(feature_group)
+                feature_group = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}
+            # Add the GHE to the new group
+            feature_group["list_ghe_ids_in_group"].append(loop_feature["id"])
         else:
-            current_group["list_bldg_ids_in_group"].append(item["id"])
+            # Add the building to the current group
+            feature_group["list_bldg_ids_in_group"].append(loop_feature["id"])
 
-    if current_group["list_bldg_ids_in_group"] or current_group["list_ghe_ids_in_group"]:
-        bldg_groups_per_ghe.append(current_group)
+    # If the last feature group has buildings or GHEs in it, add it to the list
+    if feature_group["list_bldg_ids_in_group"] or feature_group["list_ghe_ids_in_group"]:
+        bldg_groups_per_ghe.append(feature_group)
 
     # save loop order to file next to sys-params for temporary use by the GMT
     # Prepending an underscore to emphasize these as temporary files
