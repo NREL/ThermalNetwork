@@ -46,63 +46,35 @@ class Network:
         self.geojson_data = geojson_data
         self.scenario_directory_path = scenario_directory_path
 
-    def find_startloop_feature_id(self):
-        """
-        Finds the feature ID of a feature with the 'is_ghe_start_loop' property set to True in a list of features.
-
-        :param features: List of features to search for the start loop feature.
-        :return: The feature ID of the start loop feature, or None if not found.
-        """
-        for feature in self.geojson_data["features"]:
-            if feature["properties"].get("is_ghe_start_loop"):
-                start_feature_id = feature["properties"].get("buildingId") or feature["properties"].get("DSId")
-                return start_feature_id
-        return None
-
     def get_connected_features(self):
         """
         Retrieves a list of connected features from a GeoJSON data object.
 
         :return: List of connected features with additional information.
         """
-        startloop_feature_id = self.find_startloop_feature_id()
         # List thermal connections
         connectors = [
             feature for feature in self.geojson_data["features"] if feature["properties"]["type"] == "ThermalConnector"
         ]
+
+        logger.debug(f"Number of thermal connectors (horizontal pipes): {len(connectors)}")
 
         if len(connectors) == 0:
             raise ValueError(
                 "No thermal connectors (pipes) were found in the GeoJSON data which are required for a thermal network."
             )
 
-        # Find the feature that has been labelled as the start of the loop
-        # TODO: Update the UI to allow the user to select the start loop feature.
         connected_features = [
-            feature["properties"].get("buildingId") or feature["properties"].get("DSId")
+            feature["properties"].get("endFeatureId")
             for feature in self.geojson_data["features"]
-            if feature["properties"].get("is_ghe_start_loop")
+            if feature["properties"].get("endFeatureId") is not None
         ]
-        # Warn that starting from something that isn't a building makes UPSTREAM results undesirable.
-        for feature in self.geojson_data["features"]:
-            if feature["properties"]["id"] == [connected_features[0]] and feature["properties"]["type"] != "Building":
-                logger.warning(
-                    f"Feature {feature[connected_features[0]]} is not a building which may have undesirable results "
-                    "when using the UPSTREAM sizing method."
-                )
-        # complete the list of feature ids that have thermal connections (building or district system)
-        while True:
-            next_feature_id = None
-            for connector in connectors:
-                if connector["properties"]["startFeatureId"] == connected_features[-1]:
-                    next_feature_id = connector["properties"]["endFeatureId"]
-                    break
-            if next_feature_id:
-                if next_feature_id == connected_features[0]:
-                    break
-                connected_features.append(next_feature_id)
-            else:
-                break
+        logger.debug(f"Number of features (buildings & GHEs) connected to pipes: {len(connected_features)}")
+        # de-dupe connected features, if any
+        de_duped_connected_features = list(set(connected_features))
+        if len(connected_features) != len(de_duped_connected_features):
+            logger.error(f"Number of features connected after de-duplication: {len(de_duped_connected_features)}")
+            raise ValueError("Duplicate connections made between buildings. Fix geoJSON file before continuing")
 
         # Filter and return the building and district system features
         connected_objects = []
@@ -122,7 +94,6 @@ class Network:
                                 if k not in ["type", "name", "id", "district_system_type"]
                             },
                             "geometry": feature["geometry"],
-                            "is_ghe_start_loop": feature_id == startloop_feature_id,
                         }
                     )
 
@@ -131,22 +102,22 @@ class Network:
     @staticmethod
     def reorder_connected_features(features):
         """
-        Reorders a list of connected features so that the feature with
-        'is_ghe_start_loop' set to True is at the beginning.
+        Reorders a list of connected features so that a feature with
+        "district_system_type": "Ground Heat Exchanger" is at the beginning.
 
         :param features: List of connected features.
         :return: Reordered list of connected features.
-        :raises ValueError: If no feature with 'is_ghe_start_loop' set to True is found.
+        :raises ValueError: If no Ground Heat Exchanger feature is found.
         """
         start_loop_index = None
 
         for i, feature in enumerate(features):
-            if feature.get("is_ghe_start_loop"):
+            if feature.get("district_system_type") == "Ground Heat Exchanger":
                 start_loop_index = i
                 break
 
         if start_loop_index is None:
-            raise ValueError("No feature with 'is_ghe_start_loop' set to True was found in the list.")
+            raise ValueError("No Ground Heat Exchanger was found in the list.")
 
         # Reorder the features list to start with the feature having 'startloop' set to 'true'
         reordered_features = features[start_loop_index:] + features[:start_loop_index]
@@ -765,9 +736,8 @@ def run_sizer_from_cli_worker(
     sys_param_version: str = ghe_parameters_data["version"]
     if version("thermalnetwork")[:3] != sys_param_version[:3]:  # Just major & minor, ignore patch version
         logger.warning(
-            "Mismatched ThermalNetwork versions. Could be a problem. "
             f"The system_parameter.json version is {sys_param_version}, but the ThermalNetwork version is "
-            f"{version('thermalnetwork')}."
+            f"{version('thermalnetwork')}. Could be a problem."
         )
 
     ghe_design_data: dict = ghe_parameters_data["design"]
@@ -782,23 +752,24 @@ def run_sizer_from_cli_worker(
     reordered_features = network.reorder_connected_features(connected_features)
     logger.debug(f"Features in loop order: {reordered_features}\n")
 
-    num_ghes = len([x for x in reordered_features if x["district_system_type"]])
     bldg_groups_per_ghe = []
+    feature_group = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}
 
-    # populate bldg_groups_per_ghe list with info for GMT diagramming
-    seen_id_list = []
-    for _ in range(num_ghes):
-        loop_info = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}
-        for feature in reordered_features:
-            if feature["id"] in seen_id_list:
-                continue
-            elif feature["district_system_type"]:
-                loop_info["list_ghe_ids_in_group"].append(feature["id"])
-                seen_id_list.append(feature["id"])
-                break
-            loop_info["list_bldg_ids_in_group"].append(feature["id"])
-            seen_id_list.append(feature["id"])  # Add ID to seen list (so we don't add it again)
-        bldg_groups_per_ghe.append(loop_info)
+    for loop_feature in reordered_features:
+        # If a feature is a GHE, start a new group
+        if loop_feature["district_system_type"] is not None:
+            if feature_group["list_bldg_ids_in_group"] or feature_group["list_ghe_ids_in_group"]:
+                bldg_groups_per_ghe.append(feature_group)
+                feature_group = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}
+            # Add the GHE to the new group
+            feature_group["list_ghe_ids_in_group"].append(loop_feature["id"])
+        else:
+            # Add the building to the current group
+            feature_group["list_bldg_ids_in_group"].append(loop_feature["id"])
+
+    # If the last feature group has buildings or GHEs in it, add it to the list
+    if feature_group["list_bldg_ids_in_group"] or feature_group["list_ghe_ids_in_group"]:
+        bldg_groups_per_ghe.append(feature_group)
 
     # save loop order to file next to sys-params for temporary use by the GMT
     # Prepending an underscore to emphasize these as temporary files
