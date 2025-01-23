@@ -192,8 +192,7 @@
       "properties": {
         "id": "a115e9cc-7fad-4c23-b985-681fc79cdb34",
         "type": "ThermalJunction",
-        "DSId": "47fd01d3-3d72-46c0-85f2-a12854783764",
-        "is_ghe_start_loop": "true"
+        "DSId": "47fd01d3-3d72-46c0-85f2-a12854783764"
       },
       "geometry": {
         "type": "Point",
