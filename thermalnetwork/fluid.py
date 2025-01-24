@@ -19,8 +19,10 @@ def get_fluid(fluid_type: str, fluid_concentration: float = 0):
         if fluid_concentration == 0:
             return Water()
         else:
-            logging.warning(f'Fluid "{fluid_name}" - attempting to set non-zero \
-                            water-antifreeze mixture concentration "{fluid_concentration:0.3f}".')
+            logging.warning(
+                f'Fluid "{fluid_name}" - attempting to set non-zero \
+                            water-antifreeze mixture concentration "{fluid_concentration:0.3f}".'
+            )
             logging.warning("Defaulting to pure water.")
             return Water()
 
@@ -37,4 +39,4 @@ def get_fluid(fluid_type: str, fluid_concentration: float = 0):
         return PropyleneGlycol(fluid_concentration)
     else:
         logging.error(f'Unsupported fluid "{fluid_name}"')
-        assert False
+        raise SyntaxError("Unsupported fluid name")

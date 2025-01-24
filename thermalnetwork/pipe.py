@@ -4,7 +4,7 @@ from math import log, pi
 from rich.logging import RichHandler
 
 from thermalnetwork.fluid import get_fluid
-from thermalnetwork.utilities import smoothing_function, inch_to_m
+from thermalnetwork.utilities import inch_to_m, smoothing_function
 
 logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger(__name__)
@@ -143,9 +143,11 @@ class Pipe:
         Size the pipe diameter to meet the design pressure loss requirements.
 
         :param vol_flow_rate: volumetric flow rate, in m3/s
-        :param design_pressure_loss_per_length: design pressure loss per meter, in Pa/m. Typically, this will be 100-300 Pa/m.
-        :param return_discrete_pipe_size: setting True will return a discrete pipe size that meets the design pressure
-        loss requirements. setting False will return the fractional pipe size that meets the design pressure
+        :param design_pressure_loss_per_length: design pressure loss per meter, in Pa/m.
+        Typically, this will be 100-300 Pa/m.
+        :param return_discrete_pipe_size: setting True will return a discrete pipe size
+        that meets the design pressure loss requirements. setting False will return the
+        fractional pipe size that meets the design pressure
         loss requirements.
         :return:
         """

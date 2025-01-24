@@ -1,7 +1,7 @@
 import unittest
 from math import log
 
-from thermalnetwork.fluid import Water, PropyleneGlycol
+from thermalnetwork.fluid import PropyleneGlycol, Water
 from thermalnetwork.pipe import Pipe
 from thermalnetwork.utilities import inch_to_m
 
@@ -46,7 +46,7 @@ class TestPipe(unittest.TestCase):
         pipe.set_diameters(0.0334)
 
         # laminar tests
-        re = 100  # noqa: E126
+        re = 100
         self.assertEqual(pipe.friction_factor(re), 64.0 / re)
 
         re = 1000
