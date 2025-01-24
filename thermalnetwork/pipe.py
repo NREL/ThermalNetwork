@@ -11,14 +11,14 @@ logger = logging.getLogger(__name__)
 
 
 class Pipe:
-
-    def __init__(self,
-                 dimension_ratio: float,
-                 length: float,
-                 fluid_type: str = "WATER",
-                 fluid_concentration: float = 0,
-                 fluid_temperature: float = 20):
-
+    def __init__(
+        self,
+        dimension_ratio: float,
+        length: float,
+        fluid_type: str = "WATER",
+        fluid_concentration: float = 0,
+        fluid_temperature: float = 20,
+    ):
         self.fluid = get_fluid(fluid_type, fluid_concentration)
         self.fluid_temp = fluid_temperature
 
@@ -102,7 +102,7 @@ class Pipe:
         :param vol_flow_rate: volume flow rate, in m3/s
         :return: mean fluid velocity in m/s
         """
-        pipe_inner_cross_section_area = (pi * self.inner_diameter ** 2) / 4
+        pipe_inner_cross_section_area = (pi * self.inner_diameter**2) / 4
         return vol_flow_rate / pipe_inner_cross_section_area
 
     def vol_flow_rate_to_re(self, vol_flow_rate: float) -> float:
@@ -125,7 +125,7 @@ class Pipe:
         re = self.vol_flow_rate_to_re(vol_flow_rate)
         velocity = self.vol_flow_rate_to_velocity(vol_flow_rate)
         term_1 = self.friction_factor(re) * self.length / self.inner_diameter
-        term_2 = (self.fluid.density(self.fluid_temp) * velocity ** 2) / 2
+        term_2 = (self.fluid.density(self.fluid_temp) * velocity**2) / 2
 
         return term_1 * term_2
 
@@ -133,12 +133,12 @@ class Pipe:
         self.set_diameters(outside_diameter)
         return self.pressure_loss(vol_flow_rate) / self.length
 
-    def size_hydraulic_diameter(self,
-                                vol_flow_rate: float,
-                                design_pressure_loss_per_length: float,
-                                return_discrete_pipe_size: bool = True,
-                                ) -> float:
-
+    def size_hydraulic_diameter(
+        self,
+        vol_flow_rate: float,
+        design_pressure_loss_per_length: float,
+        return_discrete_pipe_size: bool = True,
+    ) -> float:
         """
         Size the pipe diameter to meet the design pressure loss requirements.
 
@@ -152,39 +152,38 @@ class Pipe:
 
         # this is the default and likely to be the most common use case, so we'll put it first
         if return_discrete_pipe_size:
-
             # https://www.dropbox.com/scl/fi/68q6h2q5kmsi5e5j7cwdl/HDPE-Pipe-Dimensions.pdf?rlkey=lp0t83df3ut8uizdrftg34318&e=1&st=xjbm19cj&dl=0
             ip_pipes = {
                 "labels": [
-                    "3/4\"",
-                    "1\"",
-                    "1-1/4\"",
-                    "1-1/2\"",
-                    "2\"",
-                    "3\"",
-                    "4\"",
-                    "5\"",
-                    "6\"",
-                    "7\"",
-                    "8\"",
-                    "10\"",
-                    "12\"",
-                    "14\"",
-                    "16\"",
-                    "18\"",
-                    "20\"",
-                    "22\"",
-                    "24\"",
-                    "26\"",
-                    "28\"",
-                    "30\"",
-                    "32\"",
-                    "34\"",
-                    "36\"",
-                    "42\"",
-                    "48\"",
-                    "54\"",
-                    "63\""
+                    '3/4"',
+                    '1"',
+                    '1-1/4"',
+                    '1-1/2"',
+                    '2"',
+                    '3"',
+                    '4"',
+                    '5"',
+                    '6"',
+                    '7"',
+                    '8"',
+                    '10"',
+                    '12"',
+                    '14"',
+                    '16"',
+                    '18"',
+                    '20"',
+                    '22"',
+                    '24"',
+                    '26"',
+                    '28"',
+                    '30"',
+                    '32"',
+                    '34"',
+                    '36"',
+                    '42"',
+                    '48"',
+                    '54"',
+                    '63"',
                 ],
                 "outside_diameter": [
                     1.05,
@@ -215,17 +214,17 @@ class Pipe:
                     42.00,
                     48.00,
                     54.00,
-                    63.00
-                ]
+                    63.00,
+                ],
             }
 
             for idx, d in enumerate(ip_pipes["outside_diameter"]):
                 pressure_loss_per_length = self.pressure_loss_per_length(vol_flow_rate, inch_to_m(d))
                 if pressure_loss_per_length < design_pressure_loss_per_length:
-                    logger.info(f"Network pipe sized to {ip_pipes["labels"][idx]}, SDR-{self.dimension_ratio}")
+                    logger.info(f"Network pipe sized to {ip_pipes['labels'][idx]}, SDR-{self.dimension_ratio}")
                     return self.inner_diameter
 
-            logger.info(f"Network pipe sized to {ip_pipes["labels"][-1]}, SDR-{self.dimension_ratio}.")
+            logger.info(f"Network pipe sized to {ip_pipes['labels'][-1]}, SDR-{self.dimension_ratio}.")
             logger.warning("Maximum available pipe size used. This may result in unexpected results.")
             return self.inner_diameter
 

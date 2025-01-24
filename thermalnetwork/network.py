@@ -650,7 +650,7 @@ class Network:
         """
 
         # Load the existing system parameters
-        sys_params =  load_json(system_parameter_path)
+        sys_params = load_json(system_parameter_path)
         dist_sys_params = sys_params["district_system"]["fifth_generation"]
         ghe_params = dist_sys_params["ghe_parameters"]
         ghe_specific_params: list = ghe_params["ghe_specific_params"]
@@ -687,15 +687,16 @@ class Network:
             length=self.total_network_pipe_length,
             fluid_type=ghe_params["fluid"]["fluid_name"],
             fluid_concentration=ghe_params["fluid"]["concentration_percent"],
-            fluid_temperature=ghe_params["fluid"]["temperature"])
+            fluid_temperature=ghe_params["fluid"]["temperature"],
+        )
 
         # we should expose this to the user at some point
-        design_pressure_loss_per_length = 300 # Pa/m
+        design_pressure_loss_per_length = 300  # Pa/m
         hydraulic_dia = network_pipe.size_hydraulic_diameter(network_design_vol_flow, design_pressure_loss_per_length)
         pipe_params["hydraulic_diameter"] = hydraulic_dia
 
         pump_params["pump_design_head"] = network_pipe.pressure_loss(network_design_vol_flow)
-        pump_params["pump_flow_rate"] =network_design_vol_flow
+        pump_params["pump_flow_rate"] = network_design_vol_flow
 
         write_json(system_parameter_path, sys_params)
 

@@ -7,7 +7,6 @@ from thermalnetwork.utilities import inch_to_m
 
 
 class TestPipe(unittest.TestCase):
-
     def test_init(self):
         # test water
         pipe = Pipe(
@@ -20,12 +19,7 @@ class TestPipe(unittest.TestCase):
         self.assertIsInstance(pipe.fluid, Water)
 
         # test propylene glycol
-        pg_pipe = Pipe(
-            dimension_ratio=11,
-            length=100,
-            fluid_type="PROPYLENEGLYCOL",
-            fluid_concentration=0.2
-        )
+        pg_pipe = Pipe(dimension_ratio=11, length=100, fluid_type="PROPYLENEGLYCOL", fluid_concentration=0.2)
 
         self.assertIsInstance(pg_pipe, Pipe)
         self.assertEqual(pg_pipe.length, 100)
@@ -47,10 +41,7 @@ class TestPipe(unittest.TestCase):
     def test_friction_factor(self):
         tol = 0.00001
 
-        pipe = Pipe(
-            dimension_ratio=11,
-            length=100
-        )
+        pipe = Pipe(dimension_ratio=11, length=100)
 
         pipe.set_diameters(0.0334)
 

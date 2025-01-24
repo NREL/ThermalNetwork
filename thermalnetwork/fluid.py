@@ -19,13 +19,13 @@ def get_fluid(fluid_type: str, fluid_concentration: float = 0):
         if fluid_concentration == 0:
             return Water()
         else:
-            logging.warning(f"Fluid \"{fluid_name}\" - attempting to set non-zero \
-                            water-antifreeze mixture concentration \"{fluid_concentration:0.3f}\".")
+            logging.warning(f'Fluid "{fluid_name}" - attempting to set non-zero \
+                            water-antifreeze mixture concentration "{fluid_concentration:0.3f}".')
             logging.warning("Defaulting to pure water.")
             return Water()
 
     if fluid_concentration == 0:
-        logging.warning(f"Setting fluid \"{fluid_name} with fluid-antifreeze mixture concentration = 0")
+        logging.warning(f'Setting fluid "{fluid_name} with fluid-antifreeze mixture concentration = 0')
 
     if fluid_name == "ETHYLALCOHOL":
         return EthylAlcohol(fluid_concentration)
@@ -36,5 +36,5 @@ def get_fluid(fluid_type: str, fluid_concentration: float = 0):
     elif fluid_name == "PROPYLENEGLYCOL":
         return PropyleneGlycol(fluid_concentration)
     else:
-        logging.error(f"Unsupported fluid \"{fluid_name}\"")
+        logging.error(f'Unsupported fluid "{fluid_name}"')
         assert False
