@@ -419,7 +419,7 @@ class Network:
         )
         space_loads_df = pd.concat([space_loads_df, new_data])
         # interpolate data to hourly
-        space_loads_df = space_loads_df.resample("H").interpolate(method="linear")
+        space_loads_df = space_loads_df.resample("h").interpolate(method="linear")
         # keep only 8760
         space_loads_df = space_loads_df.iloc[:8760]
         ets.space_loads = space_loads_df["TotalSensibleLoad"]
