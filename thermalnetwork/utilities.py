@@ -55,9 +55,10 @@ def smoothing_function(x, x_low_limit, x_high_limit, y_low_limit, y_high_limit) 
     if x > x_high_limit:
         return y_high_limit
 
-    # interp x range to value between -10 to 10 for sigmoid function
-    s_x_max = 10
-    s_x_min = -10
+    # interp x range to value between -5 to 5 for sigmoid function, which is picked to be
+    # within approx. 1% of the desired end points of the interpolation range, 0 to 1.
+    s_x_max = 5
+    s_x_min = -5
     s_x = (x - x_low_limit) / (x_high_limit - x_low_limit) * (s_x_max - s_x_min) + s_x_min
 
     # get sigmoid function for interpolation between real y values
