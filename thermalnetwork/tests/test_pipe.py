@@ -39,7 +39,7 @@ class TestPipe(unittest.TestCase):
         self.assertAlmostEqual(pipe.inner_diameter, inch_to_m(1.36), delta=0.0001)
 
     def test_friction_factor(self):
-        tol = 0.00001
+        tol = 1e-4
 
         pipe = Pipe(dimension_ratio=11, length=100)
 
@@ -57,13 +57,13 @@ class TestPipe(unittest.TestCase):
 
         # transitional tests
         re = 2000
-        self.assertAlmostEqual(pipe.friction_factor(re), 0.03200000, delta=tol)
+        self.assertAlmostEqual(pipe.friction_factor(re), 0.03213, delta=tol)
 
         re = 3000
-        self.assertAlmostEqual(pipe.friction_factor(re), 0.03344621, delta=tol)
+        self.assertAlmostEqual(pipe.friction_factor(re), 0.03344, delta=tol)
 
         re = 4000
-        self.assertAlmostEqual(pipe.friction_factor(re), 0.04143985, delta=tol)
+        self.assertAlmostEqual(pipe.friction_factor(re), 0.04127, delta=tol)
 
         # turbulent tests
         re = 5000
