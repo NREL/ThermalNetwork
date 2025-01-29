@@ -18,7 +18,7 @@ from thermalnetwork.ground_heat_exchanger import GHE
 from thermalnetwork.pipe import Pipe
 from thermalnetwork.projection import lon_lat_to_polygon, meters_to_long_lat_factors
 from thermalnetwork.pump import Pump
-from thermalnetwork.utilities import ft_to_m, load_json, lps_to_cms, write_json
+from thermalnetwork.utilities import load_json, lps_to_cms, write_json
 
 logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger(__name__)
@@ -792,7 +792,7 @@ def run_sizer_from_cli_worker(
         if "total_length" in f["properties"]:
             total_network_length += f["properties"]["total_length"]
 
-    network.total_network_pipe_length = ft_to_m(total_network_length)
+    network.total_network_pipe_length = total_network_length
 
     bldg_groups_per_ghe = []
     feature_group = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}

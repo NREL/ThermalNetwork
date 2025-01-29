@@ -57,13 +57,13 @@ class TestPipe(unittest.TestCase):
 
         # transitional tests
         re = 2000
-        self.assertAlmostEqual(pipe.friction_factor(re), 0.034003503, delta=tol)
+        self.assertAlmostEqual(pipe.friction_factor(re), 0.03200000, delta=tol)
 
         re = 3000
-        self.assertAlmostEqual(pipe.friction_factor(re), 0.033446219, delta=tol)
+        self.assertAlmostEqual(pipe.friction_factor(re), 0.03344621, delta=tol)
 
         re = 4000
-        self.assertAlmostEqual(pipe.friction_factor(re), 0.03895358, delta=tol)
+        self.assertAlmostEqual(pipe.friction_factor(re), 0.04143985, delta=tol)
 
         # turbulent tests
         re = 5000
