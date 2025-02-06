@@ -690,8 +690,9 @@ class Network:
             fluid_temperature=ghe_params["fluid"]["temperature"],
         )
 
-        # we should expose this to the user at some point
-        design_pressure_loss_per_length = 300  # Pa/m
+        design_pressure_loss_per_length = dist_sys_params["horizontal_piping_parameters"].get(
+            "pressure_drop_per_meter", 300
+        )  # Pa/m, defaults to 300 if not in sys_params
         hydraulic_dia = network_pipe.size_hydraulic_diameter(network_design_vol_flow, design_pressure_loss_per_length)
         pipe_params["hydraulic_diameter"] = hydraulic_dia
 
