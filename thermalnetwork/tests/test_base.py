@@ -71,8 +71,14 @@ class BaseCase(TestCase):
         self.test_outputs_path = here.resolve() / "test_outputs"
         self.test_outputs_path.mkdir(exist_ok=True)
 
-        # Save the original borehole length and number of boreholes, so they can be restored after the tests run.
+        # Save the original sys-param data, so they can be restored after the tests run.
         sys_param_1_ghe = json.loads(self.system_parameter_path_1_ghe.read_text())
+
+        district_params = sys_param_1_ghe["district_system"]["fifth_generation"]
+        self.original_hydraulic_diameter = district_params["horizontal_piping_parameters"]["hydraulic_diameter"]
+        self.original_pump_design_head = district_params["central_pump_parameters"]["pump_design_head"]
+        self.original_pump_flow_rate = district_params["central_pump_parameters"]["pump_flow_rate"]
+
         one_ghe_specific_params = sys_param_1_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
             "ghe_specific_params"
         ]
@@ -94,6 +100,16 @@ class BaseCase(TestCase):
 
     def reset_sys_param(self, sys_param_path: Path):
         sys_param = json.loads(sys_param_path.read_text())
+        sys_param["district_system"]["fifth_generation"]["horizontal_piping_parameters"]["hydraulic_diameter"] = (
+            self.original_hydraulic_diameter
+        )
+        sys_param["district_system"]["fifth_generation"]["central_pump_parameters"]["pump_design_head"] = (
+            self.original_pump_design_head
+        )
+        sys_param["district_system"]["fifth_generation"]["central_pump_parameters"]["pump_flow_rate"] = (
+            self.original_pump_flow_rate
+        )
+
         ghe_specific_params = sys_param["district_system"]["fifth_generation"]["ghe_parameters"]["ghe_specific_params"]
 
         for idx, _ in enumerate(ghe_specific_params):
