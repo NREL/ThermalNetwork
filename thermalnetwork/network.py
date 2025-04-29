@@ -15,11 +15,10 @@ from thermalnetwork.energy_transfer_station import ETS
 from thermalnetwork.enums import ComponentType, DesignType
 from thermalnetwork.geometry import lower_left_point, rotate_polygon_to_axes, upper_right_point
 from thermalnetwork.ground_heat_exchanger import GHE
-from thermalnetwork.projection import (
-    lon_lat_to_polygon,
-    meters_to_long_lat_factors,
-)
+from thermalnetwork.pipe import Pipe
+from thermalnetwork.projection import lon_lat_to_polygon, meters_to_long_lat_factors
 from thermalnetwork.pump import Pump
+from thermalnetwork.utilities import load_json, lps_to_cms, write_json
 
 logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger(__name__)
@@ -29,15 +28,15 @@ class Network:
     def __init__(
         self, system_parameters_data: dict, geojson_data: dict, ghe_parameters_data: dict, scenario_directory_path: Path
     ) -> None:
-        """A thermal network.
+        """
+        A thermal network.
 
-        :param des_method: Design method (upstream or proportional).
-        :param components_data: List of component data.
-        :param network: List of components.
-        :param ghe_parameters: Parameters for the ground heat exchanger.
+        :param system_parameters_data: System parameters data.
         :param geojson_data: GeoJSON data object containing features.
+        :param ghe_parameters_data: Parameters for the ground heat exchanger.
         :param scenario_directory_path: Path to the URBANopt scenario directory.
         """
+
         self.des_method = None
         self.components_data: list[dict] = []
         self.network: list[BaseComponent] = []
@@ -45,6 +44,9 @@ class Network:
         self.ghe_parameters = ghe_parameters_data
         self.geojson_data = geojson_data
         self.scenario_directory_path = scenario_directory_path
+
+        # placeholders
+        self.total_network_pipe_length = 0
 
     def get_connected_features(self):
         """
@@ -419,7 +421,7 @@ class Network:
         )
         space_loads_df = pd.concat([space_loads_df, new_data])
         # interpolate data to hourly
-        space_loads_df = space_loads_df.resample("H").interpolate(method="linear")
+        space_loads_df = space_loads_df.resample("h").interpolate(method="linear")
         # keep only 8760
         space_loads_df = space_loads_df.iloc[:8760]
         ets.space_loads = space_loads_df["TotalSensibleLoad"]
@@ -628,15 +630,19 @@ class Network:
 
     def update_sys_params(self, system_parameter_path: Path, output_directory_path: Path) -> None:
         """
-        Update the existing system parameters with the new GHEDesigner output data.
+        Update the existing system parameters file with sizing data.
 
         :param system_parameter_path: Path to the existing System Parameter file.
         :param output_directory_path: Path to the output directory containing the GHEDesigner output files.
 
         This function loads the existing system parameters from the specified file,
-        updates the GHE-specific parameters with the new data from the GHEDesigner output,
-        and saves the updated system parameters back to the same file.
-        The GHE-specific parameters include the length of the boreholes and the number of boreholes.
+        updates the GHE-specific parameters, with the new data from the GHEDesigner output, updates the pipe
+        and pump parameters with autosized flow and pressures, and saves the updated
+        system parameters back to the same file.
+
+        - The GHE-specific parameters include the length of the boreholes and the number of boreholes.
+        - Pump parameters include the design head and design flow rate
+        - Pipe parameters include the hydraulic diameter
 
         The function does not return any value, as it updates the system parameters file in place.
 
@@ -644,9 +650,18 @@ class Network:
         """
 
         # Load the existing system parameters
-        sys_params: dict = json.loads(system_parameter_path.read_text())
-        ghe_params: list = sys_params["district_system"]["fifth_generation"]["ghe_parameters"]["ghe_specific_params"]
-        for ghe in ghe_params:
+        sys_params = load_json(system_parameter_path)
+        dist_sys_params = sys_params["district_system"]["fifth_generation"]
+        ghe_params = dist_sys_params["ghe_parameters"]
+        ghe_specific_params: list = ghe_params["ghe_specific_params"]
+        pipe_params = dist_sys_params["horizontal_piping_parameters"]
+        pump_params = dist_sys_params["central_pump_parameters"]
+
+        max_num_boreholes = 0
+        bh_vol_flow = ghe_params["design"]["flow_rate"]
+
+        # update ghe parameters
+        for ghe in ghe_specific_params:
             ghe_id = ghe["ghe_id"]
             summary_data_path = output_directory_path / ghe_id / "SimulationSummary.json"
 
@@ -654,16 +669,37 @@ class Network:
                 logger.error(f"Error sizing GHE: {ghe_id}")
 
             # Get the new data from the GHEDesigner output
-            ghe_data: dict = json.loads(summary_data_path.read_text())["ghe_system"]
-            for ghe_sys_params in ghe_params:
+            ghe_data = load_json(summary_data_path)["ghe_system"]
+            for ghe_sys_params in ghe_specific_params:
                 if ghe_sys_params["ghe_id"] == ghe_id:
                     # Update system parameters dict with the new values
-                    ghe_sys_params["borehole"]["length_of_boreholes"] = ghe_data["active_borehole_length"]["value"]
-                    ghe_sys_params["borehole"]["number_of_boreholes"] = ghe_data["number_of_boreholes"]
-        with open(system_parameter_path, "w") as sys_param_file:
-            json.dump(sys_params, sys_param_file, indent=2)
-            # Restore the trailing newline
-            sys_param_file.write("\n")
+                    bh_len = ghe_data["active_borehole_length"]["value"]
+                    num_boreholes = ghe_data["number_of_boreholes"]
+                    ghe_sys_params["borehole"]["length_of_boreholes"] = bh_len
+                    ghe_sys_params["borehole"]["number_of_boreholes"] = num_boreholes
+
+                    max_num_boreholes = max(num_boreholes, max_num_boreholes)
+
+        # update pump and pipe params
+        network_design_vol_flow = lps_to_cms(bh_vol_flow) * max_num_boreholes
+        network_pipe = Pipe(
+            dimension_ratio=pipe_params["diameter_ratio"],
+            length=self.total_network_pipe_length,
+            fluid_type=ghe_params["fluid"]["fluid_name"],
+            fluid_concentration=ghe_params["fluid"]["concentration_percent"],
+            fluid_temperature=ghe_params["fluid"]["temperature"],
+        )
+
+        design_pressure_loss_per_length = dist_sys_params["horizontal_piping_parameters"].get(
+            "pressure_drop_per_meter", 300
+        )  # Pa/m, defaults to 300 if not in sys_params
+        hydraulic_dia = network_pipe.size_hydraulic_diameter(network_design_vol_flow, design_pressure_loss_per_length)
+        pipe_params["hydraulic_diameter"] = hydraulic_dia
+
+        pump_params["pump_design_head"] = network_pipe.pressure_loss(network_design_vol_flow)
+        pump_params["pump_flow_rate"] = network_design_vol_flow
+
+        write_json(system_parameter_path, sys_params)
 
 
 def run_sizer_from_cli_worker(
@@ -683,7 +719,7 @@ def run_sizer_from_cli_worker(
         logger.warning(f"No input file found at {geojson_file_path}, aborting.")
         return 1
 
-    geojson_data: dict = json.loads(geojson_file_path.read_text())
+    geojson_data = load_json(geojson_file_path)
     # logger.debug(f"{geojson_data=}")
 
     # Check if the file exists
@@ -691,7 +727,7 @@ def run_sizer_from_cli_worker(
         logger.warning(f"No system_parameter.json file found at {system_parameter_path}, aborting.")
         return 1
 
-    system_parameters_data = json.loads(system_parameter_path.read_text())
+    system_parameters_data = load_json(system_parameter_path)
     ghe_parameters_data: dict = system_parameters_data["district_system"]["fifth_generation"]["ghe_parameters"]
 
     # Downselect the buildings in the geojson that are in the system parameters file
@@ -751,6 +787,13 @@ def run_sizer_from_cli_worker(
 
     reordered_features = network.reorder_connected_features(connected_features)
     logger.debug(f"Features in loop order: {reordered_features}\n")
+
+    total_network_length = 0
+    for idx_f, f in enumerate(geojson_data["features"]):
+        if "total_length" in f["properties"]:
+            total_network_length += f["properties"]["total_length"]
+
+    network.total_network_pipe_length = total_network_length
 
     bldg_groups_per_ghe = []
     feature_group = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}

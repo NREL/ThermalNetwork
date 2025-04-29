@@ -185,3 +185,5 @@ scenarioData.js
 sqlite.err
 started.job
 stdout-energyplus
+notebooks/
+.bundle/
