@@ -18,16 +18,17 @@ authors = [
   { name="Nathan Moore", email="nathan.moore@nrel.gov" },
 ]
 description = "A thermal network solver for GHE sizing."
-requires-python = ">=3.9,<3.13"
+requires-python = ">=3.9,<3.14"
 classifiers = [
-    "Development Status :: 4 - Beta",
-    "Topic :: Scientific/Engineering",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-]
+        "Development Status :: 4 - Beta",
+        "Topic :: Scientific/Engineering",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+    ]
 dependencies = [
   "click ~= 8.1",
   "ghedesigner ~= 1.5",
