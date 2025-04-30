@@ -675,8 +675,10 @@ class Network:
                     # Update system parameters dict with the new values
                     bh_len = ghe_data["active_borehole_length"]["value"]
                     num_boreholes = ghe_data["number_of_boreholes"]
-                    ghe_sys_params["borehole"]["length_of_boreholes"] = bh_len
-                    ghe_sys_params["borehole"]["number_of_boreholes"] = num_boreholes
+                    if ghe_sys_params["borehole"].get("length_of_boreholes_autosized"):
+                        ghe_sys_params["borehole"]["length_of_boreholes"] = bh_len
+                    if ghe_sys_params["borehole"].get("number_of_boreholes_autosized"):
+                        ghe_sys_params["borehole"]["number_of_boreholes"] = num_boreholes
 
                     max_num_boreholes = max(num_boreholes, max_num_boreholes)
 
@@ -694,10 +696,13 @@ class Network:
             "pressure_drop_per_meter", 300
         )  # Pa/m, defaults to 300 if not in sys_params
         hydraulic_dia = network_pipe.size_hydraulic_diameter(network_design_vol_flow, design_pressure_loss_per_length)
-        pipe_params["hydraulic_diameter"] = hydraulic_dia
+        if pipe_params.get("hydraulic_diameter_autosized"):
+            pipe_params["hydraulic_diameter"] = hydraulic_dia
 
-        pump_params["pump_design_head"] = network_pipe.pressure_loss(network_design_vol_flow)
-        pump_params["pump_flow_rate"] = network_design_vol_flow
+        if pump_params.get("pump_design_head_autosized"):
+            pump_params["pump_design_head"] = network_pipe.pressure_loss(network_design_vol_flow)
+        if pump_params.get("pump_design_flow_rate_autosized"):
+            pump_params["pump_flow_rate"] = network_design_vol_flow
 
         write_json(system_parameter_path, sys_params)
 
