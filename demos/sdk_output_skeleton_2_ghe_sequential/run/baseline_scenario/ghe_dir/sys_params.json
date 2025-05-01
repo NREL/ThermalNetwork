@@ -28,6 +28,7 @@
         "hot_water_supply_temp": 50,
         "cop_heat_pump_heating": 2.5,
         "cop_heat_pump_cooling": 3.5,
+        "cop_heat_pump_hot_water": 2.5,
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
@@ -65,6 +66,7 @@
         "hot_water_supply_temp": 50,
         "cop_heat_pump_heating": 2.5,
         "cop_heat_pump_cooling": 3.5,
+        "cop_heat_pump_hot_water": 2.5,
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
@@ -102,6 +104,7 @@
         "hot_water_supply_temp": 50,
         "cop_heat_pump_heating": 2.5,
         "cop_heat_pump_cooling": 3.5,
+        "cop_heat_pump_hot_water": 2.5,
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
@@ -120,7 +123,7 @@
         "undisturbed_temp": 18.3
       },
       "horizontal_piping_parameters": {
-        "hydraulic_diameter": 0.089,
+        "hydraulic_diameter": 0.07273636363636363,
         "insulation_thickness": 0.2,
         "insulation_conductivity": 2.3,
         "diameter_ratio": 11,
@@ -131,8 +134,8 @@
         "buried_depth": 1.5
       },
       "central_pump_parameters": {
-        "pump_design_head": 60000,
-        "pump_flow_rate": 0.01
+        "pump_design_head": 231189.49593337576,
+        "pump_flow_rate": 0.005
       },
       "ghe_parameters": {
         "version": "0.3.0",
@@ -182,8 +185,8 @@
             "borehole": {
               "buried_depth": 2.0,
               "diameter": 0.15,
-              "length_of_boreholes": 1.0,
-              "number_of_boreholes": 5
+              "length_of_boreholes": 131.5944125663502,
+              "number_of_boreholes": 25
             }
           },
           {
@@ -195,8 +198,8 @@
             "borehole": {
               "buried_depth": 2.0,
               "diameter": 0.15,
-              "length_of_boreholes": 1.0,
-              "number_of_boreholes": 5
+              "length_of_boreholes": 133.8384228875022,
+              "number_of_boreholes": 20
             }
           }
         ]
