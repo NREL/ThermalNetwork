@@ -391,7 +391,7 @@ class Network:
         ets_data["properties"] = props
         logger.debug(f"final ets_data: {ets_data}")
         ets = ETS(ets_data)
-        logger.info("made ETS")
+        logger.info(f"made ETS for: {ets.name.capitalize()}")
         # check size of space loads
         logger.debug(f"length of spaceloads: {len(ets.space_loads)}")
         logger.debug(f"space_loads_file: {props['space_loads_file']}")
