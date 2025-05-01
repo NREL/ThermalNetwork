@@ -17,4 +17,4 @@ class ComponentType(Enum):
 class HPType(Enum):
     HEATING = auto()
     COOLING = auto()
-    DWH = auto()
+    DHW = auto()
