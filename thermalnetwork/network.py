@@ -184,6 +184,7 @@ class Network:
                     "load_side_pump": "ets pump",
                     "source_side_pump": "ets pump",
                     "fan": "simple fan",
+                    "dhw": "dhw",
                     "space_loads_file": new_path,
                 }
             elif feature["type"] == "District System" and feature["district_system_type"] == "Ground Heat Exchanger":
@@ -318,6 +319,16 @@ class Network:
         obj["name"] = str(obj["name"]).strip().upper()
         self.components_data.append(obj)
 
+        # Add DHW
+        obj = {
+            "id": "",
+            "name": "dhw",
+            "type": "HEATPUMP",
+            "properties": {},
+        }
+        obj["name"] = str(obj["name"]).strip().upper()
+        self.components_data.append(obj)
+
         for comp in comp_data_list:
             if self.check_for_existing_component(comp["name"], comp["type"], throw) != 0:
                 return 1
@@ -386,6 +397,13 @@ class Network:
                 fan_data = self.get_component(fan_name, ComponentType.FAN)
                 props["fan"] = fan_data
 
+                dhw_name = str(props["dhw"]).strip().upper()
+                dhw_data = self.get_component(dhw_name, ComponentType.HEATPUMP)
+                props["dhw"] = dhw_data
+                props["dhw"]["properties"]["cop_heat_pump_hot_water"] = building["fifth_gen_ets_parameters"][
+                    "cop_heat_pump_hot_water"
+                ]
+
                 break
 
         ets_data["properties"] = props
@@ -425,6 +443,7 @@ class Network:
         # keep only 8760
         space_loads_df = space_loads_df.iloc[:8760]
         ets.space_loads = space_loads_df["TotalSensibleLoad"]
+        ets.dhw_loads = space_loads_df["TotalWaterHeating"]
         logger.warning(f"NEW length of spaceloads: {len(ets.space_loads)}")
         return ets
 
@@ -487,6 +506,7 @@ class Network:
         for comp in self.network:
             if comp.comp_type == ComponentType.ENERGYTRANSFERSTATION:
                 comp.set_network_loads()
+                # instantiates self.network_loads with the loads
             elif comp.comp_type == ComponentType.PUMP:
                 comp.set_network_loads(8760)
 
