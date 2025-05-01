@@ -1,3 +1,5 @@
+import json
+
 from thermalnetwork.network import run_sizer_from_cli_worker
 from thermalnetwork.tests.test_base import BaseCase
 
@@ -16,7 +18,17 @@ class TestSysParams(BaseCase):
             output_path,
         )
 
-        expected_outputs = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 5, "depth": 1.0}}
+        # -- Check
+        sys_params = json.loads(self.system_parameter_autosizing_path.read_text())
+        hydraulic_diameter = sys_params["district_system"]["fifth_generation"]["horizontal_piping_parameters"][
+            "hydraulic_diameter"
+        ]
+        pump_design_head = sys_params["district_system"]["fifth_generation"]["central_pump_parameters"][
+            "pump_design_head"
+        ]
 
-        self.check_outputs(output_path, expected_outputs)
+        assert hydraulic_diameter == self.original_hydraulic_diameter
+        assert pump_design_head != self.original_pump_design_head
+
+        # -- Clean up
         self.reset_sys_param(self.system_parameter_autosizing_path)
