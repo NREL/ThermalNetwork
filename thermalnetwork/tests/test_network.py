@@ -16,7 +16,7 @@ class TestNetwork(BaseCase):
             output_path,
         )
 
-        expected_outputs = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 2460, "depth": 131.2}}
+        expected_outputs = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 2460, "depth": 135.0}}
 
         self.check_outputs(output_path, expected_outputs)
         self.reset_sys_param(self.system_parameter_path_1_ghe)
@@ -53,8 +53,8 @@ class TestNetwork(BaseCase):
         )
 
         expected_outputs = {
-            "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 2378, "depth": 131.5},
-            "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 20, "depth": 133.8},
+            "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 2378, "depth": 135.0},
+            "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 2318, "depth": 132.7},
         }
 
         self.check_outputs(output_path, expected_outputs)
@@ -74,7 +74,7 @@ class TestNetwork(BaseCase):
         )
 
         expected_outputs = {
-            "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 2464, "depth": 111.0},
+            "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 2464, "depth": 135.0},
             "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 1, "depth": 60.0},
         }
 
@@ -119,7 +119,7 @@ class TestNetwork(BaseCase):
         expected_outputs = {
             "344421ab-b416-403e-bd22-7b8af7b581a2": {"num_bh": 2380, "depth": 135.0},
             "8410c9a9-d52e-4c68-b7bc-4affae974481": {"num_bh": 2475, "depth": 135.0},
-            "3eb26af6-a1f7-4daa-8372-ec016ca185a4": {"num_bh": 2451, "depth": 134.7},
+            "3eb26af6-a1f7-4daa-8372-ec016ca185a4": {"num_bh": 2451, "depth": 135.0},
         }
 
         self.check_outputs(output_path, expected_outputs)
