@@ -503,7 +503,7 @@
         "undisturbed_temp": 18.3
       },
       "horizontal_piping_parameters": {
-        "hydraulic_diameter": 0.3740727272727272,
+        "hydraulic_diameter": 0.089,
         "insulation_thickness": 0.2,
         "insulation_conductivity": 2.3,
         "diameter_ratio": 11,
@@ -514,8 +514,8 @@
         "buried_depth": 1.5
       },
       "central_pump_parameters": {
-        "pump_design_head": 874638.9809078038,
-        "pump_flow_rate": 0.49500000000000005
+        "pump_design_head": 60000,
+        "pump_flow_rate": 0.01
       },
       "ghe_parameters": {
         "version": "0.3.0",
@@ -565,8 +565,8 @@
             "borehole": {
               "buried_depth": 2.0,
               "diameter": 0.15,
-              "length_of_boreholes": 135.0,
-              "number_of_boreholes": 2380
+              "length_of_boreholes": 1.0,
+              "number_of_boreholes": 5
             }
           },
           {
@@ -578,8 +578,8 @@
             "borehole": {
               "buried_depth": 2.0,
               "diameter": 0.15,
-              "length_of_boreholes": 135.0,
-              "number_of_boreholes": 2475
+              "length_of_boreholes": 1.0,
+              "number_of_boreholes": 5
             }
           },
           {
@@ -591,8 +591,8 @@
             "borehole": {
               "buried_depth": 2.0,
               "diameter": 0.15,
-              "length_of_boreholes": 134.7119112637823,
-              "number_of_boreholes": 1131
+              "length_of_boreholes": 1.0,
+              "number_of_boreholes": 5
             }
           }
         ]
