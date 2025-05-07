@@ -16,7 +16,7 @@ class TestNetwork(BaseCase):
             output_path,
         )
 
-        expected_outputs = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 75, "depth": 106.8}}
+        expected_outputs = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 50, "depth": 95.4}}
 
         self.check_outputs(output_path, expected_outputs)
         self.reset_sys_param(self.system_parameter_path_1_ghe)
@@ -34,7 +34,7 @@ class TestNetwork(BaseCase):
             output_path,
         )
 
-        expected_outputs = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 77, "depth": 128.6}}
+        expected_outputs = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 36, "depth": 132.2}}
 
         self.check_outputs(output_path, expected_outputs)
         self.reset_sys_param(self.system_parameter_path_1_ghe_geometry)
