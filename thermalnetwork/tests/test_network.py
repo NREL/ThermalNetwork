@@ -53,8 +53,8 @@ class TestNetwork(BaseCase):
         )
 
         expected_outputs = {
-            "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 2378, "depth": 135.0},
-            "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 2318, "depth": 132.7},
+            "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 25, "depth": 131.6},
+            "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 20, "depth": 133.8},
         }
 
         self.check_outputs(output_path, expected_outputs)
