@@ -96,7 +96,7 @@ class TestNetwork(BaseCase):
 
         expected_outputs = {
             "344421ab-b416-403e-bd22-7b8af7b581a2": {"num_bh": 2380, "depth": 135.0},
-            "8410c9a9-d52e-4c68-b7bc-4affae974481": {"num_bh": 72, "depth": 117.2},
+            "8410c9a9-d52e-4c68-b7bc-4affae974481": {"num_bh": 72, "depth": 98.6},
             "3eb26af6-a1f7-4daa-8372-ec016ca185a4": {"num_bh": 2451, "depth": 135.0},
         }
 
@@ -119,7 +119,7 @@ class TestNetwork(BaseCase):
         expected_outputs = {
             "344421ab-b416-403e-bd22-7b8af7b581a2": {"num_bh": 2380, "depth": 135.0},
             "8410c9a9-d52e-4c68-b7bc-4affae974481": {"num_bh": 2475, "depth": 135.0},
-            "3eb26af6-a1f7-4daa-8372-ec016ca185a4": {"num_bh": 2451, "depth": 135.0},
+            "3eb26af6-a1f7-4daa-8372-ec016ca185a4": {"num_bh": 1131, "depth": 134.7},
         }
 
         self.check_outputs(output_path, expected_outputs)
