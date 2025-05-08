@@ -674,11 +674,9 @@ class Network:
                 if ghe_sys_params["ghe_id"] == ghe_id:
                     # Update system parameters dict with the new values
                     bh_len = ghe_data["active_borehole_length"]["value"]
+                    num_boreholes = ghe_data["number_of_boreholes"]
                     if ghe_sys_params["borehole"].get("number_of_boreholes_autosized"):
-                        num_boreholes = ghe_data["number_of_boreholes"]
                         ghe_sys_params["borehole"]["number_of_boreholes"] = num_boreholes
-                    else:
-                        num_boreholes = ghe_sys_params["borehole"]["number_of_boreholes"]
                     if ghe_sys_params["borehole"].get("length_of_boreholes_autosized"):
                         ghe_sys_params["borehole"]["length_of_boreholes"] = bh_len
 
