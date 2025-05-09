@@ -227,7 +227,7 @@ class Network:
                     "loads": {"ground_loads": []},
                 }
             else:
-                raise ValueError(f"feature {feature["type"]} not supported")
+                raise ValueError(f"feature {feature['type']} not supported")
 
             converted_features.append(
                 {"id": feature["id"], "name": feature["name"], "type": feature_type, "properties": properties}
