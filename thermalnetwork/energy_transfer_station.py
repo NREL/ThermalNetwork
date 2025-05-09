@@ -21,13 +21,12 @@ class ETS(BaseComponent):
         self.load_fan = Fan(props["fan"])
         self.space_loads_file = props["space_loads_file"]
         space_loads_df = pd.read_csv(self.space_loads_file)
-        # self.space_loads = space_loads_df["TotalSensibleLoad"].values
         self.heating_loads = space_loads_df["TotalHeatingSensibleLoad"].to_numpy()
         self.cooling_loads = space_loads_df["TotalCoolingSensibleLoad"].apply(abs).to_numpy()
         self.dhw_loads = space_loads_df["TotalWaterHeating"].to_numpy()
 
     def get_loads(self):
-        num_loads = len(self.space_loads)
+        num_loads = len(self.heating_loads)
 
         # total cooling loads - only accounting for terminal unit fan and load side pump on cooling
         # so we don't double count them

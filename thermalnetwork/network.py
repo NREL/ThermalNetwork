@@ -413,9 +413,10 @@ class Network:
         ets = ETS(ets_data)
         logger.info("made ETS")
         # check size of space loads
-        logger.debug(f"length of spaceloads: {len(ets.space_loads)}")
+        logger.debug(f"length of heating loads: {len(ets.heating_loads)}")
         logger.debug(f"space_loads_file: {props['space_loads_file']}")
-        if len(ets.space_loads) != 8760:
+        # If any loads aren't hourly for a year, make them so
+        if any(len(lst) != 8760 for lst in [ets.heating_loads, ets.cooling_loads, ets.dhw_loads]):
             self.make_loads_hourly(ets_data["properties"], ets)
         self.network.append(ets)
         return 0
@@ -444,9 +445,10 @@ class Network:
         space_loads_df = space_loads_df.resample("h").interpolate(method="linear")
         # keep only 8760
         space_loads_df = space_loads_df.iloc[:8760]
-        ets.space_loads = space_loads_df["TotalSensibleLoad"]
+        ets.heating_loads = space_loads_df["TotalHeatingSensibleLoad"]
+        ets.cooling_loads = space_loads_df["TotalCoolingSensibleLoad"]
         ets.dhw_loads = space_loads_df["TotalWaterHeating"]
-        logger.warning(f"NEW length of spaceloads: {len(ets.space_loads)}")
+        logger.warning(f"NEW length of heating loads: {len(ets.heating_loads)}")
         return ets
 
     def add_ghe_to_network(self, name: str):
@@ -494,16 +496,6 @@ class Network:
 
         If a component does not have network loads set, it will not affect the overall sizing process.
         """
-
-        # len_loads = []
-
-        # for comp in self.network:
-        #    if comp.comp_type == ComponentType.ENERGYTRANSFERSTATION:
-        #        len_loads.append(len(comp.space_loads))
-        # print(f"len_loads: {len_loads}")
-        # check if all ets space loads have the same length
-        # if not all([x == len_loads[0] for x in len_loads]):
-        #    raise ValueError("Not all loads are of equal length")
 
         for comp in self.network:
             if comp.comp_type == ComponentType.ENERGYTRANSFERSTATION:
