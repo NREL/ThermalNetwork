@@ -293,8 +293,6 @@ class Network:
             "name": "ets pump",
             "type": "PUMP",
             "properties": {
-                "design_flow_rate": 0.0005,
-                "design_head": 0,
                 "motor_efficiency": 0.9,
                 "motor_inefficiency_to_fluid_stream": 1.0,
             },
@@ -307,7 +305,7 @@ class Network:
             "id": "",
             "name": "simple fan",
             "type": "FAN",
-            "properties": {"design_flow_rate": 0.25, "design_head": 0, "motor_efficiency": 0.6},
+            "properties": {"motor_efficiency": 0.6},
         }
         obj["name"] = str(obj["name"]).strip().upper()
         self.components_data.append(obj)
@@ -390,14 +388,30 @@ class Network:
                 load_pump_name = str(props["load_side_pump"]).strip().upper()
                 load_pump_data = self.get_component(load_pump_name, ComponentType.PUMP)
                 props["load_side_pump"] = load_pump_data
+                props["load_side_pump"]["properties"]["design_flow_rate"] = building["fifth_gen_ets_parameters"][
+                    "ets_pump_flow_rate"
+                ]
+                props["load_side_pump"]["properties"]["design_head"] = building["fifth_gen_ets_parameters"][
+                    "ets_pump_head"
+                ]
 
                 src_pump_name = str(props["source_side_pump"]).strip().upper()
                 src_pump_data = self.get_component(src_pump_name, ComponentType.PUMP)
                 props["source_side_pump"] = src_pump_data
+                props["source_side_pump"]["properties"]["design_flow_rate"] = building["fifth_gen_ets_parameters"][
+                    "ets_pump_flow_rate"
+                ]
+                props["source_side_pump"]["properties"]["design_head"] = building["fifth_gen_ets_parameters"][
+                    "ets_pump_head"
+                ]
 
                 fan_name = str(props["fan"]).strip().upper()
                 fan_data = self.get_component(fan_name, ComponentType.FAN)
                 props["fan"] = fan_data
+                props["fan"]["properties"]["design_flow_rate"] = building["fifth_gen_ets_parameters"][
+                    "fan_design_flow_rate"
+                ]
+                props["fan"]["properties"]["design_head"] = building["fifth_gen_ets_parameters"]["fan_design_head"]
 
                 dhw_name = str(props["dhw"]).strip().upper()
                 dhw_data = self.get_component(dhw_name, ComponentType.HEATPUMP)
