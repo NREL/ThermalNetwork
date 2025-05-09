@@ -14,7 +14,15 @@ class ComponentType(Enum):
     PUMP = auto()
 
 
-class HPType(Enum):
+class HeatPumpType(Enum):
     HEATING = auto()
     COOLING = auto()
     DHW = auto()
+
+
+class FluidTypes(Enum):
+    ETHYLALCOHOL = auto()
+    ETHYLENEGLYCOL = auto()
+    METHYLALCOHOL = auto()
+    PROPYLENEGLYCOL = auto()
+    WATER = auto()

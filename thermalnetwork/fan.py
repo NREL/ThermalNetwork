@@ -1,3 +1,5 @@
+import numpy as np
+
 from thermalnetwork.base_component import BaseComponent
 from thermalnetwork.enums import ComponentType
 
@@ -11,4 +13,4 @@ class Fan(BaseComponent):
         self.motor_efficiency = props["motor_efficiency"]
 
     def get_loads(self, num_loads):
-        return [self.des_flow * self.des_head / self.motor_efficiency] * num_loads
+        return np.array([self.des_flow * self.des_head / self.motor_efficiency] * num_loads)

@@ -226,6 +226,9 @@ class Network:
                     "design": self.ghe_parameters["design"],
                     "loads": {"ground_loads": []},
                 }
+            else:
+                raise ValueError(f"feature {feature["type"]} not supported")
+
             converted_features.append(
                 {"id": feature["id"], "name": feature["name"], "type": feature_type, "properties": properties}
             )
@@ -346,7 +349,6 @@ class Network:
         """
 
         for comp in self.components_data:
-            # print(f"comp: {comp}\n")
             if comp["name"] == name and comp_type.name == comp["type"]:
                 return comp
 

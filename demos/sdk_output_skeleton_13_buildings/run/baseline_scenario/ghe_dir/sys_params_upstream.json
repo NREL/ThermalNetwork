@@ -32,7 +32,7 @@
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -70,7 +70,7 @@
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -108,7 +108,7 @@
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -146,7 +146,7 @@
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -184,7 +184,7 @@
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -222,7 +222,7 @@
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -260,7 +260,7 @@
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -298,7 +298,7 @@
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -336,7 +336,7 @@
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -374,7 +374,7 @@
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -412,7 +412,7 @@
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -450,7 +450,7 @@
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -488,7 +488,7 @@
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],

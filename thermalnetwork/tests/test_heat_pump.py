@@ -1,6 +1,6 @@
 import pytest
 
-from thermalnetwork.heat_pump import HP
+from thermalnetwork.heat_pump import HeatPump
 from thermalnetwork.tests.test_base import BaseCase
 
 
@@ -10,9 +10,9 @@ class TestHeatPump(BaseCase):
         data = {"name": "WSHP", "type": "HEATPUMP", "properties": {"cop_c": 3.5, "cop_h": 2.5, "cop_dhw": 2.5}}
 
         # -- Run
-        heating_hp = HP(data["name"], data["properties"]["cop_h"], "heating")
-        cooling_hp = HP(data["name"], data["properties"]["cop_c"], "cooling")
-        dhw_hp = HP(data["name"], data["properties"]["cop_dhw"], "dhw")
+        heating_hp = HeatPump(data["name"], data["properties"]["cop_h"], "heating")
+        cooling_hp = HeatPump(data["name"], data["properties"]["cop_c"], "cooling")
+        dhw_hp = HeatPump(data["name"], data["properties"]["cop_dhw"], "dhw")
 
         # -- Check
         assert heating_hp.name == "WSHP"
