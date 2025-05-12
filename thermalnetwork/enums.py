@@ -12,3 +12,17 @@ class ComponentType(Enum):
     GROUNDHEATEXCHANGER = auto()
     HEATPUMP = auto()
     PUMP = auto()
+
+
+class HeatPumpType(Enum):
+    HEATING = auto()
+    COOLING = auto()
+    DHW = auto()
+
+
+class FluidTypes(Enum):
+    ETHYLALCOHOL = auto()
+    ETHYLENEGLYCOL = auto()
+    METHYLALCOHOL = auto()
+    PROPYLENEGLYCOL = auto()
+    WATER = auto()

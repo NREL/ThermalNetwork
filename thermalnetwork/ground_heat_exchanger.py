@@ -1,5 +1,4 @@
 import logging
-import os
 import shutil
 from pathlib import Path
 
@@ -103,6 +102,10 @@ class GHE(BaseComponent):
         logger.debug(f"creating directory: {output_file_directory}")
         output_file_directory.mkdir(parents=True)
 
+        # write input file for debugging
+        input_file = output_file_directory / "in.json"
+        ghe.write_input_file(input_file)
+
         ground_loads_df = pd.DataFrame(self.json_data["loads"]["ground_loads"])
         file_name = output_file_directory / "ground_loads.csv"
         logger.info(f"saving loads to: {file_name}")
@@ -120,10 +123,3 @@ class GHE(BaseComponent):
         # selected_coordinates = ghe.results.borehole_location_data_rows  # includes a header row
         logger.debug("Done writing output")
         return u_tube_height
-
-    def get_atlanta_loads(self) -> list[float]:
-        # read in the csv file and convert the loads to a list of length 8760
-        current_file_directory = Path(os.path.dirname(os.path.abspath(__file__)))
-        glhe_json_data = current_file_directory / "test_data" / "Atlanta_Office_Building_Loads.csv"
-        raw_lines = glhe_json_data.read_text().split("\n")
-        return [float(x) for x in raw_lines[1:] if x.strip() != ""]
