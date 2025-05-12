@@ -155,12 +155,7 @@ class Network:
             "id": "0",
             "name": "primary pump",
             "type": "PUMP",
-            "properties": {
-                "design_flow_rate": 0.01,
-                "design_head": 0,
-                "motor_efficiency": 0.9,
-                "motor_inefficiency_to_fluid_stream": 1.0,
-            },
+            "properties": {"design_flow_rate": 0.01, "design_head": 0},
         }
         converted_features.append(obj)
 
@@ -235,9 +230,9 @@ class Network:
 
         return converted_features
 
-    def set_design(self, des_method_str: str, throw: bool = True) -> int:
+    def set_ghe_design_method(self, des_method_str: str, throw: bool = True) -> int:
         """
-        Designate the network design method.
+        Designate the ghe design method.
 
         :param des_method_str: design method string
         :param throw: by default, function will raise an exception on error.
@@ -326,8 +321,6 @@ class Network:
                     "name": "ETS PUMP",
                     "type": "PUMP",
                     "properties": {
-                        "motor_efficiency": 0.9,
-                        "motor_inefficiency_to_fluid_stream": 1.0,
                         "design_flow_rate": building["fifth_gen_ets_parameters"]["ets_pump_flow_rate"],
                         "design_head": building["fifth_gen_ets_parameters"]["ets_pump_head"],
                     },
@@ -338,8 +331,6 @@ class Network:
                     "name": "ETS PUMP",
                     "type": "PUMP",
                     "properties": {
-                        "motor_efficiency": 0.9,
-                        "motor_inefficiency_to_fluid_stream": 1.0,
                         "design_flow_rate": building["fifth_gen_ets_parameters"]["ets_pump_flow_rate"],
                         "design_head": building["fifth_gen_ets_parameters"]["ets_pump_head"],
                     },
@@ -350,7 +341,6 @@ class Network:
                     "name": "SIMPLE FAN",
                     "type": "FAN",
                     "properties": {
-                        "motor_efficiency": 0.6,
                         "design_flow_rate": building["fifth_gen_ets_parameters"]["fan_design_flow_rate"],
                         "design_head": building["fifth_gen_ets_parameters"]["fan_design_head"],
                     },
@@ -797,7 +787,7 @@ def run_sizer_from_cli_worker(
 
     # begin populating structures in preparation for sizing
     errors = 0
-    errors += network.set_design(des_method_str=ghe_design_data["method"], throw=True)
+    errors += network.set_ghe_design_method(des_method_str=ghe_design_data["method"], throw=True)
     network.set_component_network_loads()
     # print(f"components_data: {network.components_data}\n")
 
