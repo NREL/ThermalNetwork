@@ -155,12 +155,7 @@ class Network:
             "id": "0",
             "name": "primary pump",
             "type": "PUMP",
-            "properties": {
-                "design_flow_rate": 0.01,
-                "design_head": 0,
-                "motor_efficiency": 0.9,
-                "motor_inefficiency_to_fluid_stream": 1.0,
-            },
+            "properties": {"design_flow_rate": 0.01, "design_head": 0},
         }
         converted_features.append(obj)
 
@@ -184,6 +179,7 @@ class Network:
                     "load_side_pump": "ets pump",
                     "source_side_pump": "ets pump",
                     "fan": "simple fan",
+                    "dhw": "dhw",
                     "space_loads_file": new_path,
                 }
             elif feature["type"] == "District System" and feature["district_system_type"] == "Ground Heat Exchanger":
@@ -225,15 +221,18 @@ class Network:
                     "design": self.ghe_parameters["design"],
                     "loads": {"ground_loads": []},
                 }
+            else:
+                raise ValueError(f"feature {feature['type']} not supported")
+
             converted_features.append(
                 {"id": feature["id"], "name": feature["name"], "type": feature_type, "properties": properties}
             )
 
         return converted_features
 
-    def set_design(self, des_method_str: str, throw: bool = True) -> int:
+    def set_ghe_design_method(self, des_method_str: str, throw: bool = True) -> int:
         """
-        Designate the network design method.
+        Designate the ghe design method.
 
         :param des_method_str: design method string
         :param throw: by default, function will raise an exception on error.
@@ -272,59 +271,6 @@ class Network:
                 return 1
         return 0
 
-    def set_components(self, comp_data_list: list[dict], throw: bool = True):
-        """
-        Sets up the components of the thermal network.
-
-        :param comp_data_list: list of dictionaries containing component data.
-        :param throw: by default, function will raise an exception on error.
-                        override to "False" to not raise exception
-        :returns: zero if successful, nonzero if failure
-        """
-
-        # TODO: replace all hard-coded values with sys-param data
-        # Add ets pump
-        obj = {
-            "id": "",
-            "name": "ets pump",
-            "type": "PUMP",
-            "properties": {
-                "design_flow_rate": 0.0005,
-                "design_head": 0,
-                "motor_efficiency": 0.9,
-                "motor_inefficiency_to_fluid_stream": 1.0,
-            },
-        }
-        obj["name"] = str(obj["name"]).strip().upper()
-        self.components_data.append(obj)
-
-        # Add fan
-        obj = {
-            "id": "",
-            "name": "simple fan",
-            "type": "FAN",
-            "properties": {"design_flow_rate": 0.25, "design_head": 0, "motor_efficiency": 0.6},
-        }
-        obj["name"] = str(obj["name"]).strip().upper()
-        self.components_data.append(obj)
-
-        # Add WAHP
-        obj = {
-            "id": "",
-            "name": "small wahp",
-            "type": "HEATPUMP",
-            "properties": {},
-        }
-        obj["name"] = str(obj["name"]).strip().upper()
-        self.components_data.append(obj)
-
-        for comp in comp_data_list:
-            if self.check_for_existing_component(comp["name"], comp["type"], throw) != 0:
-                return 1
-            comp["name"] = str(comp["name"]).strip().upper()
-            self.components_data.append(comp)
-        return 0
-
     def get_component(self, name: str, comp_type: ComponentType):
         """
         Retrieves a component by name and type from a list of component_data dicts.
@@ -335,27 +281,23 @@ class Network:
         """
 
         for comp in self.components_data:
-            # print(f"comp: {comp}\n")
             if comp["name"] == name and comp_type.name == comp["type"]:
                 return comp
 
-    def add_ets_to_network(self, name: str, component_id: str):
+    def add_ets_to_network(self, ets_data: dict):
         """
         Adds an Energy Transfer Station (ETS) to the network.
 
-        :param name: The name of the ETS to be added.
-        :param component_id: The component ID which is the geojson feature (building) associated with the ETS.
+        :param ets_data: information about the ETS
         :return: Zero if successful, nonzero if failure.
 
-        This function first retrieves the ETS data by its name and type.
-        It then modifies the ETS data to include the appropriate heat pump, load pump, source pump, and fan components.
+        This function modifies the ETS data to include the appropriate
+        heat pump, load pump, source pump, and fan components.
         After updating the ETS data, it creates a new ETS object and adds it to the network.
 
         Returns zero if the ETS is successfully added to the network, or a nonzero value if there is an error.
         """
 
-        name_uc = name.strip().upper()
-        ets_data = self.get_component(name_uc, ComponentType.ENERGYTRANSFERSTATION)
         logger.debug(f"ets_data: {ets_data}")
         props = ets_data["properties"]
         logger.debug(f"props: {props}")
@@ -363,28 +305,55 @@ class Network:
         # Read sys param for user-defined values
         sys_param_buildings_data = self.system_parameters_data["buildings"]
         for building in sys_param_buildings_data:
-            if building["geojson_id"] == component_id:
-                hp_name = str(props["heat_pump"]).strip().upper()
-                hp_data = self.get_component(hp_name, ComponentType.HEATPUMP)
-                props["heat_pump"] = hp_data
-                props["heat_pump"]["properties"]["cop_c"] = building["fifth_gen_ets_parameters"][
-                    "cop_heat_pump_cooling"
-                ]
-                props["heat_pump"]["properties"]["cop_h"] = building["fifth_gen_ets_parameters"][
-                    "cop_heat_pump_heating"
-                ]
+            if building["geojson_id"] == ets_data["id"]:
+                props["heat_pump"] = {
+                    "id": "",
+                    "name": "SMALL WAHP",
+                    "type": "HEATPUMP",
+                    "properties": {
+                        "cop_c": building["fifth_gen_ets_parameters"]["cop_heat_pump_cooling"],
+                        "cop_h": building["fifth_gen_ets_parameters"]["cop_heat_pump_heating"],
+                    },
+                }
 
-                load_pump_name = str(props["load_side_pump"]).strip().upper()
-                load_pump_data = self.get_component(load_pump_name, ComponentType.PUMP)
-                props["load_side_pump"] = load_pump_data
+                props["load_side_pump"] = {
+                    "id": "",
+                    "name": "ETS PUMP",
+                    "type": "PUMP",
+                    "properties": {
+                        "design_flow_rate": building["fifth_gen_ets_parameters"]["ets_pump_flow_rate"],
+                        "design_head": building["fifth_gen_ets_parameters"]["ets_pump_head"],
+                    },
+                }
 
-                src_pump_name = str(props["source_side_pump"]).strip().upper()
-                src_pump_data = self.get_component(src_pump_name, ComponentType.PUMP)
-                props["source_side_pump"] = src_pump_data
+                props["source_side_pump"] = {
+                    "id": "",
+                    "name": "ETS PUMP",
+                    "type": "PUMP",
+                    "properties": {
+                        "design_flow_rate": building["fifth_gen_ets_parameters"]["ets_pump_flow_rate"],
+                        "design_head": building["fifth_gen_ets_parameters"]["ets_pump_head"],
+                    },
+                }
 
-                fan_name = str(props["fan"]).strip().upper()
-                fan_data = self.get_component(fan_name, ComponentType.FAN)
-                props["fan"] = fan_data
+                props["fan"] = {
+                    "id": "",
+                    "name": "SIMPLE FAN",
+                    "type": "FAN",
+                    "properties": {
+                        "design_flow_rate": building["fifth_gen_ets_parameters"]["fan_design_flow_rate"],
+                        "design_head": building["fifth_gen_ets_parameters"]["fan_design_head"],
+                    },
+                }
+
+                props["dhw"] = {
+                    "id": "",
+                    "name": "DHW",
+                    "type": "HEATPUMP",
+                    "properties": {
+                        "cop_heat_pump_hot_water": building["fifth_gen_ets_parameters"]["cop_heat_pump_hot_water"]
+                    },
+                }
 
                 break
 
@@ -393,9 +362,10 @@ class Network:
         ets = ETS(ets_data)
         logger.info(f"made ETS for: {ets.name.capitalize()}")
         # check size of space loads
-        logger.debug(f"length of spaceloads: {len(ets.space_loads)}")
+        logger.debug(f"length of heating loads: {len(ets.heating_loads)}")
         logger.debug(f"space_loads_file: {props['space_loads_file']}")
-        if len(ets.space_loads) != 8760:
+        # If any loads aren't hourly for a year, make them so
+        if any(len(lst) != 8760 for lst in [ets.heating_loads, ets.cooling_loads, ets.dhw_loads]):
             self.make_loads_hourly(ets_data["properties"], ets)
         self.network.append(ets)
         return 0
@@ -424,41 +394,36 @@ class Network:
         space_loads_df = space_loads_df.resample("h").interpolate(method="linear")
         # keep only 8760
         space_loads_df = space_loads_df.iloc[:8760]
-        ets.space_loads = space_loads_df["TotalSensibleLoad"]
-        logger.warning(f"NEW length of spaceloads: {len(ets.space_loads)}")
+        ets.heating_loads = space_loads_df["TotalHeatingSensibleLoad"]
+        ets.cooling_loads = space_loads_df["TotalCoolingSensibleLoad"]
+        ets.dhw_loads = space_loads_df["TotalWaterHeating"]
+        logger.warning(f"NEW length of heating loads: {len(ets.heating_loads)}")
         return ets
 
-    def add_ghe_to_network(self, name: str):
+    def add_ghe_to_network(self, ghe_data: dict):
         """
         Adds a Ground Heat Exchanger (GHE) to the network.
 
-        :param name: The name of the GHE to be added.
+        :param ghe_data: information about the GHE
         :return: Zero if successful, nonzero if failure.
 
-        This function first retrieves the GHE data by its name and type from the list of components in the network.
-        It then creates a new GHE object and adds it to the network.
+        This function creates a new GHE object and adds it to the network.
         """
 
-        name_uc = name.strip().upper()
-        ghe_data = self.get_component(name_uc, ComponentType.GROUNDHEATEXCHANGER)
-        # print(f"ghe_data: {ghe_data}\n")
         ghe = GHE(ghe_data)
         self.network.append(ghe)
         return 0
 
-    def add_pump_to_network(self, name: str):
+    def add_pump_to_network(self, pump_data: dict) -> int:
         """
         Adds a Pump to the network.
 
-        :param name: The name of the Pump to be added.
+        :param pump_data: information about the pump
         :return: Zero if successful, nonzero if failure.
 
-        This function first retrieves the Pump data by its name and type from the list of components in the network.
-        It then creates a new Pump object and adds it to the network.
+        This function creates a new Pump object and adds it to the network.
         """
 
-        name_uc = name.strip().upper()
-        pump_data = self.get_component(name_uc, ComponentType.PUMP)
         pump = Pump(pump_data)
         self.network.append(pump)
         return 0
@@ -474,19 +439,10 @@ class Network:
         If a component does not have network loads set, it will not affect the overall sizing process.
         """
 
-        # len_loads = []
-
-        # for comp in self.network:
-        #    if comp.comp_type == ComponentType.ENERGYTRANSFERSTATION:
-        #        len_loads.append(len(comp.space_loads))
-        # print(f"len_loads: {len_loads}")
-        # check if all ets space loads have the same length
-        # if not all([x == len_loads[0] for x in len_loads]):
-        #    raise ValueError("Not all loads are of equal length")
-
         for comp in self.network:
             if comp.comp_type == ComponentType.ENERGYTRANSFERSTATION:
                 comp.set_network_loads()
+                # instantiates self.network_loads with the loads
             elif comp.comp_type == ComponentType.PUMP:
                 comp.set_network_loads(8760)
 
@@ -836,21 +792,18 @@ def run_sizer_from_cli_worker(
 
     # begin populating structures in preparation for sizing
     errors = 0
-    errors += network.set_design(des_method_str=ghe_design_data["method"], throw=True)
-    errors += network.set_components(network_data, throw=True)
+    errors += network.set_ghe_design_method(des_method_str=ghe_design_data["method"], throw=True)
+    network.set_component_network_loads()
     # print(f"components_data: {network.components_data}\n")
-    # pprint(network.components_data)
 
     for component in network_data:
-        comp_name = str(component["name"]).strip().upper()
         comp_type_str = str(component["type"]).strip().upper()
-        component_id = str(component["id"]).strip()
         if comp_type_str == ComponentType.ENERGYTRANSFERSTATION.name:
-            errors += network.add_ets_to_network(comp_name, component_id)
+            errors += network.add_ets_to_network(component)
         elif comp_type_str == ComponentType.GROUNDHEATEXCHANGER.name:
-            errors += network.add_ghe_to_network(comp_name)
+            errors += network.add_ghe_to_network(component)
         elif comp_type_str == ComponentType.PUMP.name:
-            errors += network.add_pump_to_network(comp_name)
+            errors += network.add_pump_to_network(component)
         else:
             logger.error(f"Unsupported component type, {comp_type_str}")
             errors += 1
@@ -858,7 +811,6 @@ def run_sizer_from_cli_worker(
     if errors != 0:
         return 1
 
-    network.set_component_network_loads()
     network.size(output_directory_path)
     network.update_sys_params(system_parameter_path, output_directory_path)
 

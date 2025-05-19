@@ -28,10 +28,11 @@
         "hot_water_supply_temp": 50,
         "cop_heat_pump_heating": 2.5,
         "cop_heat_pump_cooling": 3.5,
+        "cop_heat_pump_hot_water": 2.5,
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -65,10 +66,11 @@
         "hot_water_supply_temp": 50,
         "cop_heat_pump_heating": 2.6,
         "cop_heat_pump_cooling": 3.4,
+        "cop_heat_pump_hot_water": 2.5,
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -102,10 +104,11 @@
         "hot_water_supply_temp": 50,
         "cop_heat_pump_heating": 2.1,
         "cop_heat_pump_cooling": 3.1,
+        "cop_heat_pump_hot_water": 2.2,
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -139,10 +142,11 @@
         "hot_water_supply_temp": 50,
         "cop_heat_pump_heating": 2.5,
         "cop_heat_pump_cooling": 3.5,
+        "cop_heat_pump_hot_water": 2.5,
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -176,10 +180,11 @@
         "hot_water_supply_temp": 50,
         "cop_heat_pump_heating": 2.5,
         "cop_heat_pump_cooling": 3.5,
+        "cop_heat_pump_hot_water": 2.5,
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -213,10 +218,11 @@
         "hot_water_supply_temp": 50,
         "cop_heat_pump_heating": 2.5,
         "cop_heat_pump_cooling": 3.5,
+        "cop_heat_pump_hot_water": 2.5,
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -250,10 +256,11 @@
         "hot_water_supply_temp": 50,
         "cop_heat_pump_heating": 2.5,
         "cop_heat_pump_cooling": 3.5,
+        "cop_heat_pump_hot_water": 2.5,
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -287,10 +294,11 @@
         "hot_water_supply_temp": 50,
         "cop_heat_pump_heating": 2.5,
         "cop_heat_pump_cooling": 3.5,
+        "cop_heat_pump_hot_water": 2.5,
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -324,10 +332,11 @@
         "hot_water_supply_temp": 50,
         "cop_heat_pump_heating": 2.5,
         "cop_heat_pump_cooling": 3.5,
+        "cop_heat_pump_hot_water": 2.5,
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -361,10 +370,11 @@
         "hot_water_supply_temp": 50,
         "cop_heat_pump_heating": 2.5,
         "cop_heat_pump_cooling": 3.5,
+        "cop_heat_pump_hot_water": 2.5,
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -398,10 +408,11 @@
         "hot_water_supply_temp": 50,
         "cop_heat_pump_heating": 2.5,
         "cop_heat_pump_cooling": 3.5,
+        "cop_heat_pump_hot_water": 2.5,
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -435,10 +446,11 @@
         "hot_water_supply_temp": 50,
         "cop_heat_pump_heating": 2.5,
         "cop_heat_pump_cooling": 3.5,
+        "cop_heat_pump_hot_water": 2.5,
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
@@ -472,10 +484,11 @@
         "hot_water_supply_temp": 50,
         "cop_heat_pump_heating": 2.5,
         "cop_heat_pump_cooling": 3.5,
+        "cop_heat_pump_hot_water": 2.5,
         "ets_pump_flow_rate": 0.0005,
         "ets_pump_head": 10000,
         "fan_design_flow_rate": 0.25,
-        "fan_design_head": 150
+        "fan_design_head": 250
       },
       "photovoltaic_panels": [],
       "diesel_generators": [],
