@@ -298,9 +298,9 @@ class Network:
         Returns zero if the ETS is successfully added to the network, or a nonzero value if there is an error.
         """
 
-        logger.debug(f"ets_data: {ets_data}")
+        logger.debug(f"ETS data: {ets_data}")
         props = ets_data["properties"]
-        logger.debug(f"props: {props}")
+        logger.debug(f"ETS properties: {props}")
 
         # Read sys param for user-defined values
         sys_param_buildings_data = self.system_parameters_data["buildings"]
