@@ -67,6 +67,10 @@ class BaseCase(TestCase):
             self.scenario_directory_path_13_buildings / "ghe_dir" / "sys_params_proportional.json"
         ).resolve()
 
+        self.system_parameter_autosizing_path = (
+            self.scenario_directory_path_1_ghe / "ghe_dir" / "sys_params_autosizing.json"
+        ).resolve()
+
         # -- Output paths
         self.test_outputs_path = here.resolve() / "test_outputs"
         self.test_outputs_path.mkdir(exist_ok=True)
