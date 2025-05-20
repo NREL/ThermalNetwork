@@ -3,7 +3,6 @@ import shutil
 from pathlib import Path
 
 import pandas as pd
-from ghedesigner.manager import GHEManager
 from rich.logging import RichHandler
 
 from thermalnetwork.base_component import BaseComponent
