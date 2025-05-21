@@ -24,6 +24,7 @@ class ETS(BaseComponent):
         self.heating_loads = space_loads_df["TotalHeatingSensibleLoad"].to_numpy()
         self.cooling_loads = space_loads_df["TotalCoolingSensibleLoad"].apply(abs).to_numpy()
         self.dhw_loads = space_loads_df["TotalWaterHeating"].to_numpy()
+        self.network_loads = None
 
     def get_loads(self):
         num_loads = len(self.heating_loads)

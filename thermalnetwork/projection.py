@@ -12,7 +12,7 @@ def meters_to_long_lat_factors(origin_lon_lat=(0, 0)):
     The resulting factors obey the WSG84 assumptions for the radius of the earth
     at the equator relative to the poles.
 
-    :param origin_long_lat: An array of two numbers in degrees. The first value
+    :param origin_lon_lat: An array of two numbers in degrees. The first value
         represents the longitude of the scene origin in degrees (between -180
         and +180). The second value represents latitude of the scene origin
         in degrees (between -90 and +90). Default: (0, 0).

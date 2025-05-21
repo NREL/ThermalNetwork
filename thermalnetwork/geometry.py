@@ -105,7 +105,7 @@ def rotate(point, angle, origin):
     sin_a = math.sin(angle_rad)
     qx = cos_a * trans_pt[0] - sin_a * trans_pt[1]
     qy = sin_a * trans_pt[0] + cos_a * trans_pt[1]
-    return (qx + origin[0], qy + origin[1])
+    return qx + origin[0], qy + origin[1]
 
 
 def rotate_polygon_to_axes(polygon):

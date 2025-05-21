@@ -30,7 +30,7 @@ classifiers = [
 ]
 dependencies = [
   "click ~= 8.1",
-  "ghedesigner @ git+https://github.com/BETSRG/GHEDesigner.git@c56287b6c809c8b26789f39b518c7671f0183d8b",
+  "ghedesigner @ git+https://github.com/BETSRG/GHEDesigner.git@eec5600a17f6d4943d3ceb0e91e30088886e2cbc",
   "pandas ~= 2.0",
   "rich ~= 13.0",
   "SecondaryCoolantProps ~= 1.3"

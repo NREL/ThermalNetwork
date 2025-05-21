@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 from rich.logging import RichHandler
 
+from thermalnetwork import HOURS_IN_YEAR
 from thermalnetwork.base_component import BaseComponent
 from thermalnetwork.energy_transfer_station import ETS
 from thermalnetwork.enums import ComponentType, DesignType
@@ -175,10 +176,10 @@ class Network:
                     logger.error(f"BUILDING_LOADS.CSV NOT FOUND! {new_path}")
                     return 1
                 properties = {
-                    "heat_pump": "small wahp",
-                    "load_side_pump": "ets pump",
-                    "source_side_pump": "ets pump",
-                    "fan": "simple fan",
+                    "heat_pump": "wahp",
+                    "load_side_pump": "ets load-side pump",
+                    "source_side_pump": "ets source-side pump",
+                    "fan": "fan",
                     "dhw": "dhw",
                     "space_loads_file": new_path,
                 }
@@ -192,10 +193,10 @@ class Network:
                     # convert detailed geometry coordinates to meters
                     lat_long_polys = feature["geometry"]["coordinates"]
                     origin_lon_lat = lower_left_point(lat_long_polys[0])
-                    convert_facs = meters_to_long_lat_factors(origin_lon_lat)
+                    convert_factors = meters_to_long_lat_factors(origin_lon_lat)
                     ghe_polygons = []
                     for poly in lat_long_polys:
-                        coords = lon_lat_to_polygon(poly, origin_lon_lat, convert_facs)
+                        coords = lon_lat_to_polygon(poly, origin_lon_lat, convert_factors)
                         ghe_polygons.append(coords)
                     ghe_polygons = rotate_polygon_to_axes(ghe_polygons)
                     # set geometric constraints to be dictated by the polygons
@@ -230,13 +231,11 @@ class Network:
 
         return converted_features
 
-    def set_ghe_design_method(self, des_method_str: str, throw: bool = True) -> int:
+    def set_ghe_design_method(self, des_method_str: str):
         """
         Designate the ghe design method.
 
         :param des_method_str: design method string
-        :param throw: by default, function will raise an exception on error.
-                      override to "False" to not raise exception
         :returns: zero if successful, nonzero if failure
         :rtype: int
         """
@@ -248,28 +247,20 @@ class Network:
         elif des_method_str == DesignType.UPSTREAM.name:
             self.des_method = DesignType.UPSTREAM
         else:
-            if throw:
-                logger.error(f"Design method '{des_method_str}' not supported.")
-            return 1
-        return 0
+            logger.error(f"Design method '{des_method_str}' not supported.")
 
-    def check_for_existing_component(self, name: str, comp_type_str: str, throw: bool = True):
+    def check_for_existing_component(self, name: str, comp_type_str: str):
         """
         Checks if a component with the given name and type already exists in the network.
 
         :param name: The name of the component to check for.
         :param comp_type_str: The type of the component to check for.
-        :param throw: A boolean indicating whether an error should be thrown if the component already exists.
-            Defaults to True.
         :return: Zero if the component does not exist, nonzero if it does.
         """
 
         for comp in self.components_data:
             if comp["name"] == name and comp["type"] == comp_type_str:
-                if throw:
-                    logger.error(f'Duplicate {comp_type_str} name "{name}" encountered.')
-                return 1
-        return 0
+                logger.error(f'Duplicate {comp_type_str} name "{name}" encountered.')
 
     def get_component(self, name: str, comp_type: ComponentType):
         """
@@ -283,6 +274,8 @@ class Network:
         for comp in self.components_data:
             if comp["name"] == name and comp_type.name == comp["type"]:
                 return comp
+
+        raise ValueError(f'Component not found. Name: "{name}"; Type: "{comp_type.name}".')
 
     def add_ets_to_network(self, ets_data: dict):
         """
@@ -308,7 +301,7 @@ class Network:
             if building["geojson_id"] == ets_data["id"]:
                 props["heat_pump"] = {
                     "id": "",
-                    "name": "SMALL WAHP",
+                    "name": "WAHP",
                     "type": "HEATPUMP",
                     "properties": {
                         "cop_c": building["fifth_gen_ets_parameters"]["cop_heat_pump_cooling"],
@@ -318,7 +311,7 @@ class Network:
 
                 props["load_side_pump"] = {
                     "id": "",
-                    "name": "ETS PUMP",
+                    "name": "ETS LOAD-SIDE PUMP",
                     "type": "PUMP",
                     "properties": {
                         "design_flow_rate": building["fifth_gen_ets_parameters"]["ets_pump_flow_rate"],
@@ -328,7 +321,7 @@ class Network:
 
                 props["source_side_pump"] = {
                     "id": "",
-                    "name": "ETS PUMP",
+                    "name": "ETS SOURCE-SIDE PUMP",
                     "type": "PUMP",
                     "properties": {
                         "design_flow_rate": building["fifth_gen_ets_parameters"]["ets_pump_flow_rate"],
@@ -338,7 +331,7 @@ class Network:
 
                 props["fan"] = {
                     "id": "",
-                    "name": "SIMPLE FAN",
+                    "name": "FAN",
                     "type": "FAN",
                     "properties": {
                         "design_flow_rate": building["fifth_gen_ets_parameters"]["fan_design_flow_rate"],
@@ -364,13 +357,14 @@ class Network:
         # check size of space loads
         logger.debug(f"length of heating loads: {len(ets.heating_loads)}")
         logger.debug(f"space_loads_file: {props['space_loads_file']}")
+
         # If any loads aren't hourly for a year, make them so
-        if any(len(lst) != 8760 for lst in [ets.heating_loads, ets.cooling_loads, ets.dhw_loads]):
+        if any(len(lst) != HOURS_IN_YEAR for lst in [ets.heating_loads, ets.cooling_loads, ets.dhw_loads]):
             self.make_loads_hourly(ets_data["properties"], ets)
         self.network.append(ets)
-        return 0
 
-    def make_loads_hourly(self, properties: dict, ets: ETS):
+    @staticmethod
+    def make_loads_hourly(properties: dict, ets: ETS):
         # TODO: test this method
         """
         This method interpolates the space loads to hourly values.
@@ -392,8 +386,8 @@ class Network:
         space_loads_df = pd.concat([space_loads_df, new_data])
         # interpolate data to hourly
         space_loads_df = space_loads_df.resample("h").interpolate(method="linear")
-        # keep only 8760
-        space_loads_df = space_loads_df.iloc[:8760]
+        # keep only HOURS_IN_YEAR
+        space_loads_df = space_loads_df.iloc[:HOURS_IN_YEAR]
         ets.heating_loads = space_loads_df["TotalHeatingSensibleLoad"]
         ets.cooling_loads = space_loads_df["TotalCoolingSensibleLoad"]
         ets.dhw_loads = space_loads_df["TotalWaterHeating"]
@@ -412,7 +406,6 @@ class Network:
 
         ghe = GHE(ghe_data)
         self.network.append(ghe)
-        return 0
 
     def add_pump_to_network(self, pump_data: dict) -> int:
         """
@@ -426,25 +419,24 @@ class Network:
 
         pump = Pump(pump_data)
         self.network.append(pump)
-        return 0
 
     def set_component_network_loads(self):
         """
         This method sets the network loads for each component in the network.
 
         For each component in the network, this method checks if the component type is an Energy Transfer Station (ETS).
-        If it is, the method calls the set_network_loads method of the component.
-        If the component type is a Pump, the method sets the network loads to 8760 (the number of hours in a year).
+        If it is, the method calls the set_source_loads method of the component.
+        If the component type is a Pump, the method sets the network loads to HOURS_IN_YEAR.
 
         If a component does not have network loads set, it will not affect the overall sizing process.
         """
 
         for comp in self.network:
             if comp.comp_type == ComponentType.ENERGYTRANSFERSTATION:
-                comp.set_network_loads()
+                comp.set_source_loads()
                 # instantiates self.network_loads with the loads
             elif comp.comp_type == ComponentType.PUMP:
-                comp.set_network_loads(8760)
+                comp.set_source_loads(HOURS_IN_YEAR)
 
     def size_area_proportional(self, output_path: Path):
         """
@@ -488,7 +480,7 @@ class Network:
         logger.info(f"total_ghe_area: {total_ghe_area}")
 
         # Initialize an array to store the summed loads for each hour of the year
-        total_network_loads = [0] * 8760
+        total_network_loads = [0] * HOURS_IN_YEAR
 
         for i in other_indexes:
             # ETS .get_loads() doesnt take num_loads arg
@@ -512,7 +504,7 @@ class Network:
         for i in ghe_indexes:
             ghe_area = self.network[i].area
             self.network[i].json_data["loads"]["ground_loads"] = np.array(network_load_per_area) * ghe_area
-            self.network[i].ghe_size(sum(network_load_per_area) * ghe_area, output_path)
+            self.network[i].ghe_size(output_path)
 
     def size_to_upstream_equipment(self, output_path: Path):
         """
@@ -531,7 +523,7 @@ class Network:
         # find all objects between each groundheatexchanger
         # size to those buildings
 
-        ghe_indexes = []  # This will store the indexes of all GROUNDHEATEXCHANGER devices
+        ghe_indexes = []
 
         for i, device in enumerate(self.network):
             logger.debug(f"Network Index {i}: {device}")
@@ -540,6 +532,7 @@ class Network:
 
         logger.info("GROUNDHEATEXCHANGER indices in network:")
         logger.info(ghe_indexes)
+
         # slice the self.network by ghe_indexes
         for i, ghe_index in enumerate(ghe_indexes):
             if i == 0:  # first GHE
@@ -549,7 +542,7 @@ class Network:
             logger.info(f"Devices before GHE at index {ghe_index}: {devices_before_ghe}")
 
             # Initialize an array to store the summed network loads for each hour of the year
-            network_loads = [0] * 8760
+            network_loads = [0] * HOURS_IN_YEAR
             for device in devices_before_ghe:
                 # ETS .get_loads() doesnt take num_loads arg
                 if device.comp_type != ComponentType.ENERGYTRANSFERSTATION:
@@ -566,10 +559,11 @@ class Network:
 
             logger.info(f"Total network loads for devices before GHE: {sum(network_loads)}")
             self.network[ghe_index].json_data["loads"]["ground_loads"] = network_loads
-            # call ghe_size() with total load
-            self.network[ghe_index].ghe_size(sum(network_loads), output_path)
 
-    def size(self, output_path: Path, throw: bool = True):
+            # call ghe_size() with total load
+            self.network[ghe_index].ghe_size(output_path)
+
+    def size(self, output_path: Path):
         """
         High-level sizing call that handles any lower-level calls or iterations.
         """
@@ -579,10 +573,9 @@ class Network:
         elif self.des_method == DesignType.UPSTREAM:
             self.size_to_upstream_equipment(output_path)
         else:
-            if throw:
-                logger.error(f"Unsupported design method {self.des_method}")
-            return 1
-        return 0
+            msg = f"Unsupported design method {self.des_method}"
+            logger.error(msg)
+            raise ValueError(msg)
 
     def update_sys_params(self, system_parameter_path: Path, output_directory_path: Path) -> None:
         """
@@ -681,7 +674,6 @@ def run_sizer_from_cli_worker(
         return 1
 
     geojson_data = load_json(geojson_file_path)
-    # logger.debug(f"{geojson_data=}")
 
     # Check if the file exists
     if not system_parameter_path.exists():
@@ -697,8 +689,6 @@ def run_sizer_from_cli_worker(
     building_id_list = []
     for building in system_parameters_data["buildings"]:
         building_id_list.append(building["geojson_id"])
-
-    # logger.debug(f"{building_id_list=}")
 
     # Select the buildings in the geojson that are in the system parameters file
     building_features = [
@@ -721,13 +711,6 @@ def run_sizer_from_cli_worker(
     # Only add the buildings in the system parameters file back to the geojson data
     # This has the effect of removing buildings that are not in the system parameters file
     geojson_data["features"].extend(building_features)
-
-    # print("Building features:")
-    # for feature in geojson_data["features"]:
-    #     if feature["properties"]["type"] == "Building":
-    #         print(feature["properties"])
-    #         print("")
-    # logger.debug(f"Feature :: {feature['properties']['type']}: {feature['properties']['id']}")
 
     # load all input data
     sys_param_version: str = ghe_parameters_data["version"]
@@ -784,32 +767,23 @@ def run_sizer_from_cli_worker(
         loop_order_file.write("\n")
 
     # convert geojson type "Building","District System" to "ENERGYTRANSFERSTATION",
-    # "GROUNDHEATEXCHANGER" and add properties
     network_data: list[dict] = network.convert_features(connected_features)
-    # logger.debug(f"{network_data=}\n")
-    # network_data: list[dict] = data["network"]
-    # component_data: list[dict] = data["components"]
 
     # begin populating structures in preparation for sizing
-    errors = 0
-    errors += network.set_ghe_design_method(des_method_str=ghe_design_data["method"], throw=True)
+    network.set_ghe_design_method(des_method_str=ghe_design_data["method"])
     network.set_component_network_loads()
     # print(f"components_data: {network.components_data}\n")
 
     for component in network_data:
         comp_type_str = str(component["type"]).strip().upper()
         if comp_type_str == ComponentType.ENERGYTRANSFERSTATION.name:
-            errors += network.add_ets_to_network(component)
+            network.add_ets_to_network(component)
         elif comp_type_str == ComponentType.GROUNDHEATEXCHANGER.name:
-            errors += network.add_ghe_to_network(component)
+            network.add_ghe_to_network(component)
         elif comp_type_str == ComponentType.PUMP.name:
-            errors += network.add_pump_to_network(component)
+            network.add_pump_to_network(component)
         else:
             logger.error(f"Unsupported component type, {comp_type_str}")
-            errors += 1
-
-    if errors != 0:
-        return 1
 
     network.size(output_directory_path)
     network.update_sys_params(system_parameter_path, output_directory_path)
@@ -839,16 +813,6 @@ def run_sizer_from_cli(system_parameter_file, scenario_directory, geojson_file, 
 
     :param output_directory: path to output directory
     """
-
-    # if validate:
-    #    try:
-    #        validate_input_file(input_path)
-    #        print("Valid input file.")
-    #        return 0
-    #    except ValidationError:
-    #        print("Schema validation error. See previous error message(s) for details.", file=stderr)
-    #        return 1
-    # calling the worker function here
 
     logger.debug(f"{system_parameter_file=}")
     logger.debug(f"{scenario_directory=}")

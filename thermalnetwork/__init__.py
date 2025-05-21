@@ -1,0 +1,1 @@
+HOURS_IN_YEAR = 8760
