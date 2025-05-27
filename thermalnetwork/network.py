@@ -1,4 +1,3 @@
-import json
 import logging
 import sys
 from copy import deepcopy
@@ -231,7 +230,7 @@ class Network:
 
         return converted_features
 
-    def set_ghe_design_method(self, des_method_str: str):
+    def set_ghe_design_method(self, des_method_str: str) -> None:
         """
         Designate the ghe design method.
 
@@ -249,7 +248,7 @@ class Network:
         else:
             logger.error(f"Design method '{des_method_str}' not supported.")
 
-    def check_for_existing_component(self, name: str, comp_type_str: str):
+    def check_for_existing_component(self, name: str, comp_type_str: str) -> None:
         """
         Checks if a component with the given name and type already exists in the network.
 
@@ -343,9 +342,7 @@ class Network:
                     "id": "",
                     "name": "DHW",
                     "type": "HEATPUMP",
-                    "properties": {
-                        "cop_heat_pump_hot_water": building["fifth_gen_ets_parameters"]["cop_heat_pump_hot_water"]
-                    },
+                    "properties": {"cop_dhw": building["fifth_gen_ets_parameters"]["cop_heat_pump_hot_water"]},
                 }
 
                 break
@@ -394,7 +391,7 @@ class Network:
         logger.warning(f"NEW length of heating loads: {len(ets.heating_loads)}")
         return ets
 
-    def add_ghe_to_network(self, ghe_data: dict):
+    def add_ghe_to_network(self, ghe_data: dict) -> None:
         """
         Adds a Ground Heat Exchanger (GHE) to the network.
 
@@ -407,7 +404,7 @@ class Network:
         ghe = GHE(ghe_data)
         self.network.append(ghe)
 
-    def add_pump_to_network(self, pump_data: dict) -> int:
+    def add_pump_to_network(self, pump_data: dict) -> None:
         """
         Adds a Pump to the network.
 
@@ -420,25 +417,7 @@ class Network:
         pump = Pump(pump_data)
         self.network.append(pump)
 
-    def set_component_network_loads(self):
-        """
-        This method sets the network loads for each component in the network.
-
-        For each component in the network, this method checks if the component type is an Energy Transfer Station (ETS).
-        If it is, the method calls the set_source_loads method of the component.
-        If the component type is a Pump, the method sets the network loads to HOURS_IN_YEAR.
-
-        If a component does not have network loads set, it will not affect the overall sizing process.
-        """
-
-        for comp in self.network:
-            if comp.comp_type == ComponentType.ENERGYTRANSFERSTATION:
-                comp.set_source_loads()
-                # instantiates self.network_loads with the loads
-            elif comp.comp_type == ComponentType.PUMP:
-                comp.set_source_loads(HOURS_IN_YEAR)
-
-    def size_area_proportional(self, output_path: Path):
+    def size_area_proportional(self, output_path: Path) -> None:
         """
         Sizing method for area proportional approach.
 
@@ -461,52 +440,32 @@ class Network:
         other_indexes = []  # This will store the indexes of all other devices
 
         for i, device in enumerate(self.network):
-            logger.debug(f"Network Index {i}: {device}")
             if device.comp_type == ComponentType.GROUNDHEATEXCHANGER:
                 ghe_indexes.append(i)
             else:
                 other_indexes.append(i)
 
-        logger.info("GROUNDHEATEXCHANGER indices in network:")
-        logger.info(ghe_indexes)
-        logger.info("Other equipment indices in network:")
-        logger.info(other_indexes)
-
         total_ghe_area = 0
         for i in ghe_indexes:
             ghe_area = self.network[i].area
-            logger.info(f"{self.network[i]}.area: {ghe_area}")
             total_ghe_area += ghe_area
-        logger.info(f"total_ghe_area: {total_ghe_area}")
 
         # Initialize an array to store the summed loads for each hour of the year
-        total_network_loads = [0] * HOURS_IN_YEAR
+        total_network_loads = np.zeros(HOURS_IN_YEAR)
 
-        for i in other_indexes:
-            # ETS .get_loads() doesnt take num_loads arg
-            device = self.network[i]
-            if device.comp_type != ComponentType.ENERGYTRANSFERSTATION:
-                logger.debug(f"{device.comp_type}.get_loads: {device.get_loads(1)}")
-                device_load = device.get_loads(1)
-                # Add the scalar load to the total space loads for each hour of the year
-                total_network_loads = np.array(total_network_loads) + device_load[0]
-            else:
-                logger.debug(f"{device.comp_type}.get_loads len: {len(device.get_loads())}")
-                device_loads = device.get_loads()
-                # Add the array of loads for each hour to the total space loads array
-                total_network_loads = np.array(total_network_loads) + np.array(device_loads)
+        for comp in self.network:
+            if comp.comp_type is not ComponentType.GROUNDHEATEXCHANGER:
+                total_network_loads += comp.get_loads()
 
-        logger.info(f"Total network loads for devices: {sum(total_network_loads)}")
-
-        network_load_per_area = np.array(total_network_loads) / total_ghe_area
+        network_load_per_area = total_network_loads / total_ghe_area
 
         # loop over GHEs and size per area
         for i in ghe_indexes:
             ghe_area = self.network[i].area
             self.network[i].json_data["loads"]["ground_loads"] = np.array(network_load_per_area) * ghe_area
-            self.network[i].ghe_size(output_path)
+            self.network[i].size(output_path)
 
-    def size_to_upstream_equipment(self, output_path: Path):
+    def size_to_upstream_equipment(self, output_path: Path) -> None:
         """
         Sizing method for upstream equipment approach.
 
@@ -526,12 +485,8 @@ class Network:
         ghe_indexes = []
 
         for i, device in enumerate(self.network):
-            logger.debug(f"Network Index {i}: {device}")
             if device.comp_type == ComponentType.GROUNDHEATEXCHANGER:
                 ghe_indexes.append(i)
-
-        logger.info("GROUNDHEATEXCHANGER indices in network:")
-        logger.info(ghe_indexes)
 
         # slice the self.network by ghe_indexes
         for i, ghe_index in enumerate(ghe_indexes):
@@ -539,31 +494,25 @@ class Network:
                 devices_before_ghe = self.network[:ghe_index]
             else:
                 devices_before_ghe = self.network[ghe_indexes[i - 1] + 1 : ghe_index]
-            logger.info(f"Devices before GHE at index {ghe_index}: {devices_before_ghe}")
 
             # Initialize an array to store the summed network loads for each hour of the year
-            network_loads = [0] * HOURS_IN_YEAR
+            network_loads = np.zeros(HOURS_IN_YEAR)
             for device in devices_before_ghe:
-                # ETS .get_loads() doesnt take num_loads arg
                 if device.comp_type != ComponentType.ENERGYTRANSFERSTATION:
-                    logger.debug(f"{device.comp_type}.get_loads: {device.get_loads(1)}")
-                    device_load = device.get_loads(1)
+                    device_load = device.get_loads()
                     # Add the scalar load to the total space loads for each hour of the year
-                    network_loads = np.array(network_loads) + device_load[0]
-
+                    network_loads = network_loads + device_load[0]
                 else:
-                    logger.debug(f"{device.comp_type}.get_loads len: {len(device.get_loads())}")
                     device_loads = device.get_loads()
                     # Add the array of loads for each hour to the total space loads array
-                    network_loads = np.array(network_loads) + np.array(device_loads)
+                    network_loads = network_loads + np.array(device_loads)
 
-            logger.info(f"Total network loads for devices before GHE: {sum(network_loads)}")
             self.network[ghe_index].json_data["loads"]["ground_loads"] = network_loads
 
-            # call ghe_size() with total load
-            self.network[ghe_index].ghe_size(output_path)
+            # call size() with total load
+            self.network[ghe_index].size(output_path)
 
-    def size(self, output_path: Path):
+    def size(self, output_path: Path) -> None:
         """
         High-level sizing call that handles any lower-level calls or iterations.
         """
@@ -636,7 +585,7 @@ class Network:
         network_pipe = Pipe(
             dimension_ratio=pipe_params["diameter_ratio"],
             length=self.total_network_pipe_length,
-            fluid_type=ghe_params["fluid"]["fluid_name"],
+            fluid_type_str=ghe_params["fluid"]["fluid_name"],
             fluid_concentration=ghe_params["fluid"]["concentration_percent"],
             fluid_temperature=ghe_params["fluid"]["temperature"],
         )
@@ -686,20 +635,24 @@ def run_sizer_from_cli_worker(
     # Downselect the buildings in the geojson that are in the system parameters file
 
     # List the building ids from the system parameters file
-    building_id_list = []
+    sys_param_building_ids = []
     for building in system_parameters_data["buildings"]:
-        building_id_list.append(building["geojson_id"])
+        sys_param_building_ids.append(building["geojson_id"])
 
     # Select the buildings in the geojson that are in the system parameters file
-    building_features = [
-        feature
-        for feature in geojson_data["features"]
-        if feature["properties"]["type"] == "Building" and feature["properties"]["id"] in building_id_list
-    ]
+    building_features = [feature for feature in geojson_data["features"] if feature["properties"]["type"] == "Building"]
+
+    geojson_feature_ids = [feature["properties"]["id"] for feature in building_features]
 
     if len(building_features) == 0:
         logger.error(
             'No buildings found. Ensure the GeoJSON "Feature" "id" keys match the system \n'
+            'parameter file "geojson_id" key values for the respective buildings.'
+        )
+
+    if set(sys_param_building_ids) != set(geojson_feature_ids):
+        logger.error(
+            'Building entries in the GeoJSON "Feature" "id" keys do not match the system \n'
             'parameter file "geojson_id" key values for the respective buildings.'
         )
 
@@ -761,18 +714,13 @@ def run_sizer_from_cli_worker(
     # save loop order to file next to sys-params for temporary use by the GMT
     # Prepending an underscore to emphasize these as temporary files
     loop_order_filepath = system_parameter_path.parent.resolve() / "_loop_order.json"
-    with open(loop_order_filepath, "w") as loop_order_file:
-        json.dump(bldg_groups_per_ghe, loop_order_file, indent=2)
-        # Add a trailing newline to the file
-        loop_order_file.write("\n")
+    write_json(loop_order_filepath, bldg_groups_per_ghe)
 
     # convert geojson type "Building","District System" to "ENERGYTRANSFERSTATION",
     network_data: list[dict] = network.convert_features(connected_features)
 
     # begin populating structures in preparation for sizing
     network.set_ghe_design_method(des_method_str=ghe_design_data["method"])
-    network.set_component_network_loads()
-    # print(f"components_data: {network.components_data}\n")
 
     for component in network_data:
         comp_type_str = str(component["type"]).strip().upper()

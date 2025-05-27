@@ -4,6 +4,8 @@ from unittest import TestCase
 
 from click.testing import CliRunner
 
+from thermalnetwork.utilities import write_json
+
 
 class BaseCase(TestCase):
     def setUp(self) -> None:
@@ -124,7 +126,4 @@ class BaseCase(TestCase):
                 "number_of_boreholes"
             ] = self.original_num_boreholes
 
-        with open(sys_param_path, "w") as f:
-            json.dump(sys_param, f, indent=2)
-            # Restore the trailing newline
-            f.write("\n")
+        write_json(sys_param_path, sys_param)

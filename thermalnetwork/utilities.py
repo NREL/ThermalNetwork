@@ -27,6 +27,7 @@ def inch_to_m(x_inch: float) -> float:
 def write_json(write_path: Path, input_dict: dict, indent: int = 2, sort_keys: bool = False) -> None:
     with write_path.open("w") as f:
         f.write(json.dumps(input_dict, sort_keys=sort_keys, indent=indent, separators=(",", ": ")))
+        f.write("\n")
 
 
 def load_json(read_path: Path) -> dict:

@@ -156,4 +156,18 @@ def rotate_polygon_to_axes(polygon):
     rotated_polygon = []
     for o_poly in polygon:
         rotated_polygon.append([rotate(pt, rot_ang, origin) for pt in o_poly])
+
+    # ensure all points are positive, shift if not
+    x_shift = 0
+    y_shift = 0
+
+    for this_polygon in rotated_polygon:
+        for coord_pair in this_polygon:
+            if coord_pair[0] < 0:
+                x_shift = max(abs(coord_pair[0]), x_shift)
+            if coord_pair[1] < 0:
+                y_shift = max(abs(coord_pair[1]), y_shift)
+
+    rotated_polygon = [[(x + x_shift, y + y_shift) for x, y in this_polygon] for this_polygon in rotated_polygon]
+
     return rotated_polygon

@@ -35,7 +35,17 @@ class GHE(BaseComponent):
             width = self.json_data["geometric_constraints"]["width"]
             self.area = length * width
 
-    def ghe_size(self, output_path: Path):
+        borehole_data = self.json_data["borehole"]
+
+        if (
+            borehole_data["length_of_boreholes_autosized"] is True
+            or borehole_data["number_of_boreholes_autosized"] is True
+        ):
+            self.autosize = True
+        else:
+            self.autosize = False
+
+    def size(self, output_path: Path) -> None:
         # ghe output directory
         ghe_dir = output_path / self.id
 
@@ -107,7 +117,7 @@ class GHE(BaseComponent):
         logger.debug(f"creating directory: {ghe_dir}")
         ghe_dir.mkdir(parents=True)
         ghe_input_file = ghe_dir / "in.json"
-        write_json(ghe_input_file, d)
+        write_json(ghe_input_file, d, sort_keys=True)
 
         # size ghe
         logger.debug("running ghe sizing")
