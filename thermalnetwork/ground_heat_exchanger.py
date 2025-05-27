@@ -96,6 +96,7 @@ class GHE(BaseComponent):
                         "max_height": self.json_data["geometric_constraints"]["max_height"],
                         "min_height": self.json_data["geometric_constraints"]["min_height"],
                         "max_boreholes": 2500,
+                        "continue_if_design_unmet": True,
                     },
                     "loads": self.json_data["loads"]["ground_loads"].tolist(),
                 }

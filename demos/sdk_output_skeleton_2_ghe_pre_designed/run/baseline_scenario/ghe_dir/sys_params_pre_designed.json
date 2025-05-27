@@ -46,7 +46,7 @@
       },
       "ghe_parameters": {
         "design": {
-          "flow_rate": 0.2,
+          "flow_rate": 0.5,
           "flow_type": "borehole",
           "max_eft": 35.0,
           "method": "AREAPROPORTIONAL",
@@ -152,8 +152,8 @@
         "pipe": {
           "arrangement": "singleutube",
           "conductivity": 0.4,
-          "inner_diameter": 0.0216,
-          "outer_diameter": 0.0266,
+          "inner_diameter": 0.034036,
+          "outer_diameter": 0.042164,
           "rho_cp": 1542000,
           "roughness": 1e-06,
           "shank_spacing": 0.0323

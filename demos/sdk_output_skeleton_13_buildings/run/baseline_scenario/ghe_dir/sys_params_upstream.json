@@ -504,7 +504,7 @@
       },
       "horizontal_piping_parameters": {
         "hydraulic_diameter_autosized": true,
-        "hydraulic_diameter": 0.089,
+        "hydraulic_diameter": 0.0935181818181818,
         "insulation_thickness": 0.2,
         "insulation_conductivity": 2.3,
         "diameter_ratio": 11,
@@ -516,7 +516,7 @@
       },
       "central_pump_parameters": {
         "pump_design_head_autosized": true,
-        "pump_design_head": 60000,
+        "pump_design_head": 158326.96294916267,
         "pump_design_flow_rate_autosized": true,
         "pump_flow_rate": 0.01
       },
@@ -533,8 +533,8 @@
           "rho_cp": 3901000
         },
         "pipe": {
-          "inner_diameter": 0.0216,
-          "outer_diameter": 0.0266,
+          "inner_diameter": 0.034036,
+          "outer_diameter": 0.042164,
           "shank_spacing": 0.0323,
           "roughness": 1e-06,
           "conductivity": 0.4,
@@ -553,7 +553,7 @@
         },
         "design": {
           "method": "UPSTREAM",
-          "flow_rate": 0.2,
+          "flow_rate": 0.5,
           "flow_type": "borehole",
           "max_eft": 35.0,
           "min_eft": 5.0
@@ -569,9 +569,9 @@
               "buried_depth": 2.0,
               "diameter": 0.15,
               "length_of_boreholes_autosized": true,
-              "length_of_boreholes": 1.0,
+              "length_of_boreholes": 89.52500007543662,
               "number_of_boreholes_autosized": true,
-              "number_of_boreholes": 5
+              "number_of_boreholes": 50
             }
           },
           {
@@ -584,9 +584,9 @@
               "buried_depth": 2.0,
               "diameter": 0.15,
               "length_of_boreholes_autosized": true,
-              "length_of_boreholes": 1.0,
+              "length_of_boreholes": 89.52500007543662,
               "number_of_boreholes_autosized": true,
-              "number_of_boreholes": 5
+              "number_of_boreholes": 50
             }
           },
           {
@@ -599,9 +599,9 @@
               "buried_depth": 2.0,
               "diameter": 0.15,
               "length_of_boreholes_autosized": true,
-              "length_of_boreholes": 1.0,
+              "length_of_boreholes": 89.52500007543662,
               "number_of_boreholes_autosized": true,
-              "number_of_boreholes": 5
+              "number_of_boreholes": 50
             }
           }
         ]

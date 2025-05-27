@@ -496,18 +496,11 @@ class Network:
                 devices_before_ghe = self.network[ghe_indexes[i - 1] + 1 : ghe_index]
 
             # Initialize an array to store the summed network loads for each hour of the year
-            network_loads = np.zeros(HOURS_IN_YEAR)
+            ghe_load = np.zeros(HOURS_IN_YEAR)
             for device in devices_before_ghe:
-                if device.comp_type != ComponentType.ENERGYTRANSFERSTATION:
-                    device_load = device.get_loads()
-                    # Add the scalar load to the total space loads for each hour of the year
-                    network_loads = network_loads + device_load[0]
-                else:
-                    device_loads = device.get_loads()
-                    # Add the array of loads for each hour to the total space loads array
-                    network_loads = network_loads + np.array(device_loads)
+                ghe_load += device.get_loads()
 
-            self.network[ghe_index].json_data["loads"]["ground_loads"] = network_loads
+            self.network[ghe_index].json_data["loads"]["ground_loads"] = ghe_load
 
             # call size() with total load
             self.network[ghe_index].size(output_path)
