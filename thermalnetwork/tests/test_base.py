@@ -16,60 +16,58 @@ class BaseCase(TestCase):
         # -- Input paths
         self.demos_path = here.parent.parent / "demos"
 
-        self.geojson_file_path_1_ghe = (self.demos_path / "sdk_output_skeleton_1_ghe" / "network.geojson").resolve()
+        self.geojson_path_1_ghe = (self.demos_path / "sdk_output_skeleton_1_ghe" / "network.geojson").resolve()
         self.scenario_directory_path_1_ghe = (
             self.demos_path / "sdk_output_skeleton_1_ghe" / "run" / "baseline_scenario"
         ).resolve()
 
-        self.system_parameter_path_1_ghe = (
-            self.scenario_directory_path_1_ghe / "ghe_dir" / "sys_params.json"
+        self.sys_param_path_1_ghe = (self.scenario_directory_path_1_ghe / "ghe_dir" / "sys_params.json").resolve()
+
+        self.sys_param_path_1_ghe_detailed_geometry = (
+            self.scenario_directory_path_1_ghe / "ghe_dir" / "sys_params_detailed_geometry.json"
         ).resolve()
 
-        self.system_parameter_path_1_ghe_geometry = (
-            self.scenario_directory_path_1_ghe / "ghe_dir" / "sys_params_detailed_geo.json"
-        ).resolve()
-
-        self.geojson_file_path_2_ghe_sequential = (
+        self.geojson_path_2_ghe_sequential = (
             self.demos_path / "sdk_output_skeleton_2_ghe_sequential" / "network.geojson"
         ).resolve()
 
-        self.scenario_directory_path_2_ghe_sequential = (
+        self.scenario_dir_2_ghe_sequential = (
             self.demos_path / "sdk_output_skeleton_2_ghe_sequential" / "run" / "baseline_scenario"
         ).resolve()
 
-        self.system_parameter_path_2_ghe_sequential = (
-            self.scenario_directory_path_2_ghe_sequential / "ghe_dir" / "sys_params.json"
+        self.sys_param_path_2_ghe_sequential = (
+            self.scenario_dir_2_ghe_sequential / "ghe_dir" / "sys_params.json"
         ).resolve()
 
-        self.geojson_file_path_2_ghe_staggered = (
+        self.geojson_path_2_ghe_staggered = (
             self.demos_path / "sdk_output_skeleton_2_ghe_staggered" / "network.geojson"
         ).resolve()
 
-        self.scenario_directory_path_2_ghe_staggered = (
+        self.scenario_dir_2_ghe_staggered = (
             self.demos_path / "sdk_output_skeleton_2_ghe_staggered" / "run" / "baseline_scenario"
         ).resolve()
 
         self.system_parameter_path_2_ghe_staggered = (
-            self.scenario_directory_path_2_ghe_staggered / "ghe_dir" / "sys_params.json"
+            self.scenario_dir_2_ghe_staggered / "ghe_dir" / "sys_params.json"
         ).resolve()
 
-        self.geojson_file_path_13_buildings = (
+        self.geojson_path_13_buildings = (
             self.demos_path / "sdk_output_skeleton_13_buildings" / "network.geojson"
         ).resolve()
 
-        self.scenario_directory_path_13_buildings = (
+        self.scenario_dir_13_buildings = (
             self.demos_path / "sdk_output_skeleton_13_buildings" / "run" / "baseline_scenario"
         ).resolve()
 
-        self.system_parameter_path_13_buildings_upstream_ghe = (
-            self.scenario_directory_path_13_buildings / "ghe_dir" / "sys_params_upstream.json"
+        self.sys_param_13_buildings_upstream_ghe = (
+            self.scenario_dir_13_buildings / "ghe_dir" / "sys_params_upstream.json"
         ).resolve()
 
         self.system_parameter_path_13_buildings_proportional_ghe = (
-            self.scenario_directory_path_13_buildings / "ghe_dir" / "sys_params_proportional.json"
+            self.scenario_dir_13_buildings / "ghe_dir" / "sys_params_proportional.json"
         ).resolve()
 
-        self.system_parameter_autosizing_path = (
+        self.sys_param_path_autosizing = (
             self.scenario_directory_path_1_ghe / "ghe_dir" / "sys_params_autosizing.json"
         ).resolve()
 
@@ -78,7 +76,7 @@ class BaseCase(TestCase):
         self.test_outputs_path.mkdir(exist_ok=True)
 
         # Save the original sys-param data, so they can be restored after the tests run.
-        sys_param_1_ghe = json.loads(self.system_parameter_path_1_ghe.read_text())
+        sys_param_1_ghe = json.loads(self.sys_param_path_1_ghe.read_text())
 
         district_params = sys_param_1_ghe["district_system"]["fifth_generation"]
         self.original_hydraulic_diameter = district_params["horizontal_piping_parameters"]["hydraulic_diameter"]

@@ -11,34 +11,34 @@ class TestNetwork(BaseCase):
 
         # -- Run
         run_sizer_from_cli_worker(
-            self.system_parameter_path_1_ghe,
+            self.sys_param_path_1_ghe,
             self.scenario_directory_path_1_ghe,
-            self.geojson_file_path_1_ghe,
+            self.geojson_path_1_ghe,
             output_path,
         )
 
         expected_outputs = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 50, "depth": 89.5}}
 
         self.check_outputs(output_path, expected_outputs)
-        self.reset_sys_param(self.system_parameter_path_1_ghe)
+        self.reset_sys_param(self.sys_param_path_1_ghe)
 
-    def test_network_one_ghe_detailed(self):
+    def test_network_one_ghe_detailed_geometry(self):
         # -- Set up
         output_path = self.test_outputs_path / "one_ghe_detailed_geo"
         output_path.mkdir(parents=True, exist_ok=True)
 
         # -- Run
         run_sizer_from_cli_worker(
-            self.system_parameter_path_1_ghe_geometry,
+            self.sys_param_path_1_ghe_detailed_geometry,
             self.scenario_directory_path_1_ghe,
-            self.geojson_file_path_1_ghe,
+            self.geojson_path_1_ghe,
             output_path,
         )
 
         expected_outputs = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 36, "depth": 128.1}}
 
         self.check_outputs(output_path, expected_outputs)
-        self.reset_sys_param(self.system_parameter_path_1_ghe_geometry)
+        self.reset_sys_param(self.sys_param_path_1_ghe_detailed_geometry)
 
     def test_network_two_ghe_sequential(self):
         # -- Set up
@@ -47,9 +47,9 @@ class TestNetwork(BaseCase):
 
         # -- Run
         run_sizer_from_cli_worker(
-            self.system_parameter_path_2_ghe_sequential,
-            self.scenario_directory_path_2_ghe_sequential,
-            self.geojson_file_path_2_ghe_sequential,
+            self.sys_param_path_2_ghe_sequential,
+            self.scenario_dir_2_ghe_sequential,
+            self.geojson_path_2_ghe_sequential,
             output_path,
         )
 
@@ -59,7 +59,7 @@ class TestNetwork(BaseCase):
         }
 
         self.check_outputs(output_path, expected_outputs)
-        self.reset_sys_param(self.system_parameter_path_2_ghe_sequential)
+        self.reset_sys_param(self.sys_param_path_2_ghe_sequential)
 
     def test_network_two_ghe_staggered(self):
         # -- Set up
@@ -69,8 +69,8 @@ class TestNetwork(BaseCase):
         # -- Run
         run_sizer_from_cli_worker(
             self.system_parameter_path_2_ghe_staggered,
-            self.scenario_directory_path_2_ghe_staggered,
-            self.geojson_file_path_2_ghe_staggered,
+            self.scenario_dir_2_ghe_staggered,
+            self.geojson_path_2_ghe_staggered,
             output_path,
         )
 
@@ -89,9 +89,9 @@ class TestNetwork(BaseCase):
 
         # -- Run
         run_sizer_from_cli_worker(
-            self.system_parameter_path_13_buildings_upstream_ghe,
-            self.scenario_directory_path_13_buildings,
-            self.geojson_file_path_13_buildings,
+            self.sys_param_13_buildings_upstream_ghe,
+            self.scenario_dir_13_buildings,
+            self.geojson_path_13_buildings,
             output_path,
         )
 
@@ -102,7 +102,7 @@ class TestNetwork(BaseCase):
         }
 
         self.check_outputs(output_path, expected_outputs)
-        self.reset_sys_param(self.system_parameter_path_13_buildings_upstream_ghe)
+        self.reset_sys_param(self.sys_param_13_buildings_upstream_ghe)
 
     def test_network_three_ghe_area_proportional(self):
         # -- Set up
@@ -112,8 +112,8 @@ class TestNetwork(BaseCase):
         # -- Run
         run_sizer_from_cli_worker(
             self.system_parameter_path_13_buildings_proportional_ghe,
-            self.scenario_directory_path_13_buildings,
-            self.geojson_file_path_13_buildings,
+            self.scenario_dir_13_buildings,
+            self.geojson_path_13_buildings,
             output_path,
         )
 
@@ -133,14 +133,14 @@ class TestNetwork(BaseCase):
 
         # -- Run
         run_sizer_from_cli_worker(
-            self.system_parameter_autosizing_path,
+            self.sys_param_path_autosizing,
             self.scenario_directory_path_1_ghe,
-            self.geojson_file_path_1_ghe,
+            self.geojson_path_1_ghe,
             output_path,
         )
 
         # -- Check
-        sys_params = load_json(self.system_parameter_autosizing_path)
+        sys_params = load_json(self.sys_param_path_autosizing)
 
         pump_design_head = sys_params["district_system"]["fifth_generation"]["central_pump_parameters"][
             "pump_design_head"
@@ -154,4 +154,4 @@ class TestNetwork(BaseCase):
         # assert hydraulic_diameter == self.original_hydraulic_diameter
 
         # -- Clean up
-        self.reset_sys_param(self.system_parameter_autosizing_path)
+        self.reset_sys_param(self.sys_param_path_autosizing)

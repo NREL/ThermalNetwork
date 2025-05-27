@@ -12,11 +12,11 @@ class TestCLI(BaseCase):
             run_sizer_from_cli,
             [
                 "-y",
-                self.system_parameter_path_1_ghe,
+                self.sys_param_path_1_ghe,
                 "-s",
                 self.scenario_directory_path_1_ghe,
                 "-f",
-                self.geojson_file_path_1_ghe,
+                self.geojson_path_1_ghe,
                 "-o",
                 output_path,
             ],
@@ -31,4 +31,4 @@ class TestCLI(BaseCase):
         expected_outputs = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 50, "depth": 89.5}}
 
         self.check_outputs(output_path, expected_outputs)
-        self.reset_sys_param(self.system_parameter_path_1_ghe)
+        self.reset_sys_param(self.sys_param_path_1_ghe)
