@@ -124,7 +124,7 @@ class TestNetwork(BaseCase):
         # -- Run
         run_sizer_from_cli_worker(
             self.sys_param_path_2_ghe_sequential,
-            self.scenario_dir_2_ghe_sequential,
+            self.scenario_dir_2_ghe,
             self.geojson_path_2_ghe_sequential,
             output_path,
         )
@@ -151,13 +151,13 @@ class TestNetwork(BaseCase):
 
         # -- Run
         run_sizer_from_cli_worker(
-            self.system_parameter_path_2_ghe_staggered,
-            self.scenario_dir_2_ghe_staggered,
+            self.sys_params_path_2_ghe_staggered,
+            self.scenario_dir_2_ghe,
             self.geojson_path_2_ghe_staggered,
             output_path,
         )
 
-        updated_sys_param = load_json(self.system_parameter_path_2_ghe_staggered)
+        updated_sys_param = load_json(self.sys_params_path_2_ghe_staggered)
 
         expected_hydraulic_dia = 0.09351
         expected_pump_head = 188970
@@ -263,7 +263,7 @@ class TestNetwork(BaseCase):
         # -- Run
         run_sizer_from_cli_worker(
             self.sys_param_path_2_ghe_pre_designed,
-            self.scenario_dir_2_ghe_pre_designed,
+            self.scenario_dir_2_ghe,
             self.geojson_path_2_ghe_pre_designed,
             output_path,
         )
