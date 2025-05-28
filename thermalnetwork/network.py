@@ -47,6 +47,9 @@ class Network:
 
         # placeholders
         self.total_network_pipe_length = 0
+        self.autosized_hydraulic_dia = 0
+        self.autosized_design_pump_head = 0
+        self.autosized_design_flow_rate = 0
 
     def get_connected_features(self):
         """
@@ -220,6 +223,7 @@ class Network:
                     "geometric_constraints": geometric_constraints,
                     "design": self.ghe_parameters["design"],
                     "loads": {"ground_loads": []},
+                    "pre_designed_borefield": matching_ghe.get("pre_designed_borefield", {}),
                 }
             else:
                 raise ValueError(f"feature {feature['type']} not supported")
@@ -505,7 +509,7 @@ class Network:
             # call size() with total load
             self.network[ghe_index].size(output_path)
 
-    def size(self, output_path: Path) -> None:
+    def size_ghe(self, output_path: Path) -> None:
         """
         High-level sizing call that handles any lower-level calls or iterations.
         """
@@ -518,6 +522,39 @@ class Network:
             msg = f"Unsupported design method {self.des_method}"
             logger.error(msg)
             raise ValueError(msg)
+
+    def size_network(self, system_parameter_path: Path):
+        sys_params = load_json(system_parameter_path)
+        dist_sys_params = sys_params["district_system"]["fifth_generation"]
+        ghe_params = dist_sys_params["ghe_parameters"]
+        pipe_params = dist_sys_params["horizontal_piping_parameters"]
+
+        max_num_boreholes = 0
+
+        for i, device in enumerate(self.network):
+            if device.comp_type == ComponentType.GROUNDHEATEXCHANGER:
+                max_num_boreholes = max(device.nbh, max_num_boreholes)
+
+        bh_vol_flow_lps = ghe_params["design"]["flow_rate"]
+        network_design_vol_flow = lps_to_cms(bh_vol_flow_lps) * max_num_boreholes
+        network_pipe = Pipe(
+            dimension_ratio=pipe_params["diameter_ratio"],
+            length=self.total_network_pipe_length,
+            fluid_type_str=ghe_params["fluid"]["fluid_name"],
+            fluid_concentration=ghe_params["fluid"]["concentration_percent"],
+            fluid_temperature=ghe_params["fluid"]["temperature"],
+        )
+
+        # Pa/m, defaults to 300 if not in sys_params
+        design_pressure_loss_per_length = dist_sys_params["horizontal_piping_parameters"].get(
+            "pressure_drop_per_meter", 300
+        )
+
+        self.autosized_hydraulic_dia = network_pipe.size_hydraulic_diameter(
+            network_design_vol_flow, design_pressure_loss_per_length
+        )
+        self.autosized_design_pump_head = network_pipe.pressure_loss(network_design_vol_flow)
+        self.autosized_design_flow_rate = network_design_vol_flow
 
     def update_sys_params(self, system_parameter_path: Path, output_directory_path: Path) -> None:
         """
@@ -543,57 +580,36 @@ class Network:
         # Load the existing system parameters
         sys_params = load_json(system_parameter_path)
         dist_sys_params = sys_params["district_system"]["fifth_generation"]
-        ghe_params = dist_sys_params["ghe_parameters"]
-        ghe_specific_params: list = ghe_params["ghe_specific_params"]
         pipe_params = dist_sys_params["horizontal_piping_parameters"]
         pump_params = dist_sys_params["central_pump_parameters"]
 
-        max_num_boreholes = 0
-        bh_vol_flow = ghe_params["design"]["flow_rate"]
+        for i, device in enumerate(self.network):
+            if device.comp_type == ComponentType.GROUNDHEATEXCHANGER and device.autosize:
+                for idx_ghe, ghe in enumerate(
+                    sys_params["district_system"]["fifth_generation"]["ghe_parameters"]["ghe_specific_params"]
+                ):
+                    if ghe["ghe_id"] == device.id:
+                        sys_params["district_system"]["fifth_generation"]["ghe_parameters"]["ghe_specific_params"][
+                            idx_ghe
+                        ]["borehole"]["length_of_boreholes"] = device.bh_length
+                        sys_params["district_system"]["fifth_generation"]["ghe_parameters"]["ghe_specific_params"][
+                            idx_ghe
+                        ]["borehole"]["number_of_boreholes"] = device.nbh
 
-        # update ghe parameters
-        for ghe in ghe_specific_params:
-            ghe_id = ghe["ghe_id"]
-            summary_data_path = output_directory_path / ghe_id / "SimulationSummary.json"
-
-            if not summary_data_path.exists():
-                logger.error(f"Error sizing GHE: {ghe_id}")
-
-            # Get the new data from the GHEDesigner output
-            ghe_data = load_json(summary_data_path)["ghe_system"]
-            for ghe_sys_params in ghe_specific_params:
-                if ghe_sys_params["ghe_id"] == ghe_id:
-                    # Update system parameters dict with the new values
-                    bh_len = ghe_data["active_borehole_length"]["value"]
-                    num_boreholes = ghe_data["number_of_boreholes"]
-                    if ghe_sys_params["borehole"].get("number_of_boreholes_autosized"):
-                        ghe_sys_params["borehole"]["number_of_boreholes"] = num_boreholes
-                    if ghe_sys_params["borehole"].get("length_of_boreholes_autosized"):
-                        ghe_sys_params["borehole"]["length_of_boreholes"] = bh_len
-
-                    max_num_boreholes = max(num_boreholes, max_num_boreholes)
-
-        # update pump and pipe params
-        network_design_vol_flow = lps_to_cms(bh_vol_flow) * max_num_boreholes
-        network_pipe = Pipe(
-            dimension_ratio=pipe_params["diameter_ratio"],
-            length=self.total_network_pipe_length,
-            fluid_type_str=ghe_params["fluid"]["fluid_name"],
-            fluid_concentration=ghe_params["fluid"]["concentration_percent"],
-            fluid_temperature=ghe_params["fluid"]["temperature"],
-        )
-
-        design_pressure_loss_per_length = dist_sys_params["horizontal_piping_parameters"].get(
-            "pressure_drop_per_meter", 300
-        )  # Pa/m, defaults to 300 if not in sys_params
-        hydraulic_dia = network_pipe.size_hydraulic_diameter(network_design_vol_flow, design_pressure_loss_per_length)
         if pipe_params.get("hydraulic_diameter_autosized"):
-            pipe_params["hydraulic_diameter"] = hydraulic_dia
+            sys_params["district_system"]["fifth_generation"]["horizontal_piping_parameters"]["hydraulic_diameter"] = (
+                self.autosized_hydraulic_dia
+            )
 
         if pump_params.get("pump_design_head_autosized"):
-            pump_params["pump_design_head"] = network_pipe.pressure_loss(network_design_vol_flow)
+            pump_params["pump_design_head"] = sys_params["district_system"]["fifth_generation"][
+                "central_pump_parameters"
+            ]["pump_design_head"] = self.autosized_design_pump_head
+
         if pump_params.get("pump_design_flow_rate_autosized"):
-            pump_params["pump_flow_rate"] = network_design_vol_flow
+            pump_params["pump_flow_rate"] = sys_params["district_system"]["fifth_generation"][
+                "central_pump_parameters"
+            ]["pump_flow_rate"] = self.autosized_design_flow_rate
 
         write_json(system_parameter_path, sys_params)
 
@@ -726,7 +742,8 @@ def run_sizer_from_cli_worker(
         else:
             logger.error(f"Unsupported component type, {comp_type_str}")
 
-    network.size(output_directory_path)
+    network.size_ghe(output_directory_path)
+    network.size_network(system_parameter_path)
     network.update_sys_params(system_parameter_path, output_directory_path)
 
     return 0

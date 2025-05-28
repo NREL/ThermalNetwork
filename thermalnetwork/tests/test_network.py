@@ -1,6 +1,5 @@
 from thermalnetwork.network import run_sizer_from_cli_worker
 from thermalnetwork.tests.test_base import BaseCase
-from thermalnetwork.utilities import load_json
 
 
 class TestNetwork(BaseCase):
@@ -126,32 +125,41 @@ class TestNetwork(BaseCase):
         self.check_outputs(output_path, expected_outputs)
         self.reset_sys_param(self.system_parameter_path_13_buildings_proportional_ghe)
 
-    def test_respects_autosize_flags(self):
+    def test_one_ghe_pre_designed(self):
         # -- Set up
-        output_path = self.test_outputs_path / "autosizing"
+        output_path = self.test_outputs_path / "one_ghe_pre_designed"
         output_path.mkdir(parents=True, exist_ok=True)
 
         # -- Run
         run_sizer_from_cli_worker(
-            self.sys_param_path_autosizing,
+            self.sys_param_path_1_ghe_pre_designed,
             self.scenario_directory_path_1_ghe,
             self.geojson_path_1_ghe,
             output_path,
         )
 
-        # -- Check
-        sys_params = load_json(self.sys_param_path_autosizing)
+        expected_outputs = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 20, "depth": 89.5}}
 
-        pump_design_head = sys_params["district_system"]["fifth_generation"]["central_pump_parameters"][
-            "pump_design_head"
-        ]
-        assert pump_design_head != self.original_pump_design_head
+        self.check_outputs(output_path, expected_outputs)
+        self.reset_sys_param(self.sys_param_path_2_ghe_sequential)
 
-        # TODO: need better sets of test that know when we're autosizing or not
-        # hydraulic_diameter = sys_params["district_system"]["fifth_generation"]["horizontal_piping_parameters"][
-        #     "hydraulic_diameter"
-        # ]
-        # assert hydraulic_diameter == self.original_hydraulic_diameter
+    def test_network_two_ghe_pre_designed(self):
+        # -- Set up
+        output_path = self.test_outputs_path / "two_ghe_pre_designed"
+        output_path.mkdir(parents=True, exist_ok=True)
 
-        # -- Clean up
-        self.reset_sys_param(self.sys_param_path_autosizing)
+        # -- Run
+        run_sizer_from_cli_worker(
+            self.sys_param_path_2_ghe_sequential,
+            self.scenario_dir_2_ghe_sequential,
+            self.geojson_path_2_ghe_sequential,
+            output_path,
+        )
+
+        expected_outputs = {
+            "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 16, "depth": 127.4},
+            "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 13, "depth": 127.9},
+        }
+
+        self.check_outputs(output_path, expected_outputs)
+        self.reset_sys_param(self.sys_param_path_2_ghe_sequential)

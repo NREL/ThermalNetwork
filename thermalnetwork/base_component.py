@@ -14,6 +14,7 @@ class BaseComponent(ABC):
         self.json_data: dict[str, Any] = {}
         self.area = None
         self.autosize = False
+        self.id = None
 
     def get_loads(self) -> ArrayLike:
         raise NotImplementedError(f"{self.__class__.__name__} does not implement 'get_loads' method.")

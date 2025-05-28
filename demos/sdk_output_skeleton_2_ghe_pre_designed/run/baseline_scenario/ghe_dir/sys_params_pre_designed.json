@@ -85,10 +85,10 @@
             "borehole": {
               "buried_depth": 2.0,
               "diameter": 0.15,
-              "length_of_boreholes": 1.0,
               "length_of_boreholes_autosized": false,
-              "number_of_boreholes": 5,
-              "number_of_boreholes_autosized": false
+              "length_of_boreholes": 152,
+              "number_of_boreholes_autosized": false,
+              "number_of_boreholes": 20
             },
             "ghe_geometric_params": {
               "length_of_ghe": 100,
@@ -96,7 +96,6 @@
             },
             "ghe_id": "47fd01d3-3d72-46c0-85f2-a12854783764",
             "pre_designed_borefield": {
-              "borehole_diameter": 0.15,
               "borehole_x_coordinates": [
                 0,
                 5,
@@ -140,8 +139,7 @@
                 15,
                 15,
                 15
-              ],
-              "length_of_boreholes": 152
+              ]
             }
           }
         ],
