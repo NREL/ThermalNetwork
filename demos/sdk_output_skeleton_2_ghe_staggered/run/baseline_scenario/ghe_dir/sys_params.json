@@ -182,9 +182,9 @@
             "borehole": {
               "buried_depth": 2.0,
               "diameter": 0.15,
-              "length_of_boreholes": 89.52500007543662,
+              "length_of_boreholes": 127.31623445147535,
               "length_of_boreholes_autosized": true,
-              "number_of_boreholes": 50,
+              "number_of_boreholes": 16,
               "number_of_boreholes_autosized": true
             }
           },
@@ -197,16 +197,16 @@
             "borehole": {
               "buried_depth": 2.0,
               "diameter": 0.15,
-              "length_of_boreholes": 89.52500007543662,
+              "length_of_boreholes": 127.75251056673716,
               "length_of_boreholes_autosized": true,
-              "number_of_boreholes": 50,
+              "number_of_boreholes": 13,
               "number_of_boreholes_autosized": true
             }
           }
         ]
       },
       "central_pump_parameters": {
-        "pump_design_head": 158326.96294916267,
+        "pump_design_head": 188970.44276898509,
         "pump_design_head_autosized": true,
         "pump_flow_rate": 0.01,
         "pump_flow_rate_autosized": true

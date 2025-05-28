@@ -136,9 +136,9 @@
       },
       "central_pump_parameters": {
         "pump_design_head_autosized": true,
-        "pump_design_head": 158326.96294916267,
+        "pump_design_head": 160804.1166110063,
         "pump_design_flow_rate_autosized": true,
-        "pump_flow_rate": 0.01
+        "pump_flow_rate": 0.008
       },
       "ghe_parameters": {
         "version": "0.3.0",
@@ -189,9 +189,9 @@
               "buried_depth": 2.0,
               "diameter": 0.15,
               "length_of_boreholes_autosized": true,
-              "length_of_boreholes": 89.52500007543662,
+              "length_of_boreholes": 127.48250313279563,
               "number_of_boreholes_autosized": true,
-              "number_of_boreholes": 50
+              "number_of_boreholes": 16
             }
           },
           {
@@ -204,9 +204,9 @@
               "buried_depth": 2.0,
               "diameter": 0.15,
               "length_of_boreholes_autosized": true,
-              "length_of_boreholes": 89.52500007543662,
+              "length_of_boreholes": 127.9173410804421,
               "number_of_boreholes_autosized": true,
-              "number_of_boreholes": 50
+              "number_of_boreholes": 13
             }
           }
         ]
