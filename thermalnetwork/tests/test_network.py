@@ -72,12 +72,14 @@ class TestNetwork(BaseCase):
         output_path.mkdir(parents=True, exist_ok=True)
 
         # -- Run
-        run_sizer_from_cli_worker(
+        res = run_sizer_from_cli_worker(
             self.sys_param_path_1_ghe,
             self.scenario_directory_path_1_ghe,
             self.geojson_path_1_ghe,
             output_path,
         )
+
+        assert res == 0
 
         updated_sys_param = load_json(self.sys_param_path_1_ghe)
 
@@ -97,12 +99,14 @@ class TestNetwork(BaseCase):
         output_path.mkdir(parents=True, exist_ok=True)
 
         # -- Run
-        run_sizer_from_cli_worker(
+        res = run_sizer_from_cli_worker(
             self.sys_param_path_1_ghe_detailed_geometry,
             self.scenario_directory_path_1_ghe,
             self.geojson_path_1_ghe,
             output_path,
         )
+
+        assert res == 0
 
         updated_sys_param = load_json(self.sys_param_path_1_ghe_detailed_geometry)
 
@@ -122,12 +126,14 @@ class TestNetwork(BaseCase):
         output_path.mkdir(parents=True, exist_ok=True)
 
         # -- Run
-        run_sizer_from_cli_worker(
+        res = run_sizer_from_cli_worker(
             self.sys_param_path_2_ghe_sequential,
             self.scenario_dir_2_ghe,
             self.geojson_path_2_ghe_sequential,
             output_path,
         )
+
+        assert res == 0
 
         updated_sys_param = load_json(self.sys_param_path_2_ghe_sequential)
 
@@ -150,12 +156,14 @@ class TestNetwork(BaseCase):
         output_path.mkdir(parents=True, exist_ok=True)
 
         # -- Run
-        run_sizer_from_cli_worker(
+        res = run_sizer_from_cli_worker(
             self.sys_params_path_2_ghe_staggered,
             self.scenario_dir_2_ghe,
             self.geojson_path_2_ghe_staggered,
             output_path,
         )
+
+        assert res == 0
 
         updated_sys_param = load_json(self.sys_params_path_2_ghe_staggered)
 
@@ -178,12 +186,14 @@ class TestNetwork(BaseCase):
         output_path.mkdir(parents=True, exist_ok=True)
 
         # -- Run
-        run_sizer_from_cli_worker(
+        res = run_sizer_from_cli_worker(
             self.sys_param_13_buildings_upstream_ghe,
             self.scenario_dir_13_buildings,
             self.geojson_path_13_buildings,
             output_path,
         )
+
+        assert res == 0
 
         updated_sys_param = load_json(self.sys_param_13_buildings_upstream_ghe)
 
@@ -207,12 +217,14 @@ class TestNetwork(BaseCase):
         output_path.mkdir(parents=True, exist_ok=True)
 
         # -- Run
-        run_sizer_from_cli_worker(
+        res = run_sizer_from_cli_worker(
             self.sys_param_path_13_buildings_proportional_ghe,
             self.scenario_dir_13_buildings,
             self.geojson_path_13_buildings,
             output_path,
         )
+
+        assert res == 0
 
         updated_sys_param = load_json(self.sys_param_path_13_buildings_proportional_ghe)
 
@@ -236,12 +248,14 @@ class TestNetwork(BaseCase):
         output_path.mkdir(parents=True, exist_ok=True)
 
         # -- Run
-        run_sizer_from_cli_worker(
+        res = run_sizer_from_cli_worker(
             self.sys_param_path_1_ghe_pre_designed,
             self.scenario_directory_path_1_ghe,
             self.geojson_path_1_ghe,
             output_path,
         )
+
+        assert res == 0
 
         updated_sys_param = load_json(self.sys_param_path_1_ghe_pre_designed)
 
@@ -261,12 +275,14 @@ class TestNetwork(BaseCase):
         output_path.mkdir(parents=True, exist_ok=True)
 
         # -- Run
-        run_sizer_from_cli_worker(
+        res = run_sizer_from_cli_worker(
             self.sys_param_path_2_ghe_pre_designed,
             self.scenario_dir_2_ghe,
             self.geojson_path_2_ghe_pre_designed,
             output_path,
         )
+
+        assert res == 0
 
         updated_sys_param = load_json(self.sys_param_path_1_ghe_pre_designed)
 
