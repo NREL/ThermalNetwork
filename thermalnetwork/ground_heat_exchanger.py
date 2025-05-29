@@ -60,7 +60,7 @@ class GHE(BaseComponent):
             "ground-heat-exchanger": {
                 f"{self.id}": {
                     "flow_rate": self.json_data["design"]["flow_rate"],
-                    "flow_type": self.json_data["design"]["flow_type"],
+                    "flow_type": str(self.json_data["design"]["flow_type"]).upper(),
                     "grout": {**self.json_data["grout"]},
                     "soil": {**self.json_data["soil"]},
                     "pipe": {
