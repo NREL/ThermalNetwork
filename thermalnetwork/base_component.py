@@ -1,6 +1,6 @@
 from abc import ABC
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from numpy.typing import ArrayLike
 
@@ -19,5 +19,5 @@ class BaseComponent(ABC):
     def get_loads(self) -> ArrayLike:
         raise NotImplementedError(f"{self.__class__.__name__} does not implement 'get_loads' method.")
 
-    def size(self, output_path: Optional[Path] = None) -> None:
+    def size(self, output_path: Path | None = None) -> None:
         raise NotImplementedError(f"{self.__class__.__name__} does not implement 'size' method.")
