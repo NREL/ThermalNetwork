@@ -1,3 +1,4 @@
+from thermalnetwork.enums import GHEDesignType
 from thermalnetwork.network import run_sizer_from_cli, run_sizer_from_cli_worker
 from thermalnetwork.tests.test_base import BaseCase
 from thermalnetwork.utilities import load_json
@@ -24,13 +25,23 @@ class TestNetwork(BaseCase):
             delta=0.01,
         )
 
+    @staticmethod
+    def get_ghe_design_key(ghe_data):
+        possible_methods = [x.name.lower() for x in GHEDesignType]
+        for k in possible_methods:
+            if k in ghe_data:
+                return k
+
+        raise ValueError("ghe design key not found")
+
     def check_ghe_data(self, sys_param: dict, expected_ghe_data: dict):
-        ghe_data = sys_param["district_system"]["fifth_generation"]["ghe_parameters"]["ghe_specific_params"]
+        ghe_data = sys_param["district_system"]["fifth_generation"]["ghe_parameters"]["borefields"]
         for ghe in ghe_data:
             for k_expected, v_expected in expected_ghe_data.items():
                 if ghe["ghe_id"] == k_expected:
-                    self.assertAlmostEqual(ghe["borehole"]["length_of_boreholes"], v_expected["length"], delta=0.1)
-                    self.assertEqual(ghe["borehole"]["number_of_boreholes"], v_expected["num_bh"])
+                    design_key = self.get_ghe_design_key(ghe)
+                    self.assertAlmostEqual(ghe[design_key]["borehole_length"], v_expected["length"], delta=0.1)
+                    self.assertEqual(ghe[design_key]["number_of_boreholes"], v_expected["num_bh"])
 
     def test_cli(self):
         output_path = self.test_outputs_path.resolve() / "cli_test"

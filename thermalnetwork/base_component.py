@@ -13,7 +13,6 @@ class BaseComponent(ABC):
         self.comp_type: ComponentType = comp_type
         self.json_data: dict[str, Any] = {}
         self.area = None
-        self.autosize = False
         self.id = None
 
     def get_loads(self) -> ArrayLike:

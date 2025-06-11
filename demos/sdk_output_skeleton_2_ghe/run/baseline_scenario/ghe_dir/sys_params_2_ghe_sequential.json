@@ -164,13 +164,6 @@
         "simulation": {
           "num_months": 240
         },
-        "geometric_constraints": {
-          "b_min": 3.0,
-          "b_max": 10.0,
-          "max_height": 135.0,
-          "min_height": 60.0,
-          "method": "rectangle"
-        },
         "design": {
           "method": "AREAPROPORTIONAL",
           "flow_rate": 0.5,
@@ -178,34 +171,34 @@
           "max_eft": 35.0,
           "min_eft": 5.0
         },
-        "ghe_specific_params": [
+        "borehole": {
+          "buried_depth": 2.0,
+          "diameter": 0.15
+        },
+        "borefields": [
           {
             "ghe_id": "dd69549c-ecfc-4245-96dc-5b6127f34f46",
-            "ghe_geometric_params": {
-              "length_of_ghe": 427.09084385292005,
-              "width_of_ghe": 300.40915614707995
-            },
-            "borehole": {
-              "buried_depth": 2.0,
-              "diameter": 0.15,
-              "length_of_boreholes_autosized": true,
-              "length_of_boreholes": 127.48250313279563,
-              "number_of_boreholes_autosized": true,
+            "autosized_rectangle_borefield": {
+              "b_min": 3.0,
+              "b_max": 10.0,
+              "max_height": 135.0,
+              "min_height": 60.0,
+              "length_of_ghe": 427.09,
+              "width_of_ghe": 300.4,
+              "borehole_length": 127.48250407599134,
               "number_of_boreholes": 16
             }
           },
           {
             "ghe_id": "47fd01d3-3d72-46c0-85f2-a12854783764",
-            "ghe_geometric_params": {
-              "length_of_ghe": 411.7146746166177,
-              "width_of_ghe": 254.28532538338231
-            },
-            "borehole": {
-              "buried_depth": 2.0,
-              "diameter": 0.15,
-              "length_of_boreholes_autosized": true,
-              "length_of_boreholes": 127.9173410804421,
-              "number_of_boreholes_autosized": true,
+            "autosized_rectangle_borefield": {
+              "b_min": 3.0,
+              "b_max": 10.0,
+              "max_height": 135.0,
+              "min_height": 60.0,
+              "length_of_ghe": 411.71,
+              "width_of_ghe": 254.28,
+              "borehole_length": 127.91740511232354,
               "number_of_boreholes": 13
             }
           }
