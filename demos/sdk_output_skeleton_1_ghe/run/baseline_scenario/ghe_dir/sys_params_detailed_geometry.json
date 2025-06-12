@@ -83,7 +83,7 @@
       },
       "horizontal_piping_parameters": {
         "hydraulic_diameter_autosized": true,
-        "hydraulic_diameter": 0.11560925454545452,
+        "hydraulic_diameter": 0.15,
         "insulation_thickness": 0.2,
         "insulation_conductivity": 2.3,
         "diameter_ratio": 11,
@@ -95,9 +95,9 @@
       },
       "central_pump_parameters": {
         "pump_design_head_autosized": true,
-        "pump_design_head": 164720.1544245937,
+        "pump_design_head": 100000,
         "pump_design_flow_rate_autosized": true,
-        "pump_flow_rate": 0.018000000000000002
+        "pump_flow_rate": 0.002
       },
       "ghe_parameters": {
         "version": "0.3.0",
@@ -144,9 +144,9 @@
               "buried_depth": 2.0,
               "diameter": 0.15,
               "length_of_boreholes_autosized": true,
-              "length_of_boreholes": 128.13358122347108,
+              "length_of_boreholes": 10,
               "number_of_boreholes_autosized": true,
-              "number_of_boreholes": 36
+              "number_of_boreholes": 10
             }
           }
         ]

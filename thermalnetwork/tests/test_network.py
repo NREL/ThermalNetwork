@@ -77,6 +77,9 @@ class TestNetwork(BaseCase):
         expected_ghe_data = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 50, "length": 89.5}}
         self.check_ghe_data(updated_sys_param, expected_ghe_data)
 
+        # -- Clean up
+        self.reset_sys_param(self.sys_param_path_1_ghe)
+
     def test_network_one_ghe(self):
         # -- Set up
         output_path = self.test_outputs_path / "one_ghe"
@@ -104,6 +107,9 @@ class TestNetwork(BaseCase):
         expected_ghe_data = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 50, "length": 89.5}}
         self.check_ghe_data(updated_sys_param, expected_ghe_data)
 
+        # -- Clean up
+        self.reset_sys_param(self.sys_param_path_1_ghe)
+
     def test_network_one_ghe_detailed_geometry(self):
         # -- Set up
         output_path = self.test_outputs_path / "one_ghe_detailed_geo"
@@ -130,6 +136,9 @@ class TestNetwork(BaseCase):
 
         expected_ghe_data = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 36, "length": 128.1}}
         self.check_ghe_data(updated_sys_param, expected_ghe_data)
+
+        # -- Clean up
+        self.reset_sys_param(self.sys_param_path_1_ghe_detailed_geometry)
 
     def test_network_two_ghe_sequential(self):
         # -- Set up
@@ -161,6 +170,9 @@ class TestNetwork(BaseCase):
         }
         self.check_ghe_data(updated_sys_param, expected_ghe_data)
 
+        # -- Clean up
+        self.reset_sys_param(self.sys_param_path_2_ghe_sequential)
+
     def test_network_two_ghe_staggered(self):
         # -- Set up
         output_path = self.test_outputs_path / "two_ghe_staggered"
@@ -190,6 +202,9 @@ class TestNetwork(BaseCase):
             "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 13, "length": 127.7},
         }
         self.check_ghe_data(updated_sys_param, expected_ghe_data)
+
+        # -- Clean up
+        self.reset_sys_param(self.sys_params_path_2_ghe_staggered)
 
     def test_network_three_ghe_upstream(self):
         # -- Set up
@@ -222,6 +237,9 @@ class TestNetwork(BaseCase):
         }
         self.check_ghe_data(updated_sys_param, expected_ghe_data)
 
+        # -- Clean up
+        self.reset_sys_param(self.sys_param_13_buildings_upstream_ghe)
+
     def test_network_three_ghe_area_proportional(self):
         # -- Set up
         output_path = self.test_outputs_path / "three_ghe_area_proportional"
@@ -252,6 +270,9 @@ class TestNetwork(BaseCase):
             "3eb26af6-a1f7-4daa-8372-ec016ca185a4": {"num_bh": 1036, "length": 133.5},
         }
         self.check_ghe_data(updated_sys_param, expected_ghe_data)
+
+        # -- Clean up
+        self.reset_sys_param(self.sys_param_path_13_buildings_proportional_ghe)
 
     def test_one_ghe_pre_designed(self):
         # -- Set up
