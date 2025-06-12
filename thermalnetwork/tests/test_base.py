@@ -4,6 +4,8 @@ from unittest import TestCase
 
 from click.testing import CliRunner
 
+from thermalnetwork.enums import GHEDesignType
+
 
 class BaseCase(TestCase):
     def setUp(self) -> None:
@@ -92,13 +94,13 @@ class BaseCase(TestCase):
         self.original_pump_design_head = district_params["central_pump_parameters"]["pump_design_head"]
         self.original_pump_flow_rate = district_params["central_pump_parameters"]["pump_flow_rate"]
 
-        one_ghe_specific_params = sys_param_1_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
-            "ghe_specific_params"
-        ]
-        for ghe in one_ghe_specific_params:
-            # These values are the same across all our demo files.
-            self.original_borehole_length = ghe["borehole"]["length_of_boreholes"]
-            self.original_num_boreholes = ghe["borehole"]["number_of_boreholes"]
+        # These values are the same across all our demo files.
+        self.original_borehole_length = sys_param_1_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
+            "borefields"
+        ][0]["autosized_rectangle_borefield"]["borehole_length"]
+        self.original_num_boreholes = sys_param_1_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
+            "borefields"
+        ][0]["autosized_rectangle_borefield"]["number_of_boreholes"]
 
     def reset_sys_param(self, sys_param_path: Path):
         sys_param = json.loads(sys_param_path.read_text())
@@ -112,13 +114,16 @@ class BaseCase(TestCase):
             self.original_pump_flow_rate
         )
 
-        ghe_specific_params = sys_param["district_system"]["fifth_generation"]["ghe_parameters"]["ghe_specific_params"]
+        ghe_specific_params = sys_param["district_system"]["fifth_generation"]["ghe_parameters"]["borefields"]
 
-        for idx, _ in enumerate(ghe_specific_params):
-            sys_param["district_system"]["fifth_generation"]["ghe_parameters"]["ghe_specific_params"][idx]["borehole"][
-                "length_of_boreholes"
+        # Each dict of ghe params has a key that is one of the GHEDesignType enum.
+        for idx, ghe in enumerate(ghe_specific_params):
+            key_enum = next(enum.name.lower() for enum in GHEDesignType if enum.name.lower() in ghe)
+
+            sys_param["district_system"]["fifth_generation"]["ghe_parameters"]["borefields"][idx][key_enum][
+                "borehole_length"
             ] = self.original_borehole_length
-            sys_param["district_system"]["fifth_generation"]["ghe_parameters"]["ghe_specific_params"][idx]["borehole"][
+            sys_param["district_system"]["fifth_generation"]["ghe_parameters"]["borefields"][idx][key_enum][
                 "number_of_boreholes"
             ] = self.original_num_boreholes
 
