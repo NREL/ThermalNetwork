@@ -41,7 +41,11 @@ class TestNetwork(BaseCase):
                 if ghe["ghe_id"] == k_expected:
                     design_key = self.get_ghe_design_key(ghe)
                     self.assertAlmostEqual(ghe[design_key]["borehole_length"], v_expected["length"], delta=0.1)
-                    self.assertEqual(ghe[design_key]["number_of_boreholes"], v_expected["num_bh"])
+
+                    if "number_of_boreholes" in ghe[design_key]:
+                        self.assertEqual(ghe[design_key]["number_of_boreholes"], v_expected["num_bh"])
+                    else:
+                        self.assertEqual(len(ghe[design_key]["borehole_x_coordinates"]), v_expected["num_bh"])
 
     def test_cli(self):
         output_path = self.test_outputs_path.resolve() / "cli_test"
@@ -316,17 +320,17 @@ class TestNetwork(BaseCase):
 
         assert res == 0
 
-        updated_sys_param = load_json(self.sys_param_path_1_ghe_pre_designed)
+        updated_sys_param = load_json(self.sys_param_path_2_ghe_pre_designed)
 
-        expected_hydraulic_dia = 0.09351
-        expected_pump_head = 158326
+        expected_hydraulic_dia = 0.11560
+        expected_pump_head = 186568
         expected_flow_rate = 0.01
 
         self.check_horiz_pipe_params(updated_sys_param, expected_hydraulic_dia)
         self.check_pump_params(updated_sys_param, expected_pump_head, expected_flow_rate)
 
         expected_ghe_data = {
-            "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 16, "length": 127.4},
-            "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 13, "length": 127.9},
+            "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 28, "length": 131.8},
+            "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 20, "length": 152},
         }
         self.check_ghe_data(updated_sys_param, expected_ghe_data)

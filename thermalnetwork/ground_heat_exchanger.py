@@ -7,6 +7,7 @@ from rich.logging import RichHandler
 
 from thermalnetwork.base_component import BaseComponent
 from thermalnetwork.enums import ComponentType, GHEDesignType
+from thermalnetwork.geometry import get_boundary_points, polygon_area
 from thermalnetwork.utilities import load_json, write_json
 
 logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
@@ -52,24 +53,31 @@ class GHE(BaseComponent):
         self.bh_length = None
 
     def compute_area(self) -> float:
-        if (
-            self.design_method == GHEDesignType.AUTOSIZED_BIRECTANGLE_CONSTRAINED_BOREFIELD
-            or GHEDesignType.AUTOSIZED_BIZONED_RECTANGLE_BOREFIELD
-            or GHEDesignType.AUTOSIZED_NEAR_SQUARE_BOREFIELD
-            or GHEDesignType.AUTOSIZED_RECTANGLE_BOREFIELD
-            or GHEDesignType.AUTOSIZED_RECTANGLE_CONSTRAINED_BOREFIELD
-            or GHEDesignType.AUTOSIZED_ROWWISE_BOREFIELD
-        ):
+        if self.design_method in [
+            GHEDesignType.AUTOSIZED_BIRECTANGLE_CONSTRAINED_BOREFIELD,
+            GHEDesignType.AUTOSIZED_BIZONED_RECTANGLE_BOREFIELD,
+            GHEDesignType.AUTOSIZED_NEAR_SQUARE_BOREFIELD,
+            GHEDesignType.AUTOSIZED_RECTANGLE_BOREFIELD,
+            GHEDesignType.AUTOSIZED_RECTANGLE_CONSTRAINED_BOREFIELD,
+            GHEDesignType.AUTOSIZED_ROWWISE_BOREFIELD,
+        ]:
             length = self.json_data["borefield"]["length_of_ghe"]
             width = self.json_data["borefield"]["width_of_ghe"]
-            area = length * width
+            return length * width
 
-        elif self.design_method == GHEDesignType.PREDESIGNED_BOREFIELD:
-            area = None
+        elif self.design_method == GHEDesignType.PRE_DESIGNED_BOREFIELD:
+            boundary_points = get_boundary_points(
+                list(
+                    zip(
+                        self.json_data["borefield"]["borehole_x_coordinates"],
+                        self.json_data["borefield"]["borehole_y_coordinates"],
+                    )
+                )
+            )
+
+            return polygon_area(boundary_points)
         else:
             raise ValueError("design_type method not supported")
-
-        return area
 
     def get_common_inputs(self) -> dict:
         d = {
@@ -153,25 +161,24 @@ class GHE(BaseComponent):
         #     or self.design_method == GHEDesignType.AUTOSIZED_ROWWISE_BOREFIELD
         # ):
         #     pass
-        elif self.design_method == GHEDesignType.PREDESIGNED_BOREFIELD:
-            nbh = self.json_data["borehole"]["number_of_boreholes"]
-            nbh_x = len(self.json_data["pre_designed_borefield"]["borehole_x_coordinates"])
-            nbh_y = len(self.json_data["pre_designed_borefield"]["borehole_y_coordinates"])
+        elif self.design_method == GHEDesignType.PRE_DESIGNED_BOREFIELD:
+            nbh_x = len(self.json_data["borefield"]["borehole_x_coordinates"])
+            nbh_y = len(self.json_data["borefield"]["borehole_y_coordinates"])
 
             # check if all equal
-            if len({nbh, nbh_x, nbh_y}) != 1:
-                raise ValueError(
-                    "number of boreholes not consistent. check 'number_of_boreholes', 'borehole_x_coordinates', "
-                    "and 'borehole_y_coordinates' are not equal"
-                )
+            if nbh_x != nbh_y:
+                raise ValueError("x and y borehole coordinates must have same length")
+            else:
+                self.nbh = nbh_x
+                self.bh_length = self.json_data["borefield"]["borehole_length"]
 
             d_ghe = {
                 **d["ground-heat-exchanger"][f"{self.id}"],
                 "pre_designed": {
                     "arrangement": "MANUAL",
-                    "H": self.json_data["borehole"]["length_of_boreholes"],
-                    "x": self.json_data["pre_designed_borefield"]["borehole_x_coordinates"],
-                    "y": self.json_data["pre_designed_borefield"]["borehole_y_coordinates"],
+                    "H": self.json_data["borefield"]["borehole_length"],
+                    "x": self.json_data["borefield"]["borehole_x_coordinates"],
+                    "y": self.json_data["borefield"]["borehole_y_coordinates"],
                 },
             }
 
@@ -202,21 +209,20 @@ class GHE(BaseComponent):
         return ghe_input_file
 
     def update_config(self, results_dir: Path):
-        if (
-            self.design_method == GHEDesignType.AUTOSIZED_BIRECTANGLE_CONSTRAINED_BOREFIELD
-            or GHEDesignType.AUTOSIZED_BIZONED_RECTANGLE_BOREFIELD
-            or GHEDesignType.AUTOSIZED_NEAR_SQUARE_BOREFIELD
-            or GHEDesignType.AUTOSIZED_RECTANGLE_BOREFIELD
-            or GHEDesignType.AUTOSIZED_RECTANGLE_CONSTRAINED_BOREFIELD
-            or GHEDesignType.AUTOSIZED_ROWWISE_BOREFIELD
-        ):
+        if self.design_method in [
+            GHEDesignType.AUTOSIZED_BIRECTANGLE_CONSTRAINED_BOREFIELD,
+            GHEDesignType.AUTOSIZED_BIZONED_RECTANGLE_BOREFIELD,
+            GHEDesignType.AUTOSIZED_NEAR_SQUARE_BOREFIELD,
+            GHEDesignType.AUTOSIZED_RECTANGLE_BOREFIELD,
+            GHEDesignType.AUTOSIZED_RECTANGLE_CONSTRAINED_BOREFIELD,
+            GHEDesignType.AUTOSIZED_ROWWISE_BOREFIELD,
+        ]:
             d = load_json(results_dir / "SimulationSummary.json")
             self.nbh = d["ghe_system"]["number_of_boreholes"]
             self.bh_length = d["ghe_system"]["active_borehole_length"]["value"]
 
-        elif self.design_method == GHEDesignType.PREDESIGNED_BOREFIELD:
-            self.nbh = self.json_data["borehole"]["number_of_boreholes"]
-            self.bh_length = self.json_data["borehole"]["length_of_boreholes"]
+        elif self.design_method == GHEDesignType.PRE_DESIGNED_BOREFIELD:
+            pass
         else:
             raise ValueError("design_type method not supported")
 

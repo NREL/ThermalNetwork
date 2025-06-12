@@ -8,7 +8,7 @@ from thermalnetwork.geometry import get_boundary_points
 class TestGeometry(TestCase):
     def test_get_boundary_points(self):
         """
-        L-shaped
+        L-shaped (convex shape)
 
         5           x x x x x
         4           x x x x x

@@ -158,13 +158,6 @@
         "simulation": {
           "num_months": 240
         },
-        "geometric_constraints": {
-          "b_min": 3.0,
-          "b_max": 10.0,
-          "max_height": 135.0,
-          "min_height": 60.0,
-          "method": "rectangle"
-        },
         "design": {
           "method": "AREAPROPORTIONAL",
           "flow_rate": 0.5,
@@ -172,37 +165,28 @@
           "max_eft": 35.0,
           "min_eft": 5.0
         },
-        "ghe_specific_params": [
+        "borehole": {
+          "buried_depth": 2.0,
+          "diameter": 0.15
+        },
+        "borefields": [
           {
             "ghe_id": "dd69549c-ecfc-4245-96dc-5b6127f34f46",
-            "ghe_geometric_params": {
+            "autosized_rectangle_borefield": {
+              "b_min": 3.0,
+              "b_max": 10.0,
+              "max_height": 135.0,
+              "min_height": 60.0,
               "length_of_ghe": 427.09084385292005,
-              "width_of_ghe": 300.40915614707995
-            },
-            "borehole": {
-              "buried_depth": 2.0,
-              "diameter": 0.15,
-              "length_of_boreholes": 132.0042967029548,
-              "length_of_boreholes_autosized": true,
-              "number_of_boreholes": 26,
-              "number_of_boreholes_autosized": true
+              "width_of_ghe": 300.40915614707995,
+              "borehole_length": 131.85973637456308,
+              "number_of_boreholes": 28
             }
           },
           {
-            "borehole": {
-              "buried_depth": 2.0,
-              "diameter": 0.15,
-              "length_of_boreholes_autosized": false,
-              "length_of_boreholes": 152,
-              "number_of_boreholes_autosized": false,
-              "number_of_boreholes": 20
-            },
-            "ghe_geometric_params": {
-              "length_of_ghe": 100,
-              "width_of_ghe": 100
-            },
             "ghe_id": "47fd01d3-3d72-46c0-85f2-a12854783764",
             "pre_designed_borefield": {
+              "borehole_length": 152,
               "borehole_x_coordinates": [
                 0,
                 5,
@@ -252,7 +236,7 @@
         ]
       },
       "central_pump_parameters": {
-        "pump_design_head": 163311.60064087156,
+        "pump_design_head": 186568.15904477838,
         "pump_design_head_autosized": true,
         "pump_flow_rate": 0.01,
         "pump_flow_rate_autosized": true

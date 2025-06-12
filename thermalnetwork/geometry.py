@@ -1,6 +1,5 @@
-"""Utilities for performing geometric operations on polygons.
-
-Some code finding the boundary points taken from here: https://www.geeksforgeeks.org/dsa/convex-hull-using-graham-scan/
+"""
+Utilities for performing geometric operations on polygons.
 """
 
 import math
@@ -188,6 +187,9 @@ def alpha_shape(points, alpha=1, only_outer=True):
     or also inner edges.
     :return: set of (i,j) pairs representing edges of the alpha-shape. (i,j) are
     the indices in the points array.
+
+    Initial code taken from here: https://www.geeksforgeeks.org/dsa/convex-hull-using-graham-scan/
+
     """
     assert points.shape[0] > 3, "Need at least four points"  # noqa: S101
 
@@ -249,7 +251,11 @@ def get_boundary_points(points):
     if type(points) is not np.ndarray:
         points = np.array(points)
 
-    edges = alpha_shape(points)
+    # pick the alpha radius that give the max number of boundary points
+    all_edges = []
+    for alpha in range(1, 20, 1):
+        all_edges.append(alpha_shape(points, alpha=alpha))
+    edges = max(all_edges, key=lambda x: len(x))
 
     # get the boundary vertices from the unsorted edges
     vertices = []

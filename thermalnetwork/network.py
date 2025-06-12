@@ -620,7 +620,7 @@ class Network:
         for i, device in enumerate(self.network):
             if (
                 device.comp_type == ComponentType.GROUNDHEATEXCHANGER
-                and device.design_method != GHEDesignType.PREDESIGNED_BOREFIELD
+                and device.design_method != GHEDesignType.PRE_DESIGNED_BOREFIELD
             ):
                 for idx_ghe, ghe in enumerate(
                     sys_params["district_system"]["fifth_generation"]["ghe_parameters"]["borefields"]
