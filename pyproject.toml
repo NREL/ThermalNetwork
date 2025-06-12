@@ -32,7 +32,8 @@ dependencies = [
   "ghedesigner @ git+https://github.com/BETSRG/GHEDesigner.git@58f14058bf88d04e8a05fa75979911816fcbf369",
   "pandas ~= 2.0",
   "rich ~= 13.0",
-  "SecondaryCoolantProps ~= 1.3"
+  "SecondaryCoolantProps ~= 1.3",
+  "scipy ~= 1.15"
 ]
 
 [project.optional-dependencies]

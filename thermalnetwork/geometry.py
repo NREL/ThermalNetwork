@@ -1,6 +1,12 @@
-"""Utilities for performing geometric operations on polygons."""
+"""Utilities for performing geometric operations on polygons.
+
+Some code finding the boundary points taken from here: https://www.geeksforgeeks.org/dsa/convex-hull-using-graham-scan/
+"""
 
 import math
+
+import numpy as np
+from scipy.spatial import Delaunay
 
 
 def lower_left_point(polygon):
@@ -171,3 +177,88 @@ def rotate_polygon_to_axes(polygon):
     rotated_polygon = [[(x + x_shift, y + y_shift) for x, y in this_polygon] for this_polygon in rotated_polygon]
 
     return rotated_polygon
+
+
+def alpha_shape(points, alpha=1, only_outer=True):
+    """
+    Compute the alpha shape (concave hull) of a set of points.
+    :param points: np.array of shape (n,2) points.
+    :param alpha: alpha value.
+    :param only_outer: boolean value to specify if we keep only the outer border
+    or also inner edges.
+    :return: set of (i,j) pairs representing edges of the alpha-shape. (i,j) are
+    the indices in the points array.
+    """
+    assert points.shape[0] > 3, "Need at least four points"  # noqa: S101
+
+    def add_edge(edges, i, j):
+        """
+        Add an edge between the i-th and j-th points,
+        if not in the list already
+        """
+        if (i, j) in edges or (j, i) in edges:
+            # already added
+            assert (j, i) in edges, "Can't go twice over same directed edge right?"  # noqa: S101
+            if only_outer:
+                # if both neighboring triangles are in shape, it's not a boundary edge
+                edges.remove((j, i))
+            return
+        edges.add((i, j))
+
+    tri = Delaunay(points)
+    edges = set()
+    # Loop over triangles:
+    # ia, ib, ic = indices of corner points of the triangle
+    for ia, ib, ic in tri.simplices:
+        pa = points[ia]
+        pb = points[ib]
+        pc = points[ic]
+        # Computing radius of triangle circumcircle
+        # www.mathalino.com/reviewer/derivation-of-formulas/derivation-of-formula-for-radius-of-circumcircle
+        a = np.sqrt((pa[0] - pb[0]) ** 2 + (pa[1] - pb[1]) ** 2)
+        b = np.sqrt((pb[0] - pc[0]) ** 2 + (pb[1] - pc[1]) ** 2)
+        c = np.sqrt((pc[0] - pa[0]) ** 2 + (pc[1] - pa[1]) ** 2)
+        s = (a + b + c) / 2.0
+        area = np.sqrt(s * (s - a) * (s - b) * (s - c))
+        circum_r = a * b * c / (4.0 * area)
+        if circum_r < alpha:
+            add_edge(edges, ia, ib)
+            add_edge(edges, ib, ic)
+            add_edge(edges, ic, ia)
+    return edges
+
+
+def sort_vertices(vertices, counterclockwise=True):
+    geometric_mean = np.array([np.mean(vertices[:, 0]), np.mean(vertices[:, 1])])
+
+    # angle between points
+    dxs = [x - geometric_mean[0] for x, _ in vertices]
+    dys = [y - geometric_mean[1] for _, y in vertices]
+    rads = [math.atan2(dy, dx) for dx, dy in zip(dxs, dys)]
+
+    # sort vertices
+    _, sorted_vertices_indexes = zip(*sorted(zip(rads, range(len(vertices)))))
+    sorted_vertices = np.array([vertices[idx] for idx in sorted_vertices_indexes])
+    if not counterclockwise:
+        sorted_vertices = np.array(list(reversed(sorted_vertices)))
+
+    return sorted_vertices
+
+
+def get_boundary_points(points):
+    if type(points) is not np.ndarray:
+        points = np.array(points)
+
+    edges = alpha_shape(points)
+
+    # get the boundary vertices from the unsorted edges
+    vertices = []
+    for i, j in edges:
+        pts_x = points[[i, j], 0]
+        pts_y = points[[i, j], 1]
+        vertices.append([pts_x[0], pts_y[0]])
+        vertices.append([pts_x[1], pts_y[1]])
+
+    # there may be duplicated vertices, so make them unique
+    vertices = np.unique(np.array(vertices), axis=0)
+    return sort_vertices(vertices, counterclockwise=True)
