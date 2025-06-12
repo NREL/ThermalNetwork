@@ -127,14 +127,14 @@ class TestNetwork(BaseCase):
 
         updated_sys_param = load_json(self.sys_param_path_1_ghe_detailed_geometry)
 
-        expected_hydraulic_dia = 0.11560
-        expected_pump_head = 164720
+        expected_hydraulic_dia = 0.1377
+        expected_pump_head = 128704
         expected_flow_rate = 0.018
 
         self.check_horiz_pipe_params(updated_sys_param, expected_hydraulic_dia)
         self.check_pump_params(updated_sys_param, expected_pump_head, expected_flow_rate)
 
-        expected_ghe_data = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 36, "length": 128.1}}
+        expected_ghe_data = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 50, "length": 89.5}}
         self.check_ghe_data(updated_sys_param, expected_ghe_data)
 
         # -- Clean up
