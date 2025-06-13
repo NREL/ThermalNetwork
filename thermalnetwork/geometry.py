@@ -5,6 +5,7 @@ Utilities for performing geometric operations on polygons.
 import math
 
 import numpy as np
+import numpy.typing as npt
 from scipy.spatial import Delaunay
 
 
@@ -113,7 +114,7 @@ def rotate(point, angle, origin):
     return qx + origin[0], qy + origin[1]
 
 
-def rotate_polygon_to_axes(polygon):
+def rotate_polygon_to_axes(polygon: npt.ArrayLike) -> None:
     """
     Rotate a polygon to align with XY axes if the first few vertices form a right angle.
 
@@ -188,7 +189,7 @@ def alpha_shape(points, alpha=1, only_outer=True):
     :return: set of (i,j) pairs representing edges of the alpha-shape. (i,j) are
     the indices in the points array.
 
-    Initial code taken from here: https://www.geeksforgeeks.org/dsa/convex-hull-using-graham-scan/
+    Initial code taken from here: https://stackoverflow.com/a/50159452
 
     """
     assert points.shape[0] > 3, "Need at least four points"  # noqa: S101
@@ -230,7 +231,16 @@ def alpha_shape(points, alpha=1, only_outer=True):
     return edges
 
 
-def sort_vertices(vertices, counterclockwise=True):
+def sort_vertices(vertices: npt.ArrayLike, counterclockwise: bool = True):
+    """
+    Sort the vertices by computing the geometric mean, then sorting the points based on the angle between each point
+    and the geometric mean.
+
+    :param vertices: np.array of shape (n,2) points.
+    :param counterclockwise: bool, to select whether to sort clockwise or counterclockwise.
+    :return: np.array of shape (n,2) sorted points.
+    """
+
     geometric_mean = np.array([np.mean(vertices[:, 0]), np.mean(vertices[:, 1])])
 
     # angle between points
@@ -247,7 +257,13 @@ def sort_vertices(vertices, counterclockwise=True):
     return sorted_vertices
 
 
-def get_boundary_points(points):
+def get_boundary_points(points: npt.ArrayLike):
+    """
+    Compute the boundary points of a set of points.
+
+    :param points: np.array of shape (n,2) points.
+    :return: np.array of shape (n,2) boundary points.
+    """
     if type(points) is not np.ndarray:
         points = np.array(points)
 
