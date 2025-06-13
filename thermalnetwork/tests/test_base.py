@@ -119,6 +119,9 @@ class BaseCase(TestCase):
         # Each dict of ghe params has a key that is one of the GHEDesignType enum.
         for idx, ghe in enumerate(ghe_specific_params):
             key_enum = next(enum.name.lower() for enum in GHEDesignType if enum.name.lower() in ghe)
+            # Do not reset pre-designed borefield values
+            if key_enum == GHEDesignType.PRE_DESIGNED_BOREFIELD.name.lower():
+                continue
 
             sys_param["district_system"]["fifth_generation"]["ghe_parameters"]["borefields"][idx][key_enum][
                 "borehole_length"

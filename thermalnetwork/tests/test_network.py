@@ -334,3 +334,7 @@ class TestNetwork(BaseCase):
             "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 20, "length": 152},
         }
         self.check_ghe_data(updated_sys_param, expected_ghe_data)
+
+        # -- Clean up
+        # clean up code only resets autosized values, leaves pre-designed untouched
+        self.reset_sys_param(self.sys_param_path_2_ghe_pre_designed)
