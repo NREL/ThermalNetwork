@@ -126,6 +126,9 @@ class TestGeometry(TestCase):
         ]
         points = np.array(list(zip(x_coords, y_coords)))
         boundary_points = get_boundary_points(points)
+
+        # note that the algorithm isn't capturing the inside elbow corner point (5, 3). I think it may clip a couple
+        # corners, so it's not a foolproof solution, but seems to work well enough for now.
         expected_boundary_points = np.array(
             [
                 [0, 2],
