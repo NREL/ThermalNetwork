@@ -644,7 +644,7 @@ class Network:
                 "central_pump_parameters"
             ]["pump_design_head"] = self.autosized_design_pump_head
 
-        if pump_params.get("pump_design_flow_rate_autosized"):
+        if pump_params.get("pump_flow_rate_autosized"):
             pump_params["pump_flow_rate"] = sys_params["district_system"]["fifth_generation"][
                 "central_pump_parameters"
             ]["pump_flow_rate"] = self.autosized_design_flow_rate
