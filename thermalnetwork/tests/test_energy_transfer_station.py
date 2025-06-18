@@ -59,4 +59,4 @@ class TestEnergyTransferStation(TestCase):
 
         ets = ETS(data)
         ets_loads = ets.get_loads()
-        np.allclose(ets_loads, np.zeros(HOURS_IN_YEAR))
+        assert np.allclose(ets_loads, np.zeros(HOURS_IN_YEAR))
