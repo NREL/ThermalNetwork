@@ -137,7 +137,7 @@
       "central_pump_parameters": {
         "pump_design_head_autosized": true,
         "pump_design_head": 100000,
-        "pump_design_flow_rate_autosized": true,
+        "pump_flow_rate_autosized": true,
         "pump_flow_rate": 0.002
       },
       "ghe_parameters": {
