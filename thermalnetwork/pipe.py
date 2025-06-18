@@ -3,6 +3,7 @@ from math import log, pi
 
 from rich.logging import RichHandler
 
+from thermalnetwork.enums import FluidTypes
 from thermalnetwork.fluid import get_fluid
 from thermalnetwork.utilities import inch_to_m, smoothing_function
 
@@ -15,7 +16,7 @@ class Pipe:
         self,
         dimension_ratio: float,
         length: float,
-        fluid_type_str: str = "WATER",
+        fluid_type_str: FluidTypes = FluidTypes.WATER.name,
         fluid_concentration: float = 0,
         fluid_temperature: float = 20,
     ):
