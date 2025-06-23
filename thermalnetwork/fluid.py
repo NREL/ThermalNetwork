@@ -6,6 +6,8 @@ from scp.methyl_alcohol import MethylAlcohol
 from scp.propylene_glycol import PropyleneGlycol
 from scp.water import Water
 
+from thermalnetwork.enums import FluidTypes
+
 
 def get_fluid(fluid_type: str, fluid_concentration: float = 0):
     if fluid_concentration < 0:
@@ -15,7 +17,7 @@ def get_fluid(fluid_type: str, fluid_concentration: float = 0):
         fluid_concentration = 0
 
     fluid_name = fluid_type.upper()
-    if fluid_name == "WATER":
+    if fluid_name == FluidTypes.WATER.name:
         if fluid_concentration == 0:
             return Water()
         else:
@@ -29,13 +31,13 @@ def get_fluid(fluid_type: str, fluid_concentration: float = 0):
     if fluid_concentration == 0:
         logging.warning(f'Setting fluid "{fluid_name} with fluid-antifreeze mixture concentration = 0')
 
-    if fluid_name == "ETHYLALCOHOL":
+    if fluid_name == FluidTypes.ETHYLALCOHOL.name:
         return EthylAlcohol(fluid_concentration)
-    elif fluid_name == "ETHYLENEGLYCOL":
+    elif fluid_name == FluidTypes.ETHYLENEGLYCOL.name:
         return EthyleneGlycol(fluid_concentration)
-    elif fluid_name == "METHYLALCOHOL":
+    elif fluid_name == FluidTypes.METHYLALCOHOL.name:
         return MethylAlcohol(fluid_concentration)
-    elif fluid_name == "PROPYLENEGLYCOL":
+    elif fluid_name == FluidTypes.PROPYLENEGLYCOL.name:
         return PropyleneGlycol(fluid_concentration)
     else:
         logging.error(f'Unsupported fluid "{fluid_name}"')

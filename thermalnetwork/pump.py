@@ -1,3 +1,6 @@
+import numpy as np
+
+from thermalnetwork import HOURS_IN_YEAR
 from thermalnetwork.base_component import BaseComponent
 from thermalnetwork.enums import ComponentType
 
@@ -8,14 +11,11 @@ class Pump(BaseComponent):
         props = data["properties"]
         self.des_flow = props["design_flow_rate"]
         self.des_head = props["design_head"]
-        self.motor_efficiency = props["motor_efficiency"]
-        self.motor_inefficiency_to_fluid = props["motor_inefficiency_to_fluid_stream"]
+        self.network_loads = None
 
-    def get_loads(self, num_loads):
+    def get_loads(self):
         hydraulic_power = self.des_flow * self.des_head
-        pump_heat = hydraulic_power * (1 - self.motor_efficiency)
-        pump_heat_to_fluid = pump_heat * self.motor_inefficiency_to_fluid
-        return [hydraulic_power + pump_heat_to_fluid] * num_loads
+        return np.array([hydraulic_power] * HOURS_IN_YEAR)
 
-    def set_network_loads(self, num_loads):
-        self.network_loads = self.get_loads(num_loads)
+    def set_network_loads(self):
+        self.network_loads = self.get_loads()
