@@ -19,7 +19,7 @@ class TestPipe(unittest.TestCase):
         self.assertIsInstance(pipe.fluid, Water)
 
         # test propylene glycol
-        pg_pipe = Pipe(dimension_ratio=11, length=100, fluid_type="PROPYLENEGLYCOL", fluid_concentration=0.2)
+        pg_pipe = Pipe(dimension_ratio=11, length=100, fluid_type_str="PROPYLENEGLYCOL", fluid_concentration=0.2)
 
         self.assertIsInstance(pg_pipe, Pipe)
         self.assertEqual(pg_pipe.length, 100)

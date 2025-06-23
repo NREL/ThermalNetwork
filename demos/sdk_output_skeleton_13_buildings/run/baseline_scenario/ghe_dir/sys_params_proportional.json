@@ -503,7 +503,8 @@
         "undisturbed_temp": 18.3
       },
       "horizontal_piping_parameters": {
-        "hydraulic_diameter": 0.089,
+        "hydraulic_diameter_autosized": true,
+        "hydraulic_diameter": 0.15,
         "insulation_thickness": 0.2,
         "insulation_conductivity": 2.3,
         "diameter_ratio": 11,
@@ -514,8 +515,10 @@
         "buried_depth": 1.5
       },
       "central_pump_parameters": {
-        "pump_design_head": 60000,
-        "pump_flow_rate": 0.01
+        "pump_design_head_autosized": true,
+        "pump_design_head": 100000,
+        "pump_flow_rate_autosized": true,
+        "pump_flow_rate": 0.002
       },
       "ghe_parameters": {
         "version": "0.3.0",
@@ -530,8 +533,8 @@
           "rho_cp": 3901000
         },
         "pipe": {
-          "inner_diameter": 0.0216,
-          "outer_diameter": 0.0266,
+          "inner_diameter": 0.034036,
+          "outer_diameter": 0.042164,
           "shank_spacing": 0.0323,
           "roughness": 1e-06,
           "conductivity": 0.4,
@@ -541,58 +544,55 @@
         "simulation": {
           "num_months": 240
         },
-        "geometric_constraints": {
-          "b_min": 3.0,
-          "b_max": 10.0,
-          "max_height": 135.0,
-          "min_height": 60.0,
-          "method": "rectangle"
-        },
         "design": {
           "method": "AREAPROPORTIONAL",
-          "flow_rate": 0.2,
+          "flow_rate": 0.5,
           "flow_type": "borehole",
           "max_eft": 35.0,
           "min_eft": 5.0
         },
-        "ghe_specific_params": [
+        "borehole": {
+          "buried_depth": 2.0,
+          "diameter": 0.15
+        },
+        "borefields": [
           {
             "ghe_id": "344421ab-b416-403e-bd22-7b8af7b581a2",
-            "ghe_geometric_params": {
+            "autosized_rectangle_borefield": {
+              "b_min": 3.0,
+              "b_max": 10.0,
+              "max_height": 135.0,
+              "min_height": 60.0,
               "length_of_ghe": 527.3877277187404,
-              "width_of_ghe": 253.6122722812596
-            },
-            "borehole": {
-              "buried_depth": 2.0,
-              "diameter": 0.15,
-              "length_of_boreholes": 1.0,
-              "number_of_boreholes": 5
+              "width_of_ghe": 253.6122722812596,
+              "borehole_length": 10,
+              "number_of_boreholes": 10
             }
           },
           {
             "ghe_id": "8410c9a9-d52e-4c68-b7bc-4affae974481",
-            "ghe_geometric_params": {
+            "autosized_rectangle_borefield": {
+              "b_min": 3.0,
+              "b_max": 10.0,
+              "max_height": 135.0,
+              "min_height": 60.0,
               "length_of_ghe": 348.145994886069,
-              "width_of_ghe": 286.354005113931
-            },
-            "borehole": {
-              "buried_depth": 2.0,
-              "diameter": 0.15,
-              "length_of_boreholes": 1.0,
-              "number_of_boreholes": 5
+              "width_of_ghe": 286.354005113931,
+              "borehole_length": 10,
+              "number_of_boreholes": 10
             }
           },
           {
             "ghe_id": "3eb26af6-a1f7-4daa-8372-ec016ca185a4",
-            "ghe_geometric_params": {
+            "autosized_rectangle_borefield": {
+              "b_min": 3.0,
+              "b_max": 10.0,
+              "max_height": 135.0,
+              "min_height": 60.0,
               "length_of_ghe": 223.18122107133283,
-              "width_of_ghe": 167.81877892866717
-            },
-            "borehole": {
-              "buried_depth": 2.0,
-              "diameter": 0.15,
-              "length_of_boreholes": 1.0,
-              "number_of_boreholes": 5
+              "width_of_ghe": 167.81877892866717,
+              "borehole_length": 10,
+              "number_of_boreholes": 10
             }
           }
         ]

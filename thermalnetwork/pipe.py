@@ -15,11 +15,11 @@ class Pipe:
         self,
         dimension_ratio: float,
         length: float,
-        fluid_type: str = "WATER",
+        fluid_type_str: str = "WATER",
         fluid_concentration: float = 0,
         fluid_temperature: float = 20,
     ):
-        self.fluid = get_fluid(fluid_type, fluid_concentration)
+        self.fluid = get_fluid(fluid_type_str, fluid_concentration)
         self.fluid_temp = fluid_temperature
 
         # ratio of outer diameter to wall thickness

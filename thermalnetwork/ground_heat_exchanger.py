@@ -2,13 +2,13 @@ import logging
 import shutil
 from pathlib import Path
 
-import pandas as pd
-from ghedesigner.manager import GHEManager
+from ghedesigner.main import run
 from rich.logging import RichHandler
 
 from thermalnetwork.base_component import BaseComponent
-from thermalnetwork.enums import ComponentType
-from thermalnetwork.geometry import polygon_area
+from thermalnetwork.enums import ComponentType, GHEDesignType
+from thermalnetwork.geometry import get_boundary_points, polygon_area
+from thermalnetwork.utilities import load_json, write_json
 
 logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger(__name__)
@@ -17,109 +17,223 @@ logger = logging.getLogger(__name__)
 class GHE(BaseComponent):
     def __init__(self, data: dict) -> None:
         super().__init__(data["name"], ComponentType.GROUNDHEATEXCHANGER)
-        # design_file = data['design_file']
-        self.json_data = data["properties"]
-        # with open(design_file) as f:
-        #    self.json_data = json.load(f)
-        # compute Area
         self.id = data["id"]
-        if "polygons" in self.json_data["geometric_constraints"]:
-            bound_area = polygon_area(self.json_data["geometric_constraints"]["polygons"][0])
-            if bound_area < 0:  # clockwise polygon; reverse for GHE Designer
-                self.json_data["geometric_constraints"]["polygons"][0].reverse()
-            self.area = abs(bound_area)
-            for i, hole_poly in enumerate(self.json_data["geometric_constraints"]["polygons"][1:]):
-                hole_area = polygon_area(hole_poly)
-                if hole_area < 0:  # clockwise polygon; reverse for GHE Designer
-                    self.json_data["geometric_constraints"]["polygons"][i + 1].reverse()
-                self.area -= abs(hole_area)
-        else:
-            length = self.json_data["geometric_constraints"]["length"]
-            width = self.json_data["geometric_constraints"]["width"]
-            self.area = length * width
+        self.json_data = data["properties"]
+        self.design_method = GHEDesignType[self.json_data["borefield"]["design_method"].upper()]
+        self.area = self.compute_area()
 
-    def ghe_size(self, total_space_loads, output_path: Path) -> float:
-        logger.info(f"GHE_SIZE with total_space_loads: {total_space_loads}")
-        ghe = GHEManager()
-        ghe.set_single_u_tube_pipe(
-            inner_diameter=self.json_data["pipe"]["inner_diameter"],
-            outer_diameter=self.json_data["pipe"]["outer_diameter"],
-            shank_spacing=self.json_data["pipe"]["shank_spacing"],
-            roughness=self.json_data["pipe"]["roughness"],
-            conductivity=self.json_data["pipe"]["conductivity"],
-            rho_cp=self.json_data["pipe"]["rho_cp"],
-        )
-        ghe.set_soil(
-            conductivity=self.json_data["soil"]["conductivity"],
-            rho_cp=self.json_data["soil"]["rho_cp"],
-            undisturbed_temp=self.json_data["soil"]["undisturbed_temp"],
-        )
-        ghe.set_grout(conductivity=self.json_data["grout"]["conductivity"], rho_cp=self.json_data["grout"]["rho_cp"])
-        ghe.set_fluid()
-        ghe.set_borehole(
-            height=self.json_data["geometric_constraints"]["max_height"],
-            # Assuming max height is the height of the borehole
-            buried_depth=self.json_data["borehole"]["buried_depth"],
-            diameter=self.json_data["borehole"]["diameter"],
-        )
-        ghe.set_simulation_parameters(
-            num_months=self.json_data["simulation"]["num_months"],
-            max_eft=self.json_data["design"]["max_eft"],
-            min_eft=self.json_data["design"]["min_eft"],
-            max_height=self.json_data["geometric_constraints"]["max_height"],
-            min_height=self.json_data["geometric_constraints"]["min_height"],
-            continue_if_design_unmet=True,
-            max_boreholes=2500,
-        )
-        ghe.set_ground_loads_from_hourly_list(self.json_data["loads"]["ground_loads"])
-        if "polygons" in self.json_data["geometric_constraints"]:
-            ghe.set_geometry_constraints_bi_rectangle_constrained(
-                property_boundary=self.json_data["geometric_constraints"]["polygons"][0],
-                no_go_boundaries=self.json_data["geometric_constraints"]["polygons"][1:],
-                b_min=self.json_data["geometric_constraints"]["b_min"],
-                b_max_x=self.json_data["geometric_constraints"]["b_max"],
-                b_max_y=self.json_data["geometric_constraints"]["b_max"],
-            )
-        else:
-            ghe.set_geometry_constraints_rectangle(
-                length=self.json_data["geometric_constraints"]["length"],
-                width=self.json_data["geometric_constraints"]["width"],
-                b_min=self.json_data["geometric_constraints"]["b_min"],
-                b_max=self.json_data["geometric_constraints"]["b_max"],
-            )
-        ghe.set_design(
-            flow_rate=self.json_data["design"]["flow_rate"], flow_type_str=self.json_data["design"]["flow_type"]
-        )
+        # # compute Area
+        # self.id = data["id"]
+        # if "polygons" in self.json_data["geometric_constraints"]:
+        #     bound_area = polygon_area(self.json_data["geometric_constraints"]["polygons"][0])
+        #     if bound_area < 0:  # clockwise polygon; reverse for GHE Designer
+        #         self.json_data["geometric_constraints"]["polygons"][0].reverse()
+        #     self.area = abs(bound_area)
+        #     for i, hole_poly in enumerate(self.json_data["geometric_constraints"]["polygons"][1:]):
+        #         hole_area = polygon_area(hole_poly)
+        #         if hole_area < 0:  # clockwise polygon; reverse for GHE Designer
+        #             self.json_data["geometric_constraints"]["polygons"][i + 1].reverse()
+        #         self.area -= abs(hole_area)
+        # else:
+        #     length = self.json_data["geometric_constraints"]["length"]
+        #     width = self.json_data["geometric_constraints"]["width"]
+        #     self.area = length * width
+        #
+        # borehole_data = self.json_data["borehole"]
+        #
+        # if (
+        #     borehole_data["length_of_boreholes_autosized"] is True
+        #     or borehole_data["number_of_boreholes_autosized"] is True
+        # ):
+        #     self.autosize = True
+        # else:
+        #     self.autosize = False
 
-        output_file_directory = output_path / self.id
+        self.nbh = None
+        self.bh_length = None
+
+    def compute_area(self) -> float:
+        if self.design_method in [
+            GHEDesignType.AUTOSIZED_BIRECTANGLE_CONSTRAINED_BOREFIELD,
+            GHEDesignType.AUTOSIZED_BIZONED_RECTANGLE_BOREFIELD,
+            GHEDesignType.AUTOSIZED_NEAR_SQUARE_BOREFIELD,
+            GHEDesignType.AUTOSIZED_RECTANGLE_BOREFIELD,
+            GHEDesignType.AUTOSIZED_RECTANGLE_CONSTRAINED_BOREFIELD,
+            GHEDesignType.AUTOSIZED_ROWWISE_BOREFIELD,
+        ]:
+            length = self.json_data["borefield"]["length_of_ghe"]
+            width = self.json_data["borefield"]["width_of_ghe"]
+            return length * width
+
+        elif self.design_method == GHEDesignType.PRE_DESIGNED_BOREFIELD:
+            boundary_points = get_boundary_points(
+                list(
+                    zip(
+                        self.json_data["borefield"]["borehole_x_coordinates"],
+                        self.json_data["borefield"]["borehole_y_coordinates"],
+                    )
+                )
+            )
+
+            return polygon_area(boundary_points)
+        else:
+            raise ValueError("design_type method not supported")
+
+    def get_common_inputs(self) -> dict:
+        d = {
+            "version": 2,
+            "topology": [{"type": "ground-heat-exchanger", "name": f"{self.id}"}],
+            "fluid": {
+                "fluid_name": str(self.json_data["fluid"]["fluid_name"]).upper(),
+                "concentration_percent": self.json_data["fluid"]["concentration_percent"],
+                "temperature": self.json_data["soil"]["undisturbed_temp"],
+            },
+            "ground-heat-exchanger": {
+                f"{self.id}": {
+                    "flow_rate": self.json_data["design"]["flow_rate"],
+                    "flow_type": str(self.json_data["design"]["flow_type"]).upper(),
+                    "grout": {**self.json_data["grout"]},
+                    "soil": {**self.json_data["soil"]},
+                    "pipe": {
+                        key: val.upper() if type(val) is str else val for key, val in self.json_data["pipe"].items()
+                    },
+                    "borehole": {
+                        "buried_depth": self.json_data["borehole"]["buried_depth"],
+                        "diameter": self.json_data["borehole"]["diameter"],
+                    },
+                }
+            },
+            "simulation-control": {"simulation-months": self.json_data["simulation"]["num_months"]},
+        }
+
+        return d
+
+    def get_input_file_data(self) -> dict:
+        d = self.get_common_inputs()
+
+        # if (
+        #     self.design_method == GHEDesignType.AUTOSIZED_BIRECTANGLE_CONSTRAINED_BOREFIELD
+        #     or self.design_method == GHEDesignType.AUTOSIZED_BIZONED_RECTANGLE_BOREFIELD
+        #     or self.design_method == GHEDesignType.AUTOSIZED_NEAR_SQUARE_BOREFIELD
+        # ):
+        #     pass
+        if self.design_method == GHEDesignType.AUTOSIZED_RECTANGLE_BOREFIELD:
+            # if "polygons" in self.json_data["geometric_constraints"]:
+            #     geo_constraints = {
+            #         "property_boundary": self.json_data["geometric_constraints"]["polygons"][0],
+            #         "no_go_boundaries": self.json_data["geometric_constraints"]["polygons"][1:],
+            #         "b_min": self.json_data["geometric_constraints"]["b_min"],
+            #         "b_max_x": self.json_data["geometric_constraints"]["b_max"],
+            #         "b_max_y": self.json_data["geometric_constraints"]["b_max"],
+            #         "method": "BIRECTANGLECONSTRAINED",
+            #     }
+            # else:
+
+            geo_constraints = {
+                "length": self.json_data["borefield"]["length_of_ghe"],
+                "width": self.json_data["borefield"]["width_of_ghe"],
+                "b_min": self.json_data["borefield"]["b_min"],
+                "b_max": self.json_data["borefield"]["b_max"],
+                "method": "RECTANGLE",
+            }
+
+            d_ghe = {
+                **d["ground-heat-exchanger"][f"{self.id}"],
+                "geometric_constraints": geo_constraints,
+                "design": {
+                    "max_eft": self.json_data["design"]["max_eft"],
+                    "min_eft": self.json_data["design"]["min_eft"],
+                    "max_height": self.json_data["borefield"]["max_height"],
+                    "min_height": self.json_data["borefield"]["min_height"],
+                    "max_boreholes": 2500,
+                    "continue_if_design_unmet": True,
+                },
+                "loads": self.json_data["loads"]["ground_loads"].tolist(),
+            }
+
+            d_full = d
+            d_full["ground-heat-exchanger"][f"{self.id}"] = d_ghe
+
+            return d_full
+
+        # elif (
+        #     self.design_method == GHEDesignType.AUTOSIZED_RECTANGLE_CONSTRAINED_BOREFIELD
+        #     or self.design_method == GHEDesignType.AUTOSIZED_ROWWISE_BOREFIELD
+        # ):
+        #     pass
+        elif self.design_method == GHEDesignType.PRE_DESIGNED_BOREFIELD:
+            nbh_x = len(self.json_data["borefield"]["borehole_x_coordinates"])
+            nbh_y = len(self.json_data["borefield"]["borehole_y_coordinates"])
+
+            # check if all equal
+            if nbh_x != nbh_y:
+                raise ValueError("x and y borehole coordinates must have same length")
+            else:
+                self.nbh = nbh_x
+                self.bh_length = self.json_data["borefield"]["borehole_length"]
+
+            d_ghe = {
+                **d["ground-heat-exchanger"][f"{self.id}"],
+                "pre_designed": {
+                    "arrangement": "MANUAL",
+                    "H": self.json_data["borefield"]["borehole_length"],
+                    "x": self.json_data["borefield"]["borehole_x_coordinates"],
+                    "y": self.json_data["borefield"]["borehole_y_coordinates"],
+                },
+            }
+
+            d_full = d
+            d_full["ground-heat-exchanger"][f"{self.id}"] = d_ghe
+            return d_full
+
+        else:
+            raise ValueError("design_type not supported")
+
+    def write_input_file(self, output_path: Path):
+        d = self.get_input_file_data()
+
+        # ghe output directory
+        ghe_dir = output_path / self.id
 
         # Check if the directory exists and delete it if so
-        if output_file_directory.is_dir():
-            logger.debug(f"deleting directory: {output_file_directory}")
-            shutil.rmtree(output_file_directory)
+        if ghe_dir.is_dir():
+            logger.debug(f"deleting directory: {ghe_dir}")
+            shutil.rmtree(ghe_dir)
 
-        # Create the subdirectory
-        logger.debug(f"creating directory: {output_file_directory}")
-        output_file_directory.mkdir(parents=True)
+        # Create the subdirectory, write ghedesigner input file
+        logger.debug(f"creating directory: {ghe_dir}")
+        ghe_dir.mkdir(parents=True)
+        ghe_input_file = ghe_dir / "in.json"
+        write_json(ghe_input_file, d, sort_keys=True)
 
-        # write input file for debugging
-        input_file = output_file_directory / "in.json"
-        ghe.write_input_file(input_file)
+        return ghe_input_file
 
-        ground_loads_df = pd.DataFrame(self.json_data["loads"]["ground_loads"])
-        file_name = output_file_directory / "ground_loads.csv"
-        logger.info(f"saving loads to: {file_name}")
-        ground_loads_df.to_csv(file_name, index=False)
-        logger.debug("loads saved to csv file")
+    def update_config(self, results_dir: Path):
+        if self.design_method in [
+            GHEDesignType.AUTOSIZED_BIRECTANGLE_CONSTRAINED_BOREFIELD,
+            GHEDesignType.AUTOSIZED_BIZONED_RECTANGLE_BOREFIELD,
+            GHEDesignType.AUTOSIZED_NEAR_SQUARE_BOREFIELD,
+            GHEDesignType.AUTOSIZED_RECTANGLE_BOREFIELD,
+            GHEDesignType.AUTOSIZED_RECTANGLE_CONSTRAINED_BOREFIELD,
+            GHEDesignType.AUTOSIZED_ROWWISE_BOREFIELD,
+        ]:
+            d = load_json(results_dir / "SimulationSummary.json")
+            self.nbh = d["ghe_system"]["number_of_boreholes"]
+            self.bh_length = d["ghe_system"]["active_borehole_length"]["value"]
 
-        ghe.find_design()
-        logger.debug("design found")
-        ghe.prepare_results("Project Name", "Notes", "Author", "Iteration Name")
-        logger.debug("results prepared for writing to output directory")
+        elif self.design_method == GHEDesignType.PRE_DESIGNED_BOREFIELD:
+            pass
+        else:
+            raise ValueError("design_type method not supported")
 
-        ghe.write_output_files(output_file_directory, "")
-        logger.debug("output written to output directory")
-        u_tube_height = ghe.results.output_dict["ghe_system"]["active_borehole_length"]["value"]
-        # selected_coordinates = ghe.results.borehole_location_data_rows  # includes a header row
-        logger.debug("Done writing output")
-        return u_tube_height
+    def size(self, output_path: Path) -> None:
+        # write input file for ghedesigner
+        ghe_input_file = self.write_input_file(output_path)
+        ghe_dir = ghe_input_file.parent
+
+        # size ghe
+        logger.debug("running ghe sizing")
+        run(ghe_input_file, ghe_dir)
+        logger.debug(f"ghe sizing data written to {ghe_dir.resolve()}")
+
+        self.update_config(ghe_dir)
