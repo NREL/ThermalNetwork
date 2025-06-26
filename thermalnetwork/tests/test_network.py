@@ -112,7 +112,7 @@ class TestNetwork(BaseCase):
         self.check_ghe_data(updated_sys_param, expected_ghe_data)
 
         # -- Clean up
-        self.reset_sys_param(self.sys_param_path_1_ghe)
+        # self.reset_sys_param(self.sys_param_path_1_ghe)
 
     def test_network_one_ghe_detailed_geometry(self):
         # -- Set up
@@ -208,6 +208,72 @@ class TestNetwork(BaseCase):
 
         # -- Clean up
         self.reset_sys_param(self.sys_params_path_2_ghe_staggered)
+
+    def test_network_two_ghe_birectangles(self):
+        # -- Set up
+        output_path = self.test_outputs_path / "two_ghe_birectangles"
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        # -- Run
+        res = run_sizer_from_cli_worker(
+            self.sys_params_path_2_ghe_birectangles,
+            self.scenario_dir_2_ghe,
+            self.geojson_path_2_ghe_staggered,
+            output_path,
+        )
+
+        assert res == 0
+
+        updated_sys_param = load_json(self.sys_params_path_2_ghe_birectangles)
+
+        expected_hydraulic_dia = 0.09351
+        expected_pump_head = 334515
+        expected_flow_rate = 0.01
+
+        self.check_horiz_pipe_params(updated_sys_param, expected_hydraulic_dia)
+        self.check_pump_params(updated_sys_param, expected_pump_head, expected_flow_rate)
+
+        expected_ghe_data = {
+            "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 22, "length": 90},
+            "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 14, "length": 130},
+        }
+        self.check_ghe_data(updated_sys_param, expected_ghe_data)
+
+        # -- Clean up
+        self.reset_sys_param(self.sys_params_path_2_ghe_birectangles)
+
+    def test_network_two_ghe_bizones_and_near_square(self):
+        # -- Set up
+        output_path = self.test_outputs_path / "two_ghe_bizoned_and_near_square"
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        # -- Run
+        res = run_sizer_from_cli_worker(
+            self.sys_params_path_2_ghe_bizoned_and_near_square,
+            self.scenario_dir_2_ghe,
+            self.geojson_path_2_ghe_staggered,
+            output_path,
+        )
+
+        assert res == 0
+
+        updated_sys_param = load_json(self.sys_params_path_2_ghe_bizoned_and_near_square)
+
+        expected_hydraulic_dia = 0.09351
+        expected_pump_head = 281895
+        expected_flow_rate = 0.01
+
+        self.check_horiz_pipe_params(updated_sys_param, expected_hydraulic_dia)
+        self.check_pump_params(updated_sys_param, expected_pump_head, expected_flow_rate)
+
+        expected_ghe_data = {
+            "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 14, "length": 132},
+            "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 20, "length": 119.9},
+        }
+        self.check_ghe_data(updated_sys_param, expected_ghe_data)
+
+        # -- Clean up
+        self.reset_sys_param(self.sys_params_path_2_ghe_bizoned_and_near_square)
 
     def test_network_three_ghe_upstream(self):
         # -- Set up

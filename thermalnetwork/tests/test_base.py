@@ -22,7 +22,9 @@ class BaseCase(TestCase):
             self.demos_path / "sdk_output_skeleton_1_ghe" / "run" / "baseline_scenario"
         ).resolve()
 
-        self.sys_param_path_1_ghe = (self.scenario_directory_path_1_ghe / "ghe_dir" / "sys_params.json").resolve()
+        self.sys_param_path_1_ghe = (
+            self.scenario_directory_path_1_ghe / "ghe_dir" / "sys_params_rowwise.json"
+        ).resolve()
 
         self.sys_param_path_1_ghe_detailed_geometry = (
             self.scenario_directory_path_1_ghe / "ghe_dir" / "sys_params_detailed_geometry.json"
@@ -48,6 +50,14 @@ class BaseCase(TestCase):
 
         self.sys_params_path_2_ghe_staggered = (
             self.scenario_dir_2_ghe / "ghe_dir" / "sys_params_2_ghe_staggered.json"
+        ).resolve()
+
+        self.sys_params_path_2_ghe_birectangles = (
+            self.scenario_dir_2_ghe / "ghe_dir" / "sys_params_2_ghe_birectangles.json"
+        ).resolve()
+
+        self.sys_params_path_2_ghe_bizoned_and_near_square = (
+            self.scenario_dir_2_ghe / "ghe_dir" / "sys_params_2_ghe_bizoned_and_near_square.json"
         ).resolve()
 
         # 13 buildings upstream
@@ -97,10 +107,10 @@ class BaseCase(TestCase):
         # These values are the same across all our demo files.
         self.original_borehole_length = sys_param_1_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
             "borefields"
-        ][0]["autosized_rectangle_borefield"]["borehole_length"]
+        ][0]["autosized_rowwise_borefield"]["borehole_length"]
         self.original_num_boreholes = sys_param_1_ghe["district_system"]["fifth_generation"]["ghe_parameters"][
             "borefields"
-        ][0]["autosized_rectangle_borefield"]["number_of_boreholes"]
+        ][0]["autosized_rowwise_borefield"]["number_of_boreholes"]
 
     def reset_sys_param(self, sys_param_path: Path):
         sys_param = json.loads(sys_param_path.read_text())
