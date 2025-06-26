@@ -21,49 +21,35 @@ class GHE(BaseComponent):
         self.json_data = data["properties"]
         self.design_method = GHEDesignType[self.json_data["borefield"]["design_method"].upper()]
         self.area = self.compute_area()
-
-        # # compute Area
-        # self.id = data["id"]
-        # if "polygons" in self.json_data["geometric_constraints"]:
-        #     bound_area = polygon_area(self.json_data["geometric_constraints"]["polygons"][0])
-        #     if bound_area < 0:  # clockwise polygon; reverse for GHE Designer
-        #         self.json_data["geometric_constraints"]["polygons"][0].reverse()
-        #     self.area = abs(bound_area)
-        #     for i, hole_poly in enumerate(self.json_data["geometric_constraints"]["polygons"][1:]):
-        #         hole_area = polygon_area(hole_poly)
-        #         if hole_area < 0:  # clockwise polygon; reverse for GHE Designer
-        #             self.json_data["geometric_constraints"]["polygons"][i + 1].reverse()
-        #         self.area -= abs(hole_area)
-        # else:
-        #     length = self.json_data["geometric_constraints"]["length"]
-        #     width = self.json_data["geometric_constraints"]["width"]
-        #     self.area = length * width
-        #
-        # borehole_data = self.json_data["borehole"]
-        #
-        # if (
-        #     borehole_data["length_of_boreholes_autosized"] is True
-        #     or borehole_data["number_of_boreholes_autosized"] is True
-        # ):
-        #     self.autosize = True
-        # else:
-        #     self.autosize = False
-
         self.nbh = None
         self.bh_length = None
 
     def compute_area(self) -> float:
         if self.design_method in [
-            GHEDesignType.AUTOSIZED_BIRECTANGLE_CONSTRAINED_BOREFIELD,
-            GHEDesignType.AUTOSIZED_BIZONED_RECTANGLE_BOREFIELD,
             GHEDesignType.AUTOSIZED_NEAR_SQUARE_BOREFIELD,
             GHEDesignType.AUTOSIZED_RECTANGLE_BOREFIELD,
-            GHEDesignType.AUTOSIZED_RECTANGLE_CONSTRAINED_BOREFIELD,
-            GHEDesignType.AUTOSIZED_ROWWISE_BOREFIELD,
+            GHEDesignType.AUTOSIZED_BIRECTANGLE_BOREFIELD,
+            GHEDesignType.AUTOSIZED_BIZONED_RECTANGLE_BOREFIELD,
         ]:
             length = self.json_data["borefield"]["length_of_ghe"]
             width = self.json_data["borefield"]["width_of_ghe"]
             return length * width
+
+        elif self.design_method in [
+            GHEDesignType.AUTOSIZED_RECTANGLE_CONSTRAINED_BOREFIELD,
+            GHEDesignType.AUTOSIZED_BIRECTANGLE_CONSTRAINED_BOREFIELD,
+            GHEDesignType.AUTOSIZED_ROWWISE_BOREFIELD,
+        ]:
+            bound_area = polygon_area(self.json_data["borefield"]["polygons"][0])
+            if bound_area < 0:  # clockwise polygon; reverse for GHE Designer
+                self.json_data["borefield"]["polygons"][0].reverse()
+            area = abs(bound_area)
+            for i, hole_poly in enumerate(self.json_data["borefield"]["polygons"][1:]):
+                hole_area = polygon_area(hole_poly)
+                if hole_area < 0:  # clockwise polygon; reverse for GHE Designer
+                    self.json_data["borefield"]["polygons"][i + 1].reverse()
+                area -= abs(hole_area)
+            return area
 
         elif self.design_method == GHEDesignType.PRE_DESIGNED_BOREFIELD:
             boundary_points = get_boundary_points(
@@ -111,31 +97,84 @@ class GHE(BaseComponent):
     def get_input_file_data(self) -> dict:
         d = self.get_common_inputs()
 
-        # if (
-        #     self.design_method == GHEDesignType.AUTOSIZED_BIRECTANGLE_CONSTRAINED_BOREFIELD
-        #     or self.design_method == GHEDesignType.AUTOSIZED_BIZONED_RECTANGLE_BOREFIELD
-        #     or self.design_method == GHEDesignType.AUTOSIZED_NEAR_SQUARE_BOREFIELD
-        # ):
-        #     pass
-        if self.design_method == GHEDesignType.AUTOSIZED_RECTANGLE_BOREFIELD:
-            # if "polygons" in self.json_data["geometric_constraints"]:
-            #     geo_constraints = {
-            #         "property_boundary": self.json_data["geometric_constraints"]["polygons"][0],
-            #         "no_go_boundaries": self.json_data["geometric_constraints"]["polygons"][1:],
-            #         "b_min": self.json_data["geometric_constraints"]["b_min"],
-            #         "b_max_x": self.json_data["geometric_constraints"]["b_max"],
-            #         "b_max_y": self.json_data["geometric_constraints"]["b_max"],
-            #         "method": "BIRECTANGLECONSTRAINED",
-            #     }
-            # else:
+        if self.design_method in (
+            GHEDesignType.AUTOSIZED_NEAR_SQUARE_BOREFIELD,
+            GHEDesignType.AUTOSIZED_RECTANGLE_BOREFIELD,
+            GHEDesignType.AUTOSIZED_BIRECTANGLE_BOREFIELD,
+            GHEDesignType.AUTOSIZED_BIZONED_RECTANGLE_BOREFIELD,
+            GHEDesignType.AUTOSIZED_RECTANGLE_CONSTRAINED_BOREFIELD,
+            GHEDesignType.AUTOSIZED_BIRECTANGLE_CONSTRAINED_BOREFIELD,
+            GHEDesignType.AUTOSIZED_ROWWISE_BOREFIELD,
+        ):
+            if self.design_method == GHEDesignType.AUTOSIZED_NEAR_SQUARE_BOREFIELD:
+                geo_constraints = {
+                    "length": self.json_data["borefield"]["length_of_ghe"],
+                    "b": self.json_data["borefield"]["b"],
+                    "method": "NEARSQUARE",
+                }
 
-            geo_constraints = {
-                "length": self.json_data["borefield"]["length_of_ghe"],
-                "width": self.json_data["borefield"]["width_of_ghe"],
-                "b_min": self.json_data["borefield"]["b_min"],
-                "b_max": self.json_data["borefield"]["b_max"],
-                "method": "RECTANGLE",
-            }
+            elif self.design_method == GHEDesignType.AUTOSIZED_RECTANGLE_BOREFIELD:
+                geo_constraints = {
+                    "length": self.json_data["borefield"]["length_of_ghe"],
+                    "width": self.json_data["borefield"]["width_of_ghe"],
+                    "b_min": self.json_data["borefield"]["b_min"],
+                    "b_max": self.json_data["borefield"]["b_max"],
+                    "method": "RECTANGLE",
+                }
+
+            elif self.design_method == GHEDesignType.AUTOSIZED_BIRECTANGLE_BOREFIELD:
+                geo_constraints = {
+                    "length": self.json_data["borefield"]["length_of_ghe"],
+                    "width": self.json_data["borefield"]["width_of_ghe"],
+                    "b_min": self.json_data["borefield"]["b_min"],
+                    "b_max_x": self.json_data["borefield"]["b_max_x"],
+                    "b_max_y": self.json_data["borefield"]["b_max_y"],
+                    "method": "BIRECTANGLE",
+                }
+
+            elif self.design_method == GHEDesignType.AUTOSIZED_BIZONED_RECTANGLE_BOREFIELD:
+                geo_constraints = {
+                    "length": self.json_data["borefield"]["length_of_ghe"],
+                    "width": self.json_data["borefield"]["width_of_ghe"],
+                    "b_min": self.json_data["borefield"]["b_min"],
+                    "b_max_x": self.json_data["borefield"]["b_max_x"],
+                    "b_max_y": self.json_data["borefield"]["b_max_y"],
+                    "method": "BIZONEDRECTANGLE",
+                }
+
+            elif self.design_method == GHEDesignType.AUTOSIZED_RECTANGLE_CONSTRAINED_BOREFIELD:
+                geo_constraints = {
+                    "property_boundary": self.json_data["borefield"]["polygons"][0],
+                    "no_go_boundaries": self.json_data["borefield"]["polygons"][1:],
+                    "b_min": self.json_data["borefield"]["b_min"],
+                    "b_max_x": self.json_data["borefield"]["b_max"],
+                    "b_max_y": self.json_data["borefield"]["b_max"],
+                    "method": "BIRECTANGLECONSTRAINED",
+                }
+
+            elif self.design_method == GHEDesignType.AUTOSIZED_BIRECTANGLE_CONSTRAINED_BOREFIELD:
+                geo_constraints = {
+                    "property_boundary": self.json_data["borefield"]["polygons"][0],
+                    "no_go_boundaries": self.json_data["borefield"]["polygons"][1:],
+                    "b_min": self.json_data["borefield"]["b_min"],
+                    "b_max_x": self.json_data["borefield"]["b_max_x"],
+                    "b_max_y": self.json_data["borefield"]["b_max_y"],
+                    "method": "BIRECTANGLECONSTRAINED",
+                }
+
+            elif self.design_method == GHEDesignType.AUTOSIZED_ROWWISE_BOREFIELD:
+                geo_constraints = {
+                    "property_boundary": self.json_data["borefield"]["polygons"][0],
+                    "no_go_boundaries": self.json_data["borefield"]["polygons"][1:],
+                    "perimeter_spacing_ratio": self.json_data["borefield"]["perimeter_spacing_ratio"],
+                    "max_spacing": self.json_data["borefield"]["max_spacing"],
+                    "min_spacing": self.json_data["borefield"]["min_spacing"],
+                    "spacing_step": self.json_data["borefield"]["spacing_step"],
+                    "max_rotation": self.json_data["borefield"]["max_rotation"],
+                    "min_rotation": self.json_data["borefield"]["min_rotation"],
+                    "rotate_step": self.json_data["borefield"]["rotate_step"],
+                    "method": "ROWWISE",
+                }
 
             d_ghe = {
                 **d["ground-heat-exchanger"][f"{self.id}"],
@@ -156,11 +195,6 @@ class GHE(BaseComponent):
 
             return d_full
 
-        # elif (
-        #     self.design_method == GHEDesignType.AUTOSIZED_RECTANGLE_CONSTRAINED_BOREFIELD
-        #     or self.design_method == GHEDesignType.AUTOSIZED_ROWWISE_BOREFIELD
-        # ):
-        #     pass
         elif self.design_method == GHEDesignType.PRE_DESIGNED_BOREFIELD:
             nbh_x = len(self.json_data["borefield"]["borehole_x_coordinates"])
             nbh_y = len(self.json_data["borefield"]["borehole_y_coordinates"])
@@ -210,11 +244,12 @@ class GHE(BaseComponent):
 
     def update_config(self, results_dir: Path):
         if self.design_method in [
-            GHEDesignType.AUTOSIZED_BIRECTANGLE_CONSTRAINED_BOREFIELD,
-            GHEDesignType.AUTOSIZED_BIZONED_RECTANGLE_BOREFIELD,
             GHEDesignType.AUTOSIZED_NEAR_SQUARE_BOREFIELD,
             GHEDesignType.AUTOSIZED_RECTANGLE_BOREFIELD,
+            GHEDesignType.AUTOSIZED_BIRECTANGLE_BOREFIELD,
+            GHEDesignType.AUTOSIZED_BIZONED_RECTANGLE_BOREFIELD,
             GHEDesignType.AUTOSIZED_RECTANGLE_CONSTRAINED_BOREFIELD,
+            GHEDesignType.AUTOSIZED_BIRECTANGLE_CONSTRAINED_BOREFIELD,
             GHEDesignType.AUTOSIZED_ROWWISE_BOREFIELD,
         ]:
             d = load_json(results_dir / "SimulationSummary.json")

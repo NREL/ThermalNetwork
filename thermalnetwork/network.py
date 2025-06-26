@@ -12,8 +12,10 @@ from thermalnetwork import HOURS_IN_YEAR
 from thermalnetwork.base_component import BaseComponent
 from thermalnetwork.energy_transfer_station import ETS
 from thermalnetwork.enums import ComponentType, DesignType, GHEDesignType
+from thermalnetwork.geometry import lower_left_point, rotate_polygon_to_axes
 from thermalnetwork.ground_heat_exchanger import GHE
 from thermalnetwork.pipe import Pipe
+from thermalnetwork.projection import lon_lat_to_polygon, meters_to_long_lat_factors
 from thermalnetwork.pump import Pump
 from thermalnetwork.utilities import load_json, lps_to_cms, write_json
 
@@ -184,31 +186,10 @@ class Network:
                 }
             elif feature["type"] == "District System" and feature["district_system_type"] == "Ground Heat Exchanger":
                 feature_type = "GROUNDHEATEXCHANGER"
-                # geometric_constraints = deepcopy(self.ghe_parameters["geometric_constraints"])
-                # get ghe parameters for 'ghe_specific_params' key of system_parameters.json
+                # get ghe parameters for 'borefields' key of system_parameters.json
                 matching_ghe = self.find_matching_ghe_id(feature["id"])
                 logger.debug(f"matching_ghe: {matching_ghe}\n")
-                # if "ghe_geometric_params" not in matching_ghe:
-                #     # convert detailed geometry coordinates to meters
-                #     lat_long_polys = feature["geometry"]["coordinates"]
-                #     origin_lon_lat = lower_left_point(lat_long_polys[0])
-                #     convert_factors = meters_to_long_lat_factors(origin_lon_lat)
-                #     ghe_polygons = []
-                #     for poly in lat_long_polys:
-                #         coords = lon_lat_to_polygon(poly, origin_lon_lat, convert_factors)
-                #         ghe_polygons.append(coords)
-                #     ghe_polygons = rotate_polygon_to_axes(ghe_polygons)
-                #     # set geometric constraints to be dictated by the polygons
-                #     geometric_constraints["polygons"] = ghe_polygons
-                #     min_pt = lower_left_point(ghe_polygons[0])
-                #     max_pt = upper_right_point(ghe_polygons[0])
-                #     geometric_constraints["length"] = max_pt[0] - min_pt[0]
-                #     geometric_constraints["width"] = max_pt[1] - min_pt[1]
-                # else:  # use the old ghe_geometric_params
-                #     length = matching_ghe["ghe_geometric_params"]["length_of_ghe"]
-                #     width = matching_ghe["ghe_geometric_params"]["width_of_ghe"]
-                #     geometric_constraints["length"] = length
-                #     geometric_constraints["width"] = width
+
                 properties = {
                     "fluid": self.ghe_parameters["fluid"],
                     "grout": self.ghe_parameters["grout"],
@@ -221,6 +202,7 @@ class Network:
                     "loads": {"ground_loads": []},
                 }
 
+                needs_geojson_polygons = False
                 if "autosized_birectangle_borefield" in matching_ghe:
                     properties["borefield"] = {
                         **matching_ghe["autosized_birectangle_borefield"],
@@ -231,6 +213,13 @@ class Network:
                         **matching_ghe["autosized_birectangle_constrained_borefield"],
                         "design_method": "autosized_birectangle_constrained_borefield",
                     }
+                    needs_geojson_polygons = True
+                elif "autosized_rectangle_constrained_borefield" in matching_ghe:
+                    properties["borefield"] = {
+                        **matching_ghe["autosized_rectangle_constrained_borefield"],
+                        "design_method": "autosized_rectangle_constrained_borefield",
+                    }
+                    needs_geojson_polygons = True
                 elif "autosized_bizoned_rectangle_borefield" in matching_ghe:
                     properties["borefield"] = {
                         **matching_ghe["autosized_bizoned_rectangle_borefield"],
@@ -251,6 +240,7 @@ class Network:
                         **matching_ghe["autosized_rowwise_borefield"],
                         "design_method": "autosized_rowwise_borefield",
                     }
+                    needs_geojson_polygons = True
                 elif "pre_designed_borefield" in matching_ghe:
                     properties["borefield"] = {
                         **matching_ghe["pre_designed_borefield"],
@@ -259,6 +249,18 @@ class Network:
                 else:
                     raise ValueError("borefield design method not supported")
 
+                if needs_geojson_polygons:
+                    # convert detailed geometry coordinates to meters
+                    lat_long_polys = feature["geometry"]["coordinates"]
+                    origin_lon_lat = lower_left_point(lat_long_polys[0])
+                    convert_factors = meters_to_long_lat_factors(origin_lon_lat)
+                    ghe_polygons = []
+                    for poly in lat_long_polys:
+                        coords = lon_lat_to_polygon(poly, origin_lon_lat, convert_factors)
+                        ghe_polygons.append(coords)
+                    ghe_polygons = rotate_polygon_to_axes(ghe_polygons)
+                    # set geometric constraints to be dictated by the polygons
+                    properties["borefield"]["polygons"] = ghe_polygons
             else:
                 raise ValueError(f"feature {feature['type']} not supported")
 
