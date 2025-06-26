@@ -140,10 +140,10 @@
             "autosized_rowwise_borefield": {
               "min_spacing": 3.0,
               "max_spacing": 10.0,
-              "spacing_step": 0.1,
+              "spacing_step": 5.0,
               "min_rotation": 0.0,
               "max_rotation": 90.0,
-              "rotate_step": 0.5,
+              "rotate_step": 10.0,
               "max_height": 135.0,
               "min_height": 60.0,
               "borehole_length": 1,
