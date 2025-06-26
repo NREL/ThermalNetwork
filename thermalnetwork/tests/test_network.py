@@ -112,7 +112,7 @@ class TestNetwork(BaseCase):
         self.check_ghe_data(updated_sys_param, expected_ghe_data)
 
         # -- Clean up
-        # self.reset_sys_param(self.sys_param_path_1_ghe)
+        self.reset_sys_param(self.sys_param_path_1_ghe)
 
     def test_network_one_ghe_detailed_geometry(self):
         # -- Set up
