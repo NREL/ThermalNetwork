@@ -1,6 +1,7 @@
 import unittest
 from math import log
 
+from thermalnetwork.enums import FluidTypes
 from thermalnetwork.fluid import PropyleneGlycol, Water
 from thermalnetwork.pipe import Pipe
 from thermalnetwork.utilities import inch_to_m
@@ -19,7 +20,9 @@ class TestPipe(unittest.TestCase):
         self.assertIsInstance(pipe.fluid, Water)
 
         # test propylene glycol
-        pg_pipe = Pipe(dimension_ratio=11, length=100, fluid_type_str="PROPYLENEGLYCOL", fluid_concentration=0.2)
+        pg_pipe = Pipe(
+            dimension_ratio=11, length=100, fluid_type_str=FluidTypes.PROPYLENEGLYCOL.name, fluid_concentration=0.2
+        )
 
         self.assertIsInstance(pg_pipe, Pipe)
         self.assertEqual(pg_pipe.length, 100)
