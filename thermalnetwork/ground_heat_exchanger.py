@@ -166,7 +166,6 @@ class GHE(BaseComponent):
                 geo_constraints = {
                     "property_boundary": self.json_data["borefield"]["polygons"][0],
                     "no_go_boundaries": self.json_data["borefield"]["polygons"][1:],
-                    "perimeter_spacing_ratio": self.json_data["borefield"]["perimeter_spacing_ratio"],
                     "max_spacing": self.json_data["borefield"]["max_spacing"],
                     "min_spacing": self.json_data["borefield"]["min_spacing"],
                     "spacing_step": self.json_data["borefield"]["spacing_step"],
@@ -175,6 +174,8 @@ class GHE(BaseComponent):
                     "rotate_step": self.json_data["borefield"]["rotate_step"],
                     "method": "ROWWISE",
                 }
+                if "perimeter_spacing_ratio" in self.json_data["borefield"]:
+                    geo_constraints["perimeter_spacing_ratio"] = self.json_data["borefield"]["perimeter_spacing_ratio"]
 
             d_ghe = {
                 **d["ground-heat-exchanger"][f"{self.id}"],
