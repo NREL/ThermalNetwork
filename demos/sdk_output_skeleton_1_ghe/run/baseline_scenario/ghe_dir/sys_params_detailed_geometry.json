@@ -137,7 +137,7 @@
         "borefields": [
           {
             "ghe_id": "8c369df2-18e9-439a-8c25-875851c5aaf0",
-            "autosized_rectangle_borefield": {
+            "autosized_rectangle_constrained_borefield": {
               "b_min": 3.0,
               "b_max": 10.0,
               "max_height": 135.0,
