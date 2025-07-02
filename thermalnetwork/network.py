@@ -261,6 +261,12 @@ class Network:
                     ghe_polygons = rotate_polygon_to_axes(ghe_polygons)
                     # set geometric constraints to be dictated by the polygons
                     properties["borefield"]["polygons"] = ghe_polygons
+            elif feature["type"] == "District System" and (
+                any("waste heat source" in s.lower() for s in feature["properties"].get("equipment", []))
+            ):
+                # This makes waste heat features available in the _loop_order file.
+                # TODO: Adjust GHE size due to a waste heat source impacts on loop loads.
+                continue
             else:
                 raise ValueError(f"feature {feature['type']} not supported")
 
@@ -741,29 +747,22 @@ def run_sizer_from_cli_worker(
 
     network.total_network_pipe_length = total_network_length
 
-    bldg_groups_per_ghe = []
-    feature_group = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}
+    loop_order_list = []
 
-    for loop_feature in reordered_features:
-        # If a feature is a GHE, start a new group
-        if loop_feature["district_system_type"] is not None:
-            if feature_group["list_bldg_ids_in_group"] or feature_group["list_ghe_ids_in_group"]:
-                bldg_groups_per_ghe.append(feature_group)
-                feature_group = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}
-            # Add the GHE to the new group
-            feature_group["list_ghe_ids_in_group"].append(loop_feature["id"])
-        else:
-            # Add the building to the current group
-            feature_group["list_bldg_ids_in_group"].append(loop_feature["id"])
+    for feature in reordered_features:
+        if feature["type"] == "Building":
+            entry_type = "building"
+        elif any("waste heat source" in s.lower() for s in feature["properties"].get("equipment", [])):
+            entry_type = "source"
+        elif feature["district_system_type"] == "Ground Heat Exchanger":
+            entry_type = "ghe"
 
-    # If the last feature group has buildings or GHEs in it, add it to the list
-    if feature_group["list_bldg_ids_in_group"] or feature_group["list_ghe_ids_in_group"]:
-        bldg_groups_per_ghe.append(feature_group)
+        loop_order_list.append({"name": feature["id"], "type": entry_type})
 
     # save loop order to file next to sys-params for temporary use by the GMT
     # Prepending an underscore to emphasize these as temporary files
     loop_order_filepath = system_parameter_path.parent.resolve() / "_loop_order.json"
-    write_json(loop_order_filepath, bldg_groups_per_ghe)
+    write_json(loop_order_filepath, loop_order_list)
 
     # convert geojson type "Building","District System" to "ENERGYTRANSFERSTATION",
     network_data: list[dict] = network.convert_features(connected_features)
