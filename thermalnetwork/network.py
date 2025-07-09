@@ -748,16 +748,31 @@ def run_sizer_from_cli_worker(
     network.total_network_pipe_length = total_network_length
 
     loop_order_list = []
+    building_group = []
 
     for feature in reordered_features:
-        if feature["type"] == "Building":
-            entry_type = "building"
-        elif any("waste heat source" in s.lower() for s in feature["properties"].get("equipment", [])):
-            entry_type = "source"
-        elif feature["district_system_type"] == "Ground Heat Exchanger":
-            entry_type = "ghe"
+        feature_type = feature.get("type")
+        district_system_type = feature.get("district_system_type", "")
+        equipment = feature["properties"].get("equipment", [])
 
-        loop_order_list.append({"name": feature["id"], "type": entry_type})
+        if feature_type == "Building":
+            building_group.append(feature["id"])
+        else:
+            # If there are accumulated buildings, add them as a group
+            if building_group:
+                loop_order_list.append({"type": "building_group", "list_bldg_ids_in_group": building_group})
+                building_group = []
+
+            if any("waste heat source" in s.lower() for s in equipment):
+                entry_type = "heat_source"
+                loop_order_list.append({"name": feature["id"], "type": entry_type})
+            elif district_system_type == "Ground Heat Exchanger":
+                entry_type = "ghe"
+                loop_order_list.append({"name": feature["id"], "type": entry_type})
+
+    # Add any remaining buildings after the loop
+    if building_group:
+        loop_order_list.append({"type": "building group", "list_bldg_ids_in_group": building_group})
 
     # save loop order to file next to sys-params for temporary use by the GMT
     # Prepending an underscore to emphasize these as temporary files
