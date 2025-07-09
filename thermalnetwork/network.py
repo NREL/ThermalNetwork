@@ -772,7 +772,7 @@ def run_sizer_from_cli_worker(
 
     # Add any remaining buildings after the loop
     if building_group:
-        loop_order_list.append({"type": "building group", "list_bldg_ids_in_group": building_group})
+        loop_order_list.append({"type": "building_group", "list_bldg_ids_in_group": building_group})
 
     # save loop order to file next to sys-params for temporary use by the GMT
     # Prepending an underscore to emphasize these as temporary files
