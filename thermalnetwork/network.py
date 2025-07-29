@@ -748,7 +748,7 @@ def run_sizer_from_cli_worker(
 
     network.total_network_pipe_length = total_network_length
 
-    bldg_groups_per_source = []
+    loop_order_list = []
     feature_group = defaultdict(list)
 
     # Source type to field name
@@ -774,7 +774,7 @@ def run_sizer_from_cli_worker(
         if district_type in source_types:
             # If this starts a new group (previous group had buildings), close it
             if group_has_required_data(feature_group):
-                bldg_groups_per_source.append(strip_empty_lists(feature_group))
+                loop_order_list.append(strip_empty_lists(feature_group))
                 feature_group = defaultdict(list)
             feature_group[source_types[district_type]].append(feature["id"])
         else:
@@ -783,12 +783,12 @@ def run_sizer_from_cli_worker(
 
     # Finish last group if valid
     if group_has_required_data(feature_group):
-        bldg_groups_per_source.append(strip_empty_lists(feature_group))
+        loop_order_list.append(strip_empty_lists(feature_group))
 
     # save loop order to file next to sys-params for temporary use by the GMT
     # Prepending an underscore to emphasize these as temporary files not for human use
     loop_order_filepath = system_parameter_path.parent.resolve() / "_loop_order.json"
-    write_json(loop_order_filepath, bldg_groups_per_source)
+    write_json(loop_order_filepath, loop_order_list)
 
     # convert geojson type "Building","District System" to "ENERGYTRANSFERSTATION",
     network_data: list[dict] = network.convert_features(connected_features)
