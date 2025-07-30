@@ -1,6 +1,6 @@
 import logging
 import sys
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from importlib.metadata import version
 from pathlib import Path
 
@@ -757,9 +757,16 @@ def run_sizer_from_cli_worker(
         "Central Ambient Water": "list_source_ids_in_group",
     }
 
-    def strip_empty_lists(group_dict):
-        """Return a dict with only non-empty lists."""
-        return {k: v for k, v in group_dict.items() if v}
+    def strip_and_order(group_dict):
+        """Only include non-empty lists, with list_bldg_ids_in_group as the first key if present"""
+        keys = []
+        if group_dict.get("list_bldg_ids_in_group"):
+            keys.append("list_bldg_ids_in_group")
+        if group_dict.get("list_ghe_ids_in_group"):
+            keys.append("list_ghe_ids_in_group")
+        if group_dict.get("list_source_ids_in_group"):
+            keys.append("list_source_ids_in_group")
+        return OrderedDict((k, group_dict[k]) for k in keys)
 
     def group_has_required_data(group):
         """Check if the group has at least one source and one building."""
@@ -768,13 +775,12 @@ def run_sizer_from_cli_worker(
         return has_buildings and has_any_source
 
     for feature in reordered_features:
-        print(feature["name"])
         district_type = feature["district_system_type"]
 
         if district_type in source_types:
             # If this starts a new group (previous group had buildings), close it
             if group_has_required_data(feature_group):
-                loop_order_list.append(strip_empty_lists(feature_group))
+                loop_order_list.append(strip_and_order(feature_group))
                 feature_group = defaultdict(list)
             feature_group[source_types[district_type]].append(feature["id"])
         else:
@@ -783,7 +789,7 @@ def run_sizer_from_cli_worker(
 
     # Finish last group if valid
     if group_has_required_data(feature_group):
-        loop_order_list.append(strip_empty_lists(feature_group))
+        loop_order_list.append(strip_and_order(feature_group))
 
     # save loop order to file next to sys-params for temporary use by the GMT
     # Prepending an underscore to emphasize these as temporary files not for human use
