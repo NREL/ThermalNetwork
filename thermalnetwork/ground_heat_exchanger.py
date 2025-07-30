@@ -265,6 +265,6 @@ class GHE(BaseComponent):
         # size ghe
         logger.debug("running ghe sizing")
         run(ghe_input_file, ghe_dir)
-        logger.debug(f"ghe sizing data written to {ghe_dir.resolve()}")
+        logger.success(f"ghe sizing data written to {ghe_dir.resolve()}")
 
         self.update_config(ghe_dir)
