@@ -1,12 +1,12 @@
-import logging
 import sys
+from collections import OrderedDict, defaultdict
 from importlib.metadata import version
 from pathlib import Path
 
 import click
 import numpy as np
 import pandas as pd
-from rich.logging import RichHandler
+from loguru import logger
 
 from thermalnetwork import HOURS_IN_YEAR
 from thermalnetwork.base_component import BaseComponent
@@ -18,9 +18,6 @@ from thermalnetwork.pipe import Pipe
 from thermalnetwork.projection import lon_lat_to_polygon, meters_to_long_lat_factors
 from thermalnetwork.pump import Pump
 from thermalnetwork.utilities import load_json, lps_to_cms, write_json
-
-logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
-logger = logging.getLogger(__name__)
 
 
 class Network:
@@ -261,6 +258,12 @@ class Network:
                     ghe_polygons = rotate_polygon_to_axes(ghe_polygons)
                     # set geometric constraints to be dictated by the polygons
                     properties["borefield"]["polygons"] = ghe_polygons
+            elif feature["type"] == "District System" and (
+                any("waste heat source" in s.lower() for s in feature["properties"].get("equipment", []))
+            ):
+                # This makes waste heat features available in the _loop_order file.
+                # TODO: Adjust GHE size due to a waste heat source impacts on loop loads.
+                continue
             else:
                 raise ValueError(f"feature {feature['type']} not supported")
 
@@ -741,29 +744,53 @@ def run_sizer_from_cli_worker(
 
     network.total_network_pipe_length = total_network_length
 
-    bldg_groups_per_ghe = []
-    feature_group = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}
+    loop_order_list = []
+    feature_group = defaultdict(list)
 
-    for loop_feature in reordered_features:
-        # If a feature is a GHE, start a new group
-        if loop_feature["district_system_type"] is not None:
-            if feature_group["list_bldg_ids_in_group"] or feature_group["list_ghe_ids_in_group"]:
-                bldg_groups_per_ghe.append(feature_group)
-                feature_group = {"list_bldg_ids_in_group": [], "list_ghe_ids_in_group": []}
-            # Add the GHE to the new group
-            feature_group["list_ghe_ids_in_group"].append(loop_feature["id"])
+    # Source type to field name
+    source_types = {
+        "Ground Heat Exchanger": "list_ghe_ids_in_group",
+        "Central Ambient Water": "list_source_ids_in_group",
+    }
+
+    def strip_and_order(group_dict):
+        """Only include non-empty lists, with list_bldg_ids_in_group as the first key if present"""
+        keys = []
+        if group_dict.get("list_bldg_ids_in_group"):
+            keys.append("list_bldg_ids_in_group")
+        if group_dict.get("list_ghe_ids_in_group"):
+            keys.append("list_ghe_ids_in_group")
+        if group_dict.get("list_source_ids_in_group"):
+            keys.append("list_source_ids_in_group")
+        return OrderedDict((k, group_dict[k]) for k in keys)
+
+    def group_has_required_data(group):
+        """Check if the group has at least one source and one building."""
+        has_buildings = bool(group["list_bldg_ids_in_group"])
+        has_any_source = bool(group["list_ghe_ids_in_group"] or group["list_source_ids_in_group"])
+        return has_buildings and has_any_source
+
+    for feature in reordered_features:
+        district_type = feature["district_system_type"]
+
+        if district_type in source_types:
+            # If this starts a new group (previous group had buildings), close it
+            if group_has_required_data(feature_group):
+                loop_order_list.append(strip_and_order(feature_group))
+                feature_group = defaultdict(list)
+            feature_group[source_types[district_type]].append(feature["id"])
         else:
-            # Add the building to the current group
-            feature_group["list_bldg_ids_in_group"].append(loop_feature["id"])
+            # buildings are always added to the current group
+            feature_group["list_bldg_ids_in_group"].append(feature["id"])
 
-    # If the last feature group has buildings or GHEs in it, add it to the list
-    if feature_group["list_bldg_ids_in_group"] or feature_group["list_ghe_ids_in_group"]:
-        bldg_groups_per_ghe.append(feature_group)
+    # Finish last group if valid
+    if group_has_required_data(feature_group):
+        loop_order_list.append(strip_and_order(feature_group))
 
     # save loop order to file next to sys-params for temporary use by the GMT
-    # Prepending an underscore to emphasize these as temporary files
+    # Prepending an underscore to emphasize these as temporary files not for human use
     loop_order_filepath = system_parameter_path.parent.resolve() / "_loop_order.json"
-    write_json(loop_order_filepath, bldg_groups_per_ghe)
+    write_json(loop_order_filepath, loop_order_list)
 
     # convert geojson type "Building","District System" to "ENERGYTRANSFERSTATION",
     network_data: list[dict] = network.convert_features(connected_features)
@@ -782,9 +809,12 @@ def run_sizer_from_cli_worker(
         else:
             logger.error(f"Unsupported component type, {comp_type_str}")
 
+    # This is the call to GHED, which takes the most time.
     network.size_ghe(output_directory_path)
     network.size_network(system_parameter_path)
     network.update_sys_params(system_parameter_path, output_directory_path)
+
+    logger.info("\nSizing completed successfully.")
 
     return 0
 

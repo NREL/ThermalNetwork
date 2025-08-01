@@ -1,14 +1,10 @@
-import logging
 from math import log, pi
 
-from rich.logging import RichHandler
+from loguru import logger
 
 from thermalnetwork.enums import FluidTypes
 from thermalnetwork.fluid import get_fluid
 from thermalnetwork.utilities import inch_to_m, smoothing_function
-
-logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
-logger = logging.getLogger(__name__)
 
 
 class Pipe:

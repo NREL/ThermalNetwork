@@ -72,7 +72,7 @@ ignore = [
 # network.py has some fancy nested loops that necessitate nested statements & branches
 # Raise the allowed limits the least possible amount https://docs.astral.sh/ruff/settings/#pylint-max-branches
 max-statements = 84
-max-branches = 18
+max-branches = 25
 
 [lint.per-file-ignores]
 "thermalnetwork/tests/*" = ["S101", "S607", "S603"] # assert statements are allowed in tests, and paths are safe
