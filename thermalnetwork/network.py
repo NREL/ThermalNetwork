@@ -1,4 +1,5 @@
 import sys
+from collections import OrderedDict, defaultdict
 from importlib.metadata import version
 from pathlib import Path
 
@@ -744,19 +745,50 @@ def run_sizer_from_cli_worker(
     network.total_network_pipe_length = total_network_length
 
     loop_order_list = []
+    feature_group = defaultdict(list)
+
+    # Source type to field name
+    source_types = {
+        "Ground Heat Exchanger": "list_ghe_ids_in_group",
+        "Central Ambient Water": "list_source_ids_in_group",
+    }
+
+    def strip_and_order(group_dict):
+        """Only include non-empty lists, with list_bldg_ids_in_group as the first key if present"""
+        keys = []
+        if group_dict.get("list_bldg_ids_in_group"):
+            keys.append("list_bldg_ids_in_group")
+        if group_dict.get("list_ghe_ids_in_group"):
+            keys.append("list_ghe_ids_in_group")
+        if group_dict.get("list_source_ids_in_group"):
+            keys.append("list_source_ids_in_group")
+        return OrderedDict((k, group_dict[k]) for k in keys)
+
+    def group_has_required_data(group):
+        """Check if the group has at least one source and one building."""
+        has_buildings = bool(group["list_bldg_ids_in_group"])
+        has_any_source = bool(group["list_ghe_ids_in_group"] or group["list_source_ids_in_group"])
+        return has_buildings and has_any_source
 
     for feature in reordered_features:
-        if feature["type"] == "Building":
-            entry_type = "building"
-        elif any("waste heat source" in s.lower() for s in feature["properties"].get("equipment", [])):
-            entry_type = "source"
-        elif feature["district_system_type"] == "Ground Heat Exchanger":
-            entry_type = "ghe"
+        district_type = feature["district_system_type"]
 
-        loop_order_list.append({"name": feature["id"], "type": entry_type})
+        if district_type in source_types:
+            # If this starts a new group (previous group had buildings), close it
+            if group_has_required_data(feature_group):
+                loop_order_list.append(strip_and_order(feature_group))
+                feature_group = defaultdict(list)
+            feature_group[source_types[district_type]].append(feature["id"])
+        else:
+            # buildings are always added to the current group
+            feature_group["list_bldg_ids_in_group"].append(feature["id"])
+
+    # Finish last group if valid
+    if group_has_required_data(feature_group):
+        loop_order_list.append(strip_and_order(feature_group))
 
     # save loop order to file next to sys-params for temporary use by the GMT
-    # Prepending an underscore to emphasize these as temporary files
+    # Prepending an underscore to emphasize these as temporary files not for human use
     loop_order_filepath = system_parameter_path.parent.resolve() / "_loop_order.json"
     write_json(loop_order_filepath, loop_order_list)
 
@@ -777,9 +809,12 @@ def run_sizer_from_cli_worker(
         else:
             logger.error(f"Unsupported component type, {comp_type_str}")
 
+    # This is the call to GHED, which takes the most time.
     network.size_ghe(output_directory_path)
     network.size_network(system_parameter_path)
     network.update_sys_params(system_parameter_path, output_directory_path)
+
+    logger.info("\nSizing completed successfully.")
 
     return 0
 
