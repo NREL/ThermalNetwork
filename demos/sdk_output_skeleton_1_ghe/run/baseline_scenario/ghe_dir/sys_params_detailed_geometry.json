@@ -144,8 +144,8 @@
               "min_height": 60.0,
               "length_of_ghe": 232.52683597088145,
               "width_of_ghe": 157.97316402911855,
-              "borehole_length": 10,
-              "number_of_boreholes": 10
+              "borehole_length": 1,
+              "number_of_boreholes": 1
             }
           }
         ]

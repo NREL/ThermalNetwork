@@ -565,8 +565,8 @@
               "min_height": 60.0,
               "length_of_ghe": 527.3877277187404,
               "width_of_ghe": 253.6122722812596,
-              "borehole_length": 10,
-              "number_of_boreholes": 10
+              "borehole_length": 1,
+              "number_of_boreholes": 1
             }
           },
           {
@@ -578,8 +578,8 @@
               "min_height": 60.0,
               "length_of_ghe": 348.145994886069,
               "width_of_ghe": 286.354005113931,
-              "borehole_length": 10,
-              "number_of_boreholes": 10
+              "borehole_length": 1,
+              "number_of_boreholes": 1
             }
           },
           {
@@ -591,8 +591,8 @@
               "min_height": 60.0,
               "length_of_ghe": 223.18122107133283,
               "width_of_ghe": 167.81877892866717,
-              "borehole_length": 10,
-              "number_of_boreholes": 10
+              "borehole_length": 1,
+              "number_of_boreholes": 1
             }
           }
         ]
