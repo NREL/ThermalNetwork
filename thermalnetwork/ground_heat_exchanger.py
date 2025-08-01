@@ -1,17 +1,13 @@
-import logging
 import shutil
 from pathlib import Path
 
 from ghedesigner.main import run
-from rich.logging import RichHandler
+from loguru import logger
 
 from thermalnetwork.base_component import BaseComponent
 from thermalnetwork.enums import ComponentType, GHEDesignType
 from thermalnetwork.geometry import get_boundary_points, polygon_area
 from thermalnetwork.utilities import load_json, write_json
-
-logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
-logger = logging.getLogger(__name__)
 
 
 class GHE(BaseComponent):
@@ -269,6 +265,6 @@ class GHE(BaseComponent):
         # size ghe
         logger.debug("running ghe sizing")
         run(ghe_input_file, ghe_dir)
-        logger.debug(f"ghe sizing data written to {ghe_dir.resolve()}")
+        logger.success(f"ghe sizing data written to {ghe_dir.resolve()}")
 
         self.update_config(ghe_dir)

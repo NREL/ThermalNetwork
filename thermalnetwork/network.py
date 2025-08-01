@@ -1,4 +1,3 @@
-import logging
 import sys
 from importlib.metadata import version
 from pathlib import Path
@@ -6,7 +5,7 @@ from pathlib import Path
 import click
 import numpy as np
 import pandas as pd
-from rich.logging import RichHandler
+from loguru import logger
 
 from thermalnetwork import HOURS_IN_YEAR
 from thermalnetwork.base_component import BaseComponent
@@ -18,9 +17,6 @@ from thermalnetwork.pipe import Pipe
 from thermalnetwork.projection import lon_lat_to_polygon, meters_to_long_lat_factors
 from thermalnetwork.pump import Pump
 from thermalnetwork.utilities import load_json, lps_to_cms, write_json
-
-logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
-logger = logging.getLogger(__name__)
 
 
 class Network:
