@@ -85,7 +85,7 @@ class GHE(BaseComponent):
                     },
                 }
             },
-            "simulation-control": {"simulation-months": self.json_data["simulation"]["num_months"]},
+            "simulation_control": {"sizing_months": self.json_data["simulation"]["num_months"]},
         }
 
         return d
