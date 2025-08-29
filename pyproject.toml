@@ -40,10 +40,9 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest >= 6.0",
-    "pytest-cov ~= 5.0",
+    "pytest-cov ~= 6.0",
     "pytest-xdist ~= 3.6",
     "pre-commit ~= 3.7",
-    "jupyterlab ~= 4.0",
     "mkdocs-material ~= 9.5"
 ]
 
