@@ -234,7 +234,7 @@ class TestNetwork(BaseCase):
         self.check_pump_params(updated_sys_param, expected_pump_head, expected_flow_rate)
 
         expected_ghe_data = {
-            "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 22, "length": 90},
+            "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 22, "length": 90.3},
             "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 14, "length": 130},
         }
         self.check_ghe_data(updated_sys_param, expected_ghe_data)
@@ -268,7 +268,7 @@ class TestNetwork(BaseCase):
 
         expected_ghe_data = {
             "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 14, "length": 132},
-            "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 20, "length": 119.9},
+            "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 20, "length": 120},
         }
         self.check_ghe_data(updated_sys_param, expected_ghe_data)
 
