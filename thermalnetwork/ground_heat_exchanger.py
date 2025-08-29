@@ -183,7 +183,9 @@ class GHE(BaseComponent):
                     "max_boreholes": 2500,
                     "continue_if_design_unmet": True,
                 },
-                "loads": self.json_data["loads"]["ground_loads"].tolist(),
+                "loads": {
+                    "load_values": self.json_data["loads"]["ground_loads"].tolist(),
+                },
             }
 
             d_full = d
