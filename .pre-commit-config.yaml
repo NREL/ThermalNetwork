@@ -28,7 +28,7 @@ repos:
   # - id: check-useless-excludes # Ensure the exclude syntax is correct
   # - id: check-hooks-apply # Fails if a hook doesn't apply to any file
   - repo: https://github.com/crate-ci/typos
-    rev: v1.35.6
+    rev: v1.36.0
     hooks:
       - id: typos
   - repo: https://github.com/astral-sh/ruff-pre-commit
