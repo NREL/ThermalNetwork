@@ -1,3 +1,5 @@
+import pytest
+
 from thermalnetwork.enums import GHEDesignType
 from thermalnetwork.network import run_sizer_from_cli, run_sizer_from_cli_worker
 from thermalnetwork.tests.test_base import BaseCase
@@ -56,7 +58,7 @@ class TestNetwork(BaseCase):
             run_sizer_from_cli,
             [
                 "-y",
-                self.sys_param_path_1_ghe,
+                self.sys_param_path_1_ghe_detailed_geometry,
                 "-s",
                 self.scenario_directory_path_1_ghe,
                 "-f",
@@ -69,21 +71,23 @@ class TestNetwork(BaseCase):
         # -- Assert
         assert res.exit_code == 0
 
-        updated_sys_param = load_json(self.sys_param_path_1_ghe)
+        updated_sys_param = load_json(self.sys_param_path_1_ghe_detailed_geometry)
 
-        expected_hydraulic_dia = 0.13767
-        expected_pump_head = 128704
-        expected_flow_rate = 0.025
+        expected_hydraulic_dia = 0.1156
+        expected_pump_head = 164_720
+        expected_flow_rate = 0.018
 
         self.check_horiz_pipe_params(updated_sys_param, expected_hydraulic_dia)
         self.check_pump_params(updated_sys_param, expected_pump_head, expected_flow_rate)
 
-        expected_ghe_data = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 50, "length": 89.8}}
+        expected_ghe_data = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 36, "length": 128.2}}
         self.check_ghe_data(updated_sys_param, expected_ghe_data)
 
         # -- Clean up
-        self.reset_sys_param(self.sys_param_path_1_ghe)
+        # If any assertion fails, this will not run. Useful for debugging, as long as you don't get confused.
+        self.reset_sys_param(self.sys_param_path_1_ghe_detailed_geometry)
 
+    @pytest.mark.skip(reason="Skip until GHED improves ROWWISE autosizing technique")
     def test_network_one_ghe(self):
         # -- Set up
         output_path = self.test_outputs_path / "one_ghe"
