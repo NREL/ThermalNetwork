@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-added-large-files
         args: ["--maxkb=5000"]
@@ -28,14 +28,14 @@ repos:
   # - id: check-useless-excludes # Ensure the exclude syntax is correct
   # - id: check-hooks-apply # Fails if a hook doesn't apply to any file
   - repo: https://github.com/crate-ci/typos
-    rev: v1.34.0
+    rev: v1.36.0
     hooks:
       - id: typos
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.1
+    rev: v0.12.11
     hooks:
       # Run the linter
-      - id: ruff
+      - id: ruff-check
         args: [--fix, --exit-non-zero-on-fix, --output-format=full]
         types_or: [python, pyi, jupyter]
       # Run the formatter

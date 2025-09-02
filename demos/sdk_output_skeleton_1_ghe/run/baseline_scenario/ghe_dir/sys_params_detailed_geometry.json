@@ -100,7 +100,7 @@
         "pump_flow_rate": 0.002
       },
       "ghe_parameters": {
-        "version": "0.3.0",
+        "version": "0.4.0",
         "ghe_dir": "tests\\management\\data\\sdk_project_scraps\\run\\baseline_scenario\\ghe_dir",
         "fluid": {
           "fluid_name": "Water",
@@ -144,8 +144,8 @@
               "min_height": 60.0,
               "length_of_ghe": 232.52683597088145,
               "width_of_ghe": 157.97316402911855,
-              "borehole_length": 10,
-              "number_of_boreholes": 10
+              "borehole_length": 1,
+              "number_of_boreholes": 1
             }
           }
         ]

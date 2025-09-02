@@ -1,3 +1,5 @@
+import pytest
+
 from thermalnetwork.enums import GHEDesignType
 from thermalnetwork.network import run_sizer_from_cli, run_sizer_from_cli_worker
 from thermalnetwork.tests.test_base import BaseCase
@@ -56,7 +58,7 @@ class TestNetwork(BaseCase):
             run_sizer_from_cli,
             [
                 "-y",
-                self.sys_param_path_1_ghe,
+                self.sys_param_path_1_ghe_detailed_geometry,
                 "-s",
                 self.scenario_directory_path_1_ghe,
                 "-f",
@@ -69,21 +71,23 @@ class TestNetwork(BaseCase):
         # -- Assert
         assert res.exit_code == 0
 
-        updated_sys_param = load_json(self.sys_param_path_1_ghe)
+        updated_sys_param = load_json(self.sys_param_path_1_ghe_detailed_geometry)
 
-        expected_hydraulic_dia = 0.13767
-        expected_pump_head = 128704
-        expected_flow_rate = 0.025
+        expected_hydraulic_dia = 0.1156
+        expected_pump_head = 164_720
+        expected_flow_rate = 0.018
 
         self.check_horiz_pipe_params(updated_sys_param, expected_hydraulic_dia)
         self.check_pump_params(updated_sys_param, expected_pump_head, expected_flow_rate)
 
-        expected_ghe_data = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 50, "length": 89.5}}
+        expected_ghe_data = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 36, "length": 128.2}}
         self.check_ghe_data(updated_sys_param, expected_ghe_data)
 
         # -- Clean up
-        self.reset_sys_param(self.sys_param_path_1_ghe)
+        # If any assertion fails, this will not run. Useful for debugging, as long as you don't get confused.
+        self.reset_sys_param(self.sys_param_path_1_ghe_detailed_geometry)
 
+    @pytest.mark.skip(reason="Skip until GHED improves ROWWISE autosizing technique")
     def test_network_one_ghe(self):
         # -- Set up
         output_path = self.test_outputs_path / "one_ghe"
@@ -108,7 +112,7 @@ class TestNetwork(BaseCase):
         self.check_horiz_pipe_params(updated_sys_param, expected_hydraulic_dia)
         self.check_pump_params(updated_sys_param, expected_pump_head, expected_flow_rate)
 
-        expected_ghe_data = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 50, "length": 89.5}}
+        expected_ghe_data = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 50, "length": 89.8}}
         self.check_ghe_data(updated_sys_param, expected_ghe_data)
 
         # -- Clean up
@@ -137,7 +141,7 @@ class TestNetwork(BaseCase):
         self.check_horiz_pipe_params(updated_sys_param, expected_hydraulic_dia)
         self.check_pump_params(updated_sys_param, expected_pump_head, expected_flow_rate)
 
-        expected_ghe_data = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 36, "length": 128.13}}
+        expected_ghe_data = {"8c369df2-18e9-439a-8c25-875851c5aaf0": {"num_bh": 36, "length": 128.23}}
         self.check_ghe_data(updated_sys_param, expected_ghe_data)
 
         # -- Clean up
@@ -168,8 +172,8 @@ class TestNetwork(BaseCase):
         self.check_pump_params(updated_sys_param, expected_pump_head, expected_flow_rate)
 
         expected_ghe_data = {
-            "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 16, "length": 127.4},
-            "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 13, "length": 127.9},
+            "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 16, "length": 127.5},
+            "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 13, "length": 128.0},
         }
         self.check_ghe_data(updated_sys_param, expected_ghe_data)
 
@@ -201,13 +205,79 @@ class TestNetwork(BaseCase):
         self.check_pump_params(updated_sys_param, expected_pump_head, expected_flow_rate)
 
         expected_ghe_data = {
-            "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 16, "length": 127.3},
-            "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 13, "length": 127.7},
+            "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 16, "length": 127.5},
+            "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 13, "length": 127.8},
         }
         self.check_ghe_data(updated_sys_param, expected_ghe_data)
 
         # -- Clean up
         self.reset_sys_param(self.sys_params_path_2_ghe_staggered)
+
+    def test_network_two_ghe_birectangles(self):
+        # -- Set up
+        output_path = self.test_outputs_path / "two_ghe_birectangles"
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        # -- Run
+        res = run_sizer_from_cli_worker(
+            self.sys_params_path_2_ghe_birectangles,
+            self.scenario_dir_2_ghe,
+            self.geojson_path_2_ghe_staggered,
+            output_path,
+        )
+
+        assert res == 0
+
+        updated_sys_param = load_json(self.sys_params_path_2_ghe_birectangles)
+
+        expected_hydraulic_dia = 0.09351
+        expected_pump_head = 334515
+        expected_flow_rate = 0.01
+
+        self.check_horiz_pipe_params(updated_sys_param, expected_hydraulic_dia)
+        self.check_pump_params(updated_sys_param, expected_pump_head, expected_flow_rate)
+
+        expected_ghe_data = {
+            "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 22, "length": 90.3},
+            "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 14, "length": 130},
+        }
+        self.check_ghe_data(updated_sys_param, expected_ghe_data)
+
+        # -- Clean up
+        self.reset_sys_param(self.sys_params_path_2_ghe_birectangles)
+
+    def test_network_two_ghe_bizones_and_near_square(self):
+        # -- Set up
+        output_path = self.test_outputs_path / "two_ghe_bizoned_and_near_square"
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        # -- Run
+        res = run_sizer_from_cli_worker(
+            self.sys_params_path_2_ghe_bizoned_and_near_square,
+            self.scenario_dir_2_ghe,
+            self.geojson_path_2_ghe_staggered,
+            output_path,
+        )
+
+        assert res == 0
+
+        updated_sys_param = load_json(self.sys_params_path_2_ghe_bizoned_and_near_square)
+
+        expected_hydraulic_dia = 0.09351
+        expected_pump_head = 281895
+        expected_flow_rate = 0.01
+
+        self.check_horiz_pipe_params(updated_sys_param, expected_hydraulic_dia)
+        self.check_pump_params(updated_sys_param, expected_pump_head, expected_flow_rate)
+
+        expected_ghe_data = {
+            "dd69549c-ecfc-4245-96dc-5b6127f34f46": {"num_bh": 14, "length": 132},
+            "47fd01d3-3d72-46c0-85f2-a12854783764": {"num_bh": 20, "length": 120},
+        }
+        self.check_ghe_data(updated_sys_param, expected_ghe_data)
+
+        # -- Clean up
+        self.reset_sys_param(self.sys_params_path_2_ghe_bizoned_and_near_square)
 
     def test_network_three_ghe_upstream(self):
         # -- Set up
@@ -235,7 +305,7 @@ class TestNetwork(BaseCase):
 
         expected_ghe_data = {
             "344421ab-b416-403e-bd22-7b8af7b581a2": {"num_bh": 2380, "length": 135.0},
-            "8410c9a9-d52e-4c68-b7bc-4affae974481": {"num_bh": 72, "length": 93.0},
+            "8410c9a9-d52e-4c68-b7bc-4affae974481": {"num_bh": 72, "length": 93.3},
             "3eb26af6-a1f7-4daa-8372-ec016ca185a4": {"num_bh": 2451, "length": 135.0},
         }
         self.check_ghe_data(updated_sys_param, expected_ghe_data)

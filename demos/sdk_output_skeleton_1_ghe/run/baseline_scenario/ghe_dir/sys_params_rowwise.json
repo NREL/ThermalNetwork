@@ -100,7 +100,7 @@
         "pump_flow_rate": 0.002
       },
       "ghe_parameters": {
-        "version": "0.3.0",
+        "version": "0.4.0",
         "ghe_dir": "tests\\management\\data\\sdk_project_scraps\\run\\baseline_scenario\\ghe_dir",
         "fluid": {
           "fluid_name": "Water",
@@ -137,15 +137,53 @@
         "borefields": [
           {
             "ghe_id": "8c369df2-18e9-439a-8c25-875851c5aaf0",
-            "autosized_rectangle_borefield": {
-              "b_min": 3.0,
-              "b_max": 10.0,
+            "autosized_rowwise_borefield": {
+              "min_spacing": 3.0,
+              "max_spacing": 10.0,
+              "spacing_step": 5.0,
+              "min_rotation": 0.0,
+              "max_rotation": 90.0,
+              "rotate_step": 10.0,
               "max_height": 135.0,
               "min_height": 60.0,
-              "length_of_ghe": 232.52683597088145,
-              "width_of_ghe": 157.97316402911855,
-              "borehole_length": 10,
-              "number_of_boreholes": 10
+              "borehole_length": 1,
+              "number_of_boreholes": 1,
+              "property_boundary": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  100,
+                  0
+                ],
+                [
+                  100,
+                  100
+                ],
+                [
+                  0,
+                  100
+                ]
+              ],
+              "no_go_boundaries": [
+                [
+                  10,
+                  10
+                ],
+                [
+                  10,
+                  20
+                ],
+                [
+                  20,
+                  20
+                ],
+                [
+                  20,
+                  10
+                ]
+              ]
             }
           }
         ]

@@ -64,13 +64,13 @@ class GHE(BaseComponent):
     def get_common_inputs(self) -> dict:
         d = {
             "version": 2,
-            "topology": [{"type": "ground-heat-exchanger", "name": f"{self.id}"}],
+            "topology": [{"type": "ground_heat_exchanger", "name": f"{self.id}"}],
             "fluid": {
                 "fluid_name": str(self.json_data["fluid"]["fluid_name"]).upper(),
                 "concentration_percent": self.json_data["fluid"]["concentration_percent"],
                 "temperature": self.json_data["soil"]["undisturbed_temp"],
             },
-            "ground-heat-exchanger": {
+            "ground_heat_exchanger": {
                 f"{self.id}": {
                     "flow_rate": self.json_data["design"]["flow_rate"],
                     "flow_type": str(self.json_data["design"]["flow_type"]).upper(),
@@ -85,7 +85,7 @@ class GHE(BaseComponent):
                     },
                 }
             },
-            "simulation-control": {"simulation-months": self.json_data["simulation"]["num_months"]},
+            "simulation_control": {"sizing_months": self.json_data["simulation"]["num_months"]},
         }
 
         return d
@@ -162,7 +162,6 @@ class GHE(BaseComponent):
                 geo_constraints = {
                     "property_boundary": self.json_data["borefield"]["polygons"][0],
                     "no_go_boundaries": self.json_data["borefield"]["polygons"][1:],
-                    "perimeter_spacing_ratio": self.json_data["borefield"]["perimeter_spacing_ratio"],
                     "max_spacing": self.json_data["borefield"]["max_spacing"],
                     "min_spacing": self.json_data["borefield"]["min_spacing"],
                     "spacing_step": self.json_data["borefield"]["spacing_step"],
@@ -171,9 +170,11 @@ class GHE(BaseComponent):
                     "rotate_step": self.json_data["borefield"]["rotate_step"],
                     "method": "ROWWISE",
                 }
+                if "perimeter_spacing_ratio" in self.json_data["borefield"]:
+                    geo_constraints["perimeter_spacing_ratio"] = self.json_data["borefield"]["perimeter_spacing_ratio"]
 
             d_ghe = {
-                **d["ground-heat-exchanger"][f"{self.id}"],
+                **d["ground_heat_exchanger"][f"{self.id}"],
                 "geometric_constraints": geo_constraints,
                 "design": {
                     "max_eft": self.json_data["design"]["max_eft"],
@@ -183,11 +184,13 @@ class GHE(BaseComponent):
                     "max_boreholes": 2500,
                     "continue_if_design_unmet": True,
                 },
-                "loads": self.json_data["loads"]["ground_loads"].tolist(),
+                "loads": {
+                    "load_values": self.json_data["loads"]["ground_loads"].tolist(),
+                },
             }
 
             d_full = d
-            d_full["ground-heat-exchanger"][f"{self.id}"] = d_ghe
+            d_full["ground_heat_exchanger"][f"{self.id}"] = d_ghe
 
             return d_full
 
@@ -203,7 +206,7 @@ class GHE(BaseComponent):
                 self.bh_length = self.json_data["borefield"]["borehole_length"]
 
             d_ghe = {
-                **d["ground-heat-exchanger"][f"{self.id}"],
+                **d["ground_heat_exchanger"][f"{self.id}"],
                 "pre_designed": {
                     "arrangement": "MANUAL",
                     "H": self.json_data["borefield"]["borehole_length"],
@@ -213,7 +216,7 @@ class GHE(BaseComponent):
             }
 
             d_full = d
-            d_full["ground-heat-exchanger"][f"{self.id}"] = d_ghe
+            d_full["ground_heat_exchanger"][f"{self.id}"] = d_ghe
             return d_full
 
         else:
