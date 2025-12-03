@@ -471,7 +471,7 @@ class Network:
         pump = Pump(pump_data)
         self.network.append(pump)
 
-    def add_waste_heat_sources(self, total_network_loads) -> None:
+    def add_waste_heat_sources(self, total_network_loads):
         """
         Adjusts the total loads to account for any waste heat sources.
 
@@ -487,7 +487,7 @@ class Network:
         )
         if sys_param_heat_params is None or len(sys_param_heat_params) == 0:
             # nothing to do
-            logger.warning("No waste heat source rate found in the system parameters.")
+            logger.warning("No heat source parameters found in the system parameters.")
             return total_network_loads
 
         # find heat_source_rate in sys_params_heat_params
@@ -508,13 +508,12 @@ class Network:
             heat_source_rate_filepath = self.system_parameter_path.parent / heat_source_rate
 
             # load the mos file and get the waste heat data
-            # don't assume that the loads in this file are hourly (may need interpoliation).
+            # don't assume that the loads in this file are hourly (may need interpolation).
             mos_file = ModelicaMOS(heat_source_rate_filepath)
             print(f"mos_file.data :\n{mos_file.data}")
             # Data is in mos_file.data. Expecting first column to be timestamps in seconds
-            # and second row being heat in Watts
+            # and second column being heat in Watts
             waste_heat_df = pd.DataFrame(mos_file.data)
-            print(f"waste_heat_df head:\n{waste_heat_df.head()}")
             waste_heat_df.columns = ["Time_s", "Waste_Heat_W"]
             waste_heat_df["Date Time"] = pd.to_datetime(waste_heat_df["Time_s"], unit="s")
             waste_heat_df = waste_heat_df.set_index("Date Time")
@@ -524,7 +523,9 @@ class Network:
             if waste_heat_df["Time_s"].iloc[-1] < 31536000:
                 new_date = pd.to_datetime(31536000, unit="s")
                 new_data = pd.DataFrame(
-                    waste_heat_df["Waste_Heat_W"].iloc[-1].reshape(1, -1), index=[new_date], columns=["Waste_Heat_W"]
+                    {"Waste_Heat_W": [waste_heat_df["Waste_Heat_W"].iloc[-1]]},
+                    index=[new_date],
+                    columns=["Waste_Heat_W"],
                 )
                 waste_heat_df = pd.concat([waste_heat_df, new_data])
 
@@ -533,7 +534,7 @@ class Network:
             # keep only HOURS_IN_YEAR
             waste_heat_df = waste_heat_df.iloc[:HOURS_IN_YEAR]
             logger.debug(f"length of waste heat: {len(waste_heat_df)}")
-            waste_heat_addition = waste_heat_df["Waste_Heat_W"]
+            waste_heat_addition = waste_heat_df["Waste_Heat_W"].to_numpy()
 
             # Store original loads for comparison
             original_heating_loads = total_network_loads.copy()
@@ -570,6 +571,9 @@ class Network:
                 )
             except ValueError:
                 # heat_source_rate is not a valid number, do nothing and return
+                logger.error(
+                    "Waste heat source rate is not a valid number.Please provide a valid value or schedule file."
+                )
                 return total_network_loads
 
         logger.info("Adjusted total loads to account for waste heat sources.")

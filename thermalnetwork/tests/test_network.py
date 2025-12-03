@@ -518,8 +518,8 @@ class TestNetwork(BaseCase):
 
             # Verify the loads were adjusted
             # Since waste heat varies from +1000W to -1000W throughout the year,
-            # some loads should be reduced (when waste heat is positive)
-            # and some should be increased (when waste heat is negative, but capped at 0 minimum)
+            # some loads should be reduced (when waste heat is positive, but capped at 0 minimum)
+            # and some should be increased (when waste heat is negative)
             self.assertFalse(np.array_equal(adjusted_loads, original_loads))
 
             # Verify no negative values (loads can't go below 0)
