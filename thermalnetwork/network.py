@@ -482,9 +482,12 @@ class Network:
         # handle both cases. All values assumed to be in Watts
 
         # find data in the system parameters file
-        sys_param_heat_params = self.system_parameters_data["district_system"]["fifth_generation"].get(
-            "heat_source_parameters", []
+        sys_param_heat_params = (
+            self.system_parameters_data.get("district_system", {})
+            .get("fifth_generation", {})
+            .get("heat_source_parameters", [])
         )
+
         if sys_param_heat_params is None or len(sys_param_heat_params) == 0:
             # nothing to do
             logger.warning("No heat source parameters found in the system parameters.")
