@@ -7,6 +7,7 @@ import click
 import numpy as np
 import pandas as pd
 from loguru import logger
+from modelica_builder.modelica_mos_file import ModelicaMOS
 
 from thermalnetwork import HOURS_IN_YEAR
 from thermalnetwork.base_component import BaseComponent
@@ -22,7 +23,12 @@ from thermalnetwork.utilities import load_json, lps_to_cms, write_json
 
 class Network:
     def __init__(
-        self, system_parameters_data: dict, geojson_data: dict, ghe_parameters_data: dict, scenario_directory_path: Path
+        self,
+        system_parameters_data: dict,
+        geojson_data: dict,
+        ghe_parameters_data: dict,
+        scenario_directory_path: Path,
+        system_parameter_path: Path,
     ) -> None:
         """
         A thermal network.
@@ -31,6 +37,7 @@ class Network:
         :param geojson_data: GeoJSON data object containing features.
         :param ghe_parameters_data: Parameters for the ground heat exchanger.
         :param scenario_directory_path: Path to the URBANopt scenario directory.
+        :param system_parameter_path: Path to the system parameters file.
         """
 
         self.des_method = None
@@ -40,6 +47,7 @@ class Network:
         self.ghe_parameters = ghe_parameters_data
         self.geojson_data = geojson_data
         self.scenario_directory_path = scenario_directory_path
+        self.system_parameter_path = system_parameter_path
 
         # placeholders
         self.total_network_pipe_length = 0
@@ -401,6 +409,8 @@ class Network:
         # If any loads aren't hourly for a year, make them so
         if any(len(lst) != HOURS_IN_YEAR for lst in [ets.heating_loads, ets.cooling_loads, ets.dhw_loads]):
             self.make_loads_hourly(ets_data["properties"], ets)
+
+        # Append to network
         self.network.append(ets)
 
     @staticmethod
@@ -417,6 +427,7 @@ class Network:
         space_loads_df = pd.read_csv(properties["space_loads_file"])
         space_loads_df["Date Time"] = pd.to_datetime(space_loads_df["Date Time"])
         space_loads_df = space_loads_df.set_index("Date Time")
+
         # Find the last date in the DataFrame and add one day so interpolation will get the last day
         new_date = space_loads_df.index[-1] + pd.Timedelta(days=1)
         # add duplicate entry at end of dataframe
@@ -460,6 +471,110 @@ class Network:
         pump = Pump(pump_data)
         self.network.append(pump)
 
+    def add_waste_heat_sources(self, total_network_loads) -> None:
+        """
+        Adjusts the total loads to account for any waste heat sources.
+
+        :param total_network_loads: The total network loads before accounting for waste heat.
+        :return: Adjusted total network loads accounting for waste heat.
+        """
+        # there are 2 ways of specifying waste heat. One is constant value, the other is a timeseries file
+        # handle both cases. All values assumed to be in Watts
+
+        # find data in the system parameters file
+        sys_param_heat_params = self.system_parameters_data["district_system"]["fifth_generation"].get(
+            "heat_source_parameters", []
+        )
+        if sys_param_heat_params is None or len(sys_param_heat_params) == 0:
+            # nothing to do
+            logger.warning("No waste heat source rate found in the system parameters.")
+            return total_network_loads
+
+        # find heat_source_rate in sys_params_heat_params
+        # TODO: is it correct to look in first element only? could there be more elements here?
+        heat_source_rate = sys_param_heat_params[0].get("heat_source_rate", None)
+        if heat_source_rate is None:
+            logger.warning(
+                "Waste heat source rate is not provided. Please provide a value or schedule "
+                "for the waste heat source if you want to consider it in the sizing."
+            )
+            return total_network_loads
+
+        logger.info(f"Found waste heat source rate: {heat_source_rate}")
+        # determine if rate is a number or a file.
+        # the path is expected to be related to the system parameter file location
+        if heat_source_rate.endswith(".mos"):
+            logger.debug("heat source rate parameter is a path; loading values from file")
+            heat_source_rate_filepath = self.system_parameter_path.parent / heat_source_rate
+
+            # load the mos file and get the waste heat data
+            # don't assume that the loads in this file are hourly (may need interpoliation).
+            mos_file = ModelicaMOS(heat_source_rate_filepath)
+            print(f"mos_file.data :\n{mos_file.data}")
+            # Data is in mos_file.data. Expecting first column to be timestamps in seconds
+            # and second row being heat in Watts
+            waste_heat_df = pd.DataFrame(mos_file.data)
+            print(f"waste_heat_df head:\n{waste_heat_df.head()}")
+            waste_heat_df.columns = ["Time_s", "Waste_Heat_W"]
+            waste_heat_df["Date Time"] = pd.to_datetime(waste_heat_df["Time_s"], unit="s")
+            waste_heat_df = waste_heat_df.set_index("Date Time")
+
+            # Make sure that last timestamp (in seconds) goes to end of year (31536000 seconds)
+            # if not, copy last Watts value to a new timestamp representing end of year
+            if waste_heat_df["Time_s"].iloc[-1] < 31536000:
+                new_date = pd.to_datetime(31536000, unit="s")
+                new_data = pd.DataFrame(
+                    waste_heat_df["Waste_Heat_W"].iloc[-1].reshape(1, -1), index=[new_date], columns=["Waste_Heat_W"]
+                )
+                waste_heat_df = pd.concat([waste_heat_df, new_data])
+
+            # Interpolate data to hourly
+            waste_heat_df = waste_heat_df.resample("h").interpolate(method="linear")
+            # keep only HOURS_IN_YEAR
+            waste_heat_df = waste_heat_df.iloc[:HOURS_IN_YEAR]
+            logger.debug(f"length of waste heat: {len(waste_heat_df)}")
+            waste_heat_addition = waste_heat_df["Waste_Heat_W"]
+
+            # Store original loads for comparison
+            original_heating_loads = total_network_loads.copy()
+
+            # Adjust the heating loads by subtracting the waste heat addition
+            total_network_loads = np.maximum(total_network_loads - waste_heat_addition, 0)
+
+            # Log comparison statistics (temporary)
+            total_reduction = np.sum(original_heating_loads) - np.sum(total_network_loads)
+            max_reduction = np.max(original_heating_loads - total_network_loads)
+            avg_reduction = np.mean(original_heating_loads - total_network_loads)
+            logger.info(
+                f"Waste heat impact: Total reduction={total_reduction:.2f} W, "
+                f"Max hourly reduction={max_reduction:.2f} W, Avg hourly reduction={avg_reduction:.2f} W"
+            )
+        else:
+            try:
+                logger.debug("heat source rate parameter is a number; applying constant to heating loads")
+                waste_heat_addition = float(heat_source_rate)
+
+                # Store original loads for comparison
+                original_heating_loads = total_network_loads.copy()
+
+                # Adjust the heating loads by subtracting the waste heat addition
+                total_network_loads = np.maximum(total_network_loads - waste_heat_addition, 0)
+
+                # Log comparison statistics
+                total_reduction = np.sum(original_heating_loads) - np.sum(total_network_loads)
+                hours_affected = np.sum(original_heating_loads > waste_heat_addition)
+                logger.info(
+                    f"Constant waste heat impact: Total reduction={total_reduction:.2f} W-hr, "
+                    f"Constant reduction={waste_heat_addition} W, Hours with heating "
+                    f"needed={hours_affected}/{len(total_network_loads)}"
+                )
+            except ValueError:
+                # heat_source_rate is not a valid number, do nothing and return
+                return total_network_loads
+
+        logger.info("Adjusted total loads to account for waste heat sources.")
+        return total_network_loads
+
     def size_area_proportional(self, output_path: Path) -> None:
         """
         Sizing method for area proportional approach.
@@ -499,6 +614,9 @@ class Network:
         for comp in self.network:
             if comp.comp_type is not ComponentType.GROUNDHEATEXCHANGER:
                 total_network_loads += comp.get_loads()
+
+        # add waste heat source impacts on loads here
+        total_network_loads = self.add_waste_heat_sources(total_network_loads)
 
         network_load_per_area = total_network_loads / total_ghe_area
 
@@ -542,7 +660,7 @@ class Network:
             ghe_load = np.zeros(HOURS_IN_YEAR)
             for device in devices_before_ghe:
                 ghe_load += device.get_loads()
-
+            # TODO: do we need to add the waste heat source impacts on loads for this method?
             self.network[ghe_index].json_data["loads"]["ground_loads"] = ghe_load
 
             # call size() with total load
@@ -728,7 +846,9 @@ def run_sizer_from_cli_worker(
     ghe_design_data: dict = ghe_parameters_data["design"]
     logger.debug(f"{ghe_design_data=}")
     # instantiate a new Network object
-    network = Network(system_parameters_data, geojson_data, ghe_parameters_data, scenario_directory_path)
+    network = Network(
+        system_parameters_data, geojson_data, ghe_parameters_data, scenario_directory_path, system_parameter_path
+    )
 
     # get network list from geojson
     connected_features = network.get_connected_features()

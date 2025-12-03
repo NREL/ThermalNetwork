@@ -1,7 +1,12 @@
+import shutil
+import tempfile
+from pathlib import Path
+
+import numpy as np
 import pytest
 
 from thermalnetwork.enums import GHEDesignType
-from thermalnetwork.network import run_sizer_from_cli, run_sizer_from_cli_worker
+from thermalnetwork.network import Network, run_sizer_from_cli, run_sizer_from_cli_worker
 from thermalnetwork.tests.test_base import BaseCase
 from thermalnetwork.utilities import load_json
 
@@ -407,3 +412,155 @@ class TestNetwork(BaseCase):
         # -- Clean up
         # clean up code only resets autosized values, leaves pre-designed untouched
         self.reset_sys_param(self.sys_param_path_2_ghe_pre_designed)
+
+    def test_waste_heat_constant_value(self):
+        """Test waste heat processing with a constant numeric value."""
+        # Set up sample total network loads (24 hours for simplicity)
+        original_loads = np.array(
+            [
+                1000,
+                1200,
+                800,
+                600,
+                400,
+                200,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                500,
+                800,
+                1000,
+                1200,
+                1500,
+                1800,
+                2000,
+                1800,
+                1500,
+                1200,
+                1000,
+                800,
+            ]
+        )
+
+        # Create system parameters with constant waste heat value
+        system_params = {
+            "district_system": {
+                "fifth_generation": {
+                    "heat_source_parameters": [
+                        {"heat_source_rate": "500"}  # 500W constant waste heat
+                    ]
+                }
+            }
+        }
+
+        # Create a minimal Network instance
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            sys_param_file = tmp_path / "sys_params.json"
+
+            network = Network(
+                system_parameters_data=system_params,
+                geojson_data={},
+                ghe_parameters_data={},
+                scenario_directory_path=tmp_path,
+                system_parameter_path=sys_param_file,
+            )
+
+            # Call the waste heat function with total network loads
+            adjusted_loads = network.add_waste_heat_sources(original_loads.copy())
+
+            # Verify the loads were reduced correctly
+            expected_loads = np.maximum(original_loads - 500, 0)
+            np.testing.assert_array_equal(adjusted_loads, expected_loads)
+
+            # Verify some specific values
+            self.assertEqual(adjusted_loads[0], 500)  # 1000 - 500 = 500
+            self.assertEqual(adjusted_loads[5], 0)  # max(200 - 500, 0) = 0
+            self.assertEqual(adjusted_loads[6], 0)  # max(0 - 500, 0) = 0
+
+    def test_waste_heat_mos_file(self):
+        """Test waste heat processing with a MOS file."""
+        # Set up total network loads for 8760 hours (full year)
+        original_loads = np.ones(8760) * 1000  # 1000W constant for simplicity
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            sys_param_file = tmp_path / "sys_params.json"
+
+            # Use the existing test MOS file
+            test_data_dir = Path(__file__).parent / "data"
+            waste_heat_file = test_data_dir / "wasteHeatSchedule.mos"
+
+            # Copy the MOS file to our temp directory so the path resolution works
+            temp_mos_file = tmp_path / "wasteHeatSchedule.mos"
+            shutil.copy(waste_heat_file, temp_mos_file)
+
+            # Create system parameters with MOS file reference
+            system_params = {
+                "district_system": {
+                    "fifth_generation": {"heat_source_parameters": [{"heat_source_rate": "wasteHeatSchedule.mos"}]}
+                }
+            }
+            # Create Network instance
+            network = Network(
+                system_parameters_data=system_params,
+                geojson_data={},
+                ghe_parameters_data={},
+                scenario_directory_path=tmp_path,
+                system_parameter_path=sys_param_file,
+            )
+
+            # Call the waste heat function with total network loads
+            adjusted_loads = network.add_waste_heat_sources(original_loads.copy())
+
+            # Verify the loads were adjusted
+            # Since waste heat varies from +1000W to -1000W throughout the year,
+            # some loads should be reduced (when waste heat is positive)
+            # and some should be increased (when waste heat is negative, but capped at 0 minimum)
+            self.assertFalse(np.array_equal(adjusted_loads, original_loads))
+
+            # Verify no negative values (loads can't go below 0)
+            self.assertTrue(np.all(adjusted_loads >= 0))
+
+            # Verify length is still 8760 hours
+            self.assertEqual(len(adjusted_loads), 8760)
+
+            # Verify that original loads are unchanged (function doesn't modify input)
+            np.testing.assert_array_equal(original_loads, np.ones(8760) * 1000)
+
+            # Since the test file has positive waste heat for first half of year,
+            # those loads should be reduced from 1000W
+            # We can check that some loads are less than 1000W
+            self.assertTrue(np.any(adjusted_loads < 1000))
+
+    def test_waste_heat_no_parameters(self):
+        """Test waste heat processing when no heat source parameters are provided."""
+        original_loads = np.array([1000, 1200, 800, 600])
+
+        # Create system parameters without heat source parameters
+        system_params = {
+            "district_system": {
+                "fifth_generation": {}  # No heat_source_parameters
+            }
+        }
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            sys_param_file = tmp_path / "sys_params.json"
+
+            network = Network(
+                system_parameters_data=system_params,
+                geojson_data={},
+                ghe_parameters_data={},
+                scenario_directory_path=tmp_path,
+                system_parameter_path=sys_param_file,
+            )
+
+            # Call the waste heat function
+            adjusted_loads = network.add_waste_heat_sources(original_loads.copy())
+
+            # Verify loads are unchanged when no waste heat parameters
+            np.testing.assert_array_equal(adjusted_loads, original_loads)
