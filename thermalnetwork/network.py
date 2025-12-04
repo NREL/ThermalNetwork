@@ -472,7 +472,7 @@ class Network:
         pump = Pump(pump_data)
         self.network.append(pump)
 
-    def add_waste_heat_sources(self, total_network_loads):  # noqa: PLR0911
+    def add_waste_heat_sources(self, total_network_loads: np.ndarray) -> np.ndarray:  # noqa: PLR0911
         """
         Adjusts the total loads to account for any waste heat sources. Waste Heat
         can be specified as a constant value or as a timeseries file in MOS format.
