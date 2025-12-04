@@ -488,7 +488,7 @@ class Network:
             .get("heat_source_parameters", [])
         )
 
-        if sys_param_heat_params is None or len(sys_param_heat_params) == 0:
+        if not sys_param_heat_params:
             # nothing to do
             logger.info("No heat source parameters found in the system parameters; proceeding without waste heat sources.")
             return total_network_loads
