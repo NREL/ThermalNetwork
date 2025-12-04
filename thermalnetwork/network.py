@@ -484,6 +484,8 @@ class Network:
         # there are 2 ways of specifying waste heat. One is constant value, the other is a timeseries file
         # handle both cases. All values assumed to be in Watts
 
+        total_network_loads = total_network_loads.copy()
+
         # find data in the system parameters file
         sys_param_heat_params = (
             self.system_parameters_data.get("district_system", {})
@@ -589,6 +591,7 @@ class Network:
             total_network_loads = np.maximum(total_network_loads - waste_heat_addition, 0)
 
             # Log comparison statistics (temporary)
+            # todo: remove these?
             total_reduction = np.sum(original_network_loads) - np.sum(total_network_loads)
             max_reduction = np.max(original_network_loads - total_network_loads)
             avg_reduction = np.mean(original_network_loads - total_network_loads)
@@ -602,14 +605,15 @@ class Network:
                 waste_heat_addition = float(heat_source_rate)
 
                 # Store original loads for comparison
-                original_heating_loads = total_network_loads.copy()
+                original_network_loads = total_network_loads.copy()
 
                 # Adjust the heating loads by subtracting the waste heat addition
                 total_network_loads = np.maximum(total_network_loads - waste_heat_addition, 0)
 
-                # Log comparison statistics
-                total_reduction = np.sum(original_heating_loads) - np.sum(total_network_loads)
-                hours_affected = np.sum(original_heating_loads > waste_heat_addition)
+                # Log comparison statistics (temporary)
+                # TODO: remove these?
+                total_reduction = np.sum(original_network_loads) - np.sum(total_network_loads)
+                hours_affected = np.sum(original_network_loads > waste_heat_addition)
                 logger.info(
                     f"Constant waste heat impact: Total reduction={total_reduction:.2f} W-hr, "
                     f"Constant reduction={waste_heat_addition} W, Hours with heating "
