@@ -490,7 +490,7 @@ class Network:
 
         if sys_param_heat_params is None or len(sys_param_heat_params) == 0:
             # nothing to do
-            logger.warning("No heat source parameters found in the system parameters.")
+            logger.info("No heat source parameters found in the system parameters; proceeding without waste heat sources.")
             return total_network_loads
 
         # find heat_source_rate in sys_params_heat_params
