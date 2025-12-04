@@ -618,7 +618,7 @@ class Network:
             except ValueError:
                 # heat_source_rate is not a valid number, do nothing and return
                 logger.error(
-                    "Waste heat source rate is not a valid number.Please provide a valid value or schedule file."
+                    "Waste heat source rate is not a valid number. Please provide a valid value or schedule file."
                 )
                 return total_network_loads
 
