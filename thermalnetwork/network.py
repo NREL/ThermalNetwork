@@ -28,7 +28,7 @@ class Network:
         geojson_data: dict,
         ghe_parameters_data: dict,
         scenario_directory_path: Path,
-        system_parameter_path: Path,
+        system_parameter_path: Path | None = None,
     ) -> None:
         """
         A thermal network.
@@ -38,6 +38,7 @@ class Network:
         :param ghe_parameters_data: Parameters for the ground heat exchanger.
         :param scenario_directory_path: Path to the URBANopt scenario directory.
         :param system_parameter_path: Path to the system parameters file.
+        Optional - only needed for waste heat file processing.
         """
 
         self.des_method = None
@@ -471,12 +472,14 @@ class Network:
         pump = Pump(pump_data)
         self.network.append(pump)
 
-    def add_waste_heat_sources(self, total_network_loads):
+    def add_waste_heat_sources(self, total_network_loads):  # noqa: PLR0911
         """
-        Adjusts the total loads to account for any waste heat sources.
+        Adjusts the total loads to account for any waste heat sources. Waste Heat
+        can be specified as a constant value or as a timeseries file in MOS format.
 
         :param total_network_loads: The total network loads before accounting for waste heat.
-        :return: Adjusted total network loads accounting for waste heat.
+        :return: Adjusted total network loads accounting for waste heat. The input array
+        is not modified; a copy is returned.
         """
         # there are 2 ways of specifying waste heat. One is constant value, the other is a timeseries file
         # handle both cases. All values assumed to be in Watts
@@ -490,7 +493,9 @@ class Network:
 
         if sys_param_heat_params is None or len(sys_param_heat_params) == 0:
             # nothing to do
-            logger.info("No heat source parameters found in the system parameters; proceeding without waste heat sources.")
+            logger.info(
+                "No heat source parameters found in the system parameters; proceeding without waste heat sources."
+            )
             return total_network_loads
 
         # find heat_source_rate in sys_params_heat_params
@@ -507,17 +512,52 @@ class Network:
         # determine if rate is a number or a file.
         # the path is expected to be related to the system parameter file location
         if heat_source_rate.endswith(".mos"):
-            logger.debug("heat source rate parameter is a path; loading values from file")
+            logger.debug("heat source rate parameter is a MOS file; loading values from file")
+
+            # Check if system_parameter_path is available for file resolution
+            if self.system_parameter_path is None:
+                logger.error(
+                    "Cannot load MOS file for waste heat: system_parameter_path not provided to Network constructor. "
+                    "System parameter path is required to resolve relative file paths."
+                )
+                return total_network_loads
+
             heat_source_rate_filepath = self.system_parameter_path.parent / heat_source_rate
 
-            # load the mos file and get the waste heat data
-            # don't assume that the loads in this file are hourly (may need interpolation).
-            mos_file = ModelicaMOS(heat_source_rate_filepath)
-            print(f"mos_file.data :\n{mos_file.data}")
-            # Data is in mos_file.data. Expecting first column to be timestamps in seconds
-            # and second column being heat in Watts
-            waste_heat_df = pd.DataFrame(mos_file.data)
-            waste_heat_df.columns = ["Time_s", "Waste_Heat_W"]
+            # Check if the file exists
+            if not heat_source_rate_filepath.exists():
+                logger.error(
+                    f"Waste heat MOS file not found at {heat_source_rate_filepath}. "
+                    f"Please check the path in your system parameters file."
+                )
+                return total_network_loads
+
+            try:
+                # load the mos file and get the waste heat data
+                # don't assume that the loads in this file are hourly (may need interpolation).
+                mos_file = ModelicaMOS(heat_source_rate_filepath)
+
+                # Check if the MOS file actually contains data
+                if mos_file.data is None or len(mos_file.data) == 0:
+                    logger.error(f"MOS file {heat_source_rate_filepath} exists but contains no data.")
+                    return total_network_loads
+
+            except Exception as e:  # noqa: BLE001
+                logger.error(f"Error reading MOS file {heat_source_rate_filepath}: {e!s}")
+                return total_network_loads
+
+            try:
+                # Data is in mos_file.data. Expecting first column to be timestamps in seconds
+                # and second column being heat in Watts
+                waste_heat_df = pd.DataFrame(mos_file.data)
+                waste_heat_df.columns = ["Time_s", "Waste_Heat_W"]
+            except Exception as e:  # noqa: BLE001
+                logger.error(
+                    f"Error processing data from MOS file {heat_source_rate_filepath}: {e!s}. "
+                    f"Expected 2 columns (time in seconds, heat in Watts)."
+                )
+                return total_network_loads
+
             waste_heat_df["Date Time"] = pd.to_datetime(waste_heat_df["Time_s"], unit="s")
             waste_heat_df = waste_heat_df.set_index("Date Time")
 
@@ -526,9 +566,12 @@ class Network:
             if waste_heat_df["Time_s"].iloc[-1] < 31536000:
                 new_date = pd.to_datetime(31536000, unit="s")
                 new_data = pd.DataFrame(
-                    {"Waste_Heat_W": [waste_heat_df["Waste_Heat_W"].iloc[-1]]},
+                    {
+                        "Time_s": [31536000],
+                        "Waste_Heat_W": [waste_heat_df["Waste_Heat_W"].iloc[-1]],
+                    },
                     index=[new_date],
-                    columns=["Waste_Heat_W"],
+                    columns=["Time_s", "Waste_Heat_W"],
                 )
                 waste_heat_df = pd.concat([waste_heat_df, new_data])
 
@@ -550,7 +593,7 @@ class Network:
             max_reduction = np.max(original_heating_loads - total_network_loads)
             avg_reduction = np.mean(original_heating_loads - total_network_loads)
             logger.info(
-                f"Waste heat impact: Total reduction={total_reduction:.2f} W, "
+                f"Waste heat impact: Total reduction={total_reduction:.2f} W-h, "
                 f"Max hourly reduction={max_reduction:.2f} W, Avg hourly reduction={avg_reduction:.2f} W"
             )
         else:

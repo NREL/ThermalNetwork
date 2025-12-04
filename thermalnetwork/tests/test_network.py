@@ -535,6 +535,9 @@ class TestNetwork(BaseCase):
             # those loads should be reduced from 1000W
             # We can check that some loads are less than 1000W
             self.assertTrue(np.any(adjusted_loads < 1000))
+            # We can also test that some loads are greater than 1000W
+            # since the test file has negative waste heat in the latter half
+            self.assertTrue(np.any(adjusted_loads > 1000))
 
     def test_waste_heat_no_parameters(self):
         """Test waste heat processing when no heat source parameters are provided."""
