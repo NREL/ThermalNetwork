@@ -583,15 +583,15 @@ class Network:
             waste_heat_addition = waste_heat_df["Waste_Heat_W"].to_numpy()
 
             # Store original loads for comparison
-            original_heating_loads = total_network_loads.copy()
+            original_network_loads = total_network_loads.copy()
 
             # Adjust the heating loads by subtracting the waste heat addition
             total_network_loads = np.maximum(total_network_loads - waste_heat_addition, 0)
 
             # Log comparison statistics (temporary)
-            total_reduction = np.sum(original_heating_loads) - np.sum(total_network_loads)
-            max_reduction = np.max(original_heating_loads - total_network_loads)
-            avg_reduction = np.mean(original_heating_loads - total_network_loads)
+            total_reduction = np.sum(original_network_loads) - np.sum(total_network_loads)
+            max_reduction = np.max(original_network_loads - total_network_loads)
+            avg_reduction = np.mean(original_network_loads - total_network_loads)
             logger.info(
                 f"Waste heat impact: Total reduction={total_reduction:.2f} W-h, "
                 f"Max hourly reduction={max_reduction:.2f} W, Avg hourly reduction={avg_reduction:.2f} W"
