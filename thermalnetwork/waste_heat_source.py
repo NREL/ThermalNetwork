@@ -96,14 +96,14 @@ class WasteHeatSource(BaseComponent):
             waste_heat_df = waste_heat_df.iloc[:HOURS_IN_YEAR]
             waste_heat_values = waste_heat_df["Waste_Heat_W"].to_numpy()
 
-            self.network_loads = self.network_loads - waste_heat_values
+            self.network_loads = waste_heat_values
 
         else:
             try:
                 logger.debug("heat source rate parameter is a number; applying constant to heating loads")
                 waste_heat_val = float(self.heat_source_rate)
                 # subtract (make negative) from network loads
-                self.network_loads = self.network_loads - waste_heat_val
+                self.network_loads = self.network_loads + waste_heat_val
 
             except ValueError:
                 # heat_source_rate is not a valid number, make loads zero and log error
