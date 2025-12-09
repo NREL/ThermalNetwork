@@ -496,8 +496,10 @@ class Network:
         if not sys_param_heat_params:
             # no loads found
             logger.warning(
-                f"No heat source parameters found in the system parameters; \
-                Setting loads to 0 for waste heat source {wsh_data['name']}."
+                (
+                    f"No heat source parameters found in the system parameters; "
+                    f"Setting loads to 0 for waste heat source {wsh_data['name']}."
+                )
             )
         else:
             # find heat_source_rate in sys_params_heat_params for heat_source_id matching wsh_data['id']
