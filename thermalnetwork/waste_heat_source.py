@@ -33,7 +33,7 @@ class WasteHeatSource(BaseComponent):
             if self.system_parameter_path is None:
                 logger.error(
                     "Cannot load MOS file for waste heat: system_parameter_path not provided to Network constructor."
-                    "System parameter path is required to resolve relative file paths."
+                    " System parameter path is required to resolve relative file paths."
                 )
                 return
 
