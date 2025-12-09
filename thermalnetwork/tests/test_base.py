@@ -46,6 +46,11 @@ class BaseCase(TestCase):
             self.scenario_dir_2_ghe / "ghe_dir" / "sys_params_2_ghe_bizoned_and_near_square.json"
         )
 
+        # Waste Heat
+        self.waste_heat_geojson_path = self.demos_path / "waste_heat_demo" / "waste_heat_example.geojson"
+        self.waste_heat_sys_params_path = self.demos_path / "waste_heat_demo" / "sys_params_waste_heat.json"
+        self.waste_heat_scenario_path = self.demos_path / "waste_heat_demo" / "run" / "baseline_scenario"
+
         # 13 buildings upstream
         self.geojson_path_13_buildings = self.demos_path / "sdk_output_skeleton_13_buildings" / "network.geojson"
 
