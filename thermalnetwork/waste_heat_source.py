@@ -26,7 +26,7 @@ class WasteHeatSource(BaseComponent):
 
         # determine if rate is a number or a file.
         # the path is expected to be related to the system parameter file location
-        if self.heat_source_rate.endswith(".mos"):
+        if self.heat_source_rate.endswith is not None and self.heat_source_rate.endswith(".mos"):
             logger.debug("heat source rate parameter is a MOS file; loading values from file")
 
             # Check if system_parameter_path is available for file resolution
