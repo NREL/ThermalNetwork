@@ -116,7 +116,7 @@ class TestNetwork(BaseCase):
         # same path as the original path
         updated_sys_param = load_json(self.waste_heat_sys_params_path)
 
-        expected_ghe_data = {"0b575a8f-97d1-47e6-b329-7ef7566d26f2": {"num_bh": 180, "length": 127}}
+        expected_ghe_data = {"0b575a8f-97d1-47e6-b329-7ef7566d26f2": {"num_bh": 180, "length": 127.1}}
         self.check_ghe_data(updated_sys_param, expected_ghe_data)
 
         # -- Clean up
