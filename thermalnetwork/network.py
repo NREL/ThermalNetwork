@@ -508,9 +508,9 @@ class Network:
 
             if heat_source_rate is None:
                 logger.warning(
-                    f"No heat source parameters found in the system parameters \
-                    matching feature id {wsh_data['id']}. \
-                    Setting loads to 0 for waste heat source {wsh_data['name']}."
+                    f"No heat source parameters found in the system parameters "
+                    f"matching feature id {wsh_data['id']}. "
+                    f"Setting loads to 0 for waste heat source {wsh_data['name']}."
                 )
             else:
                 logger.info(f"Found waste heat source rate: {heat_source_rate}")
