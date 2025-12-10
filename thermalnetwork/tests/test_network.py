@@ -105,9 +105,9 @@ class TestNetwork(BaseCase):
                 output_path,
             ],
         )
-
+        print(res.output)
         # -- Assert
-        assert res.exit_code == 0
+        assert res.exit_code == 0, f"CLI failed with exit code {res.exit_code}, output: {res.output}"
 
         # assert there is a loop order file saved next to the sys-param file
         loop_order_file = self.waste_heat_sys_params_path.parent / "_loop_order.json"
