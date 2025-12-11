@@ -51,6 +51,13 @@ class BaseCase(TestCase):
         self.waste_heat_sys_params_path = self.demos_path / "waste_heat_demo" / "sys_params_waste_heat.json"
         self.waste_heat_scenario_path = self.demos_path / "waste_heat_demo" / "run" / "baseline_scenario"
 
+        # Check if waste heat demo files exist (may not be available in all environments)
+        self.waste_heat_demo_available = (
+            self.waste_heat_geojson_path.exists()
+            and self.waste_heat_sys_params_path.exists()
+            and self.waste_heat_scenario_path.exists()
+        )
+
         # 13 buildings upstream
         self.geojson_path_13_buildings = self.demos_path / "sdk_output_skeleton_13_buildings" / "network.geojson"
 

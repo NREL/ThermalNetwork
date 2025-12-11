@@ -88,6 +88,22 @@ class TestNetwork(BaseCase):
         self.reset_sys_param(self.sys_param_path_1_ghe_detailed_geometry)
 
     def test_waste_heat(self):
+        # Check if waste heat demo files are available and log detailed error if not
+        if not self.waste_heat_demo_available:
+            missing_files = []
+            if not self.waste_heat_geojson_path.exists():
+                missing_files.append(str(self.waste_heat_geojson_path))
+            if not self.waste_heat_sys_params_path.exists():
+                missing_files.append(str(self.waste_heat_sys_params_path))
+            if not self.waste_heat_scenario_path.exists():
+                missing_files.append(str(self.waste_heat_scenario_path))
+
+            error_msg = "Waste heat test cannot run: Missing required demo files:\n" + "\n".join(
+                f"  - {file}" for file in missing_files
+            )
+            print(error_msg)
+            self.fail(error_msg)
+
         output_path = self.test_outputs_path.resolve() / "waste_heat_test"
 
         # -- Act
