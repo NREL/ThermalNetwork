@@ -91,11 +91,11 @@ class TestNetwork(BaseCase):
         # Check if waste heat demo files are available and log detailed error if not
         if not self.waste_heat_demo_available:
             missing_files = []
-            if not self.waste_heat_geojson_path.exists():
+            if not self.waste_heat_geojson_path or not self.waste_heat_geojson_path.exists():
                 missing_files.append(str(self.waste_heat_geojson_path))
-            if not self.waste_heat_sys_params_path.exists():
+            if not self.waste_heat_sys_params_path or not self.waste_heat_sys_params_path.exists():
                 missing_files.append(str(self.waste_heat_sys_params_path))
-            if not self.waste_heat_scenario_path.exists():
+            if not self.waste_heat_scenario_path or not self.waste_heat_scenario_path.exists():
                 missing_files.append(str(self.waste_heat_scenario_path))
 
             error_msg = "Waste heat test cannot run: Missing required demo files:\n" + "\n".join(

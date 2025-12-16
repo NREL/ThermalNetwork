@@ -80,6 +80,7 @@ class BaseCase(TestCase):
         # Use case-insensitive path resolution to handle filesystem differences
         waste_heat_demo_dir = self._resolve_case_insensitive_path(self.demos_path, "waste_heat_demo")
         if waste_heat_demo_dir:
+            print(f"Waste heat demo dir: {waste_heat_demo_dir}")
             self.waste_heat_geojson_path = self._resolve_case_insensitive_path(
                 waste_heat_demo_dir, "waste_heat_example.geojson"
             )
