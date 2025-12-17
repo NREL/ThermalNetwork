@@ -40,9 +40,9 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest >= 6.0",
-    "pytest-cov ~= 6.0",
+    "pytest-cov >= 6,< 8",
     "pytest-xdist ~= 3.6",
-    "pre-commit ~= 3.7",
+    "pre-commit >= 3.7,< 5.0",
     "mkdocs-material ~= 9.5"
 ]
 
