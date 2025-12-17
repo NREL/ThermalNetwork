@@ -187,3 +187,6 @@ started.job
 stdout-energyplus
 notebooks/
 .bundle/
+
+# include the building_loads.csv in the subdirectories of the waste_heat_demo folder
+!demos/waste_heat_demo/**/building_loads.csv
