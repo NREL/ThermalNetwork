@@ -27,12 +27,18 @@ repos:
   # hooks:
   # - id: check-useless-excludes # Ensure the exclude syntax is correct
   # - id: check-hooks-apply # Fails if a hook doesn't apply to any file
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        # for now ignoring html, javascript
+        types_or: [yaml, markdown, css, scss]
   - repo: https://github.com/crate-ci/typos
     rev: v1.36.0
     hooks:
       - id: typos
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.11
+    rev: v0.13.3
     hooks:
       # Run the linter
       - id: ruff-check
