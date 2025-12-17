@@ -174,7 +174,7 @@ modelica.mos
 out.*
 pre-preprocess.*
 pre-process.*
-precess_status.json
+process_status.json
 process_status.jso
 process_status.json
 report.*

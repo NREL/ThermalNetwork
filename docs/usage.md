@@ -8,4 +8,4 @@ Full documnentation of the URBANopt commands to work with a Ground Heat Exchange
 
 It is possible to use ThermalNetwork directly, and can be done so with a similar (though not identical) command:
 
- `thermalnetwork --system-parameter-file <path/to/sys_param.json> --geojson-file <path/to/FEATUREFILE.json> --scenario-directory <path/to/SCENARIO_dir>`
+`thermalnetwork --system-parameter-file <path/to/sys_param.json> --geojson-file <path/to/FEATUREFILE.json> --scenario-directory <path/to/SCENARIO_dir>`
