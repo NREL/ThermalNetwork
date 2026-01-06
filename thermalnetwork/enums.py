@@ -12,6 +12,7 @@ class ComponentType(Enum):
     GROUNDHEATEXCHANGER = auto()
     HEATPUMP = auto()
     PUMP = auto()
+    WASTEHEATSOURCE = auto()
 
 
 class HeatPumpType(Enum):

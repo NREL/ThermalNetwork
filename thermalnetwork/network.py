@@ -18,11 +18,17 @@ from thermalnetwork.pipe import Pipe
 from thermalnetwork.projection import lon_lat_to_polygon, meters_to_long_lat_factors
 from thermalnetwork.pump import Pump
 from thermalnetwork.utilities import load_json, lps_to_cms, write_json
+from thermalnetwork.waste_heat_source import WasteHeatSource
 
 
 class Network:
     def __init__(
-        self, system_parameters_data: dict, geojson_data: dict, ghe_parameters_data: dict, scenario_directory_path: Path
+        self,
+        system_parameters_data: dict,
+        geojson_data: dict,
+        ghe_parameters_data: dict,
+        scenario_directory_path: Path,
+        system_parameter_path: Path | None = None,
     ) -> None:
         """
         A thermal network.
@@ -31,6 +37,8 @@ class Network:
         :param geojson_data: GeoJSON data object containing features.
         :param ghe_parameters_data: Parameters for the ground heat exchanger.
         :param scenario_directory_path: Path to the URBANopt scenario directory.
+        :param system_parameter_path: Path to the system parameters file.
+        Optional - only needed for waste heat file processing.
         """
 
         self.des_method = None
@@ -40,6 +48,7 @@ class Network:
         self.ghe_parameters = ghe_parameters_data
         self.geojson_data = geojson_data
         self.scenario_directory_path = scenario_directory_path
+        self.system_parameter_path = system_parameter_path
 
         # placeholders
         self.total_network_pipe_length = 0
@@ -122,7 +131,6 @@ class Network:
 
         # Reorder the features list to start with the feature having 'startloop' set to 'true'
         reordered_features = features[start_loop_index:] + features[:start_loop_index]
-
         return reordered_features
 
     def find_matching_ghe_id(self, feature_id):
@@ -262,11 +270,13 @@ class Network:
                 any("waste heat source" in s.lower() for s in feature["properties"].get("equipment", []))
             ):
                 # This makes waste heat features available in the _loop_order file.
-                # TODO: Adjust GHE size due to a waste heat source impacts on loop loads.
-                continue
+                # for waste heat District System, add feature id, name, type (waste heat)
+                feature_type = "WASTEHEATSOURCE"
+                properties = {}  # no properties needed?
             else:
                 raise ValueError(f"feature {feature['type']} not supported")
 
+            # add feature to converted features list
             converted_features.append(
                 {"id": feature["id"], "name": feature["name"], "type": feature_type, "properties": properties}
             )
@@ -401,6 +411,8 @@ class Network:
         # If any loads aren't hourly for a year, make them so
         if any(len(lst) != HOURS_IN_YEAR for lst in [ets.heating_loads, ets.cooling_loads, ets.dhw_loads]):
             self.make_loads_hourly(ets_data["properties"], ets)
+
+        # Append to network
         self.network.append(ets)
 
     @staticmethod
@@ -417,6 +429,7 @@ class Network:
         space_loads_df = pd.read_csv(properties["space_loads_file"])
         space_loads_df["Date Time"] = pd.to_datetime(space_loads_df["Date Time"])
         space_loads_df = space_loads_df.set_index("Date Time")
+
         # Find the last date in the DataFrame and add one day so interpolation will get the last day
         new_date = space_loads_df.index[-1] + pd.Timedelta(days=1)
         # add duplicate entry at end of dataframe
@@ -459,6 +472,54 @@ class Network:
 
         pump = Pump(pump_data)
         self.network.append(pump)
+
+    def add_waste_heat_source_to_network(self, wsh_data: dict) -> None:
+        """
+        Adjusts the total loads to account for any waste heat sources. Waste Heat
+        can be specified as a constant value or as a timeseries file in MOS format.
+
+        :param total_network_loads: The total network loads before accounting for waste heat.
+        :return: Adjusted total network loads accounting for waste heat. The input array
+        is not modified; a copy is returned.
+        """
+
+        # initialize
+        heat_source_rate = None
+
+        # find data in the system parameters file and pass to Waste Heat Source object
+        sys_param_heat_params = (
+            self.system_parameters_data.get("district_system", {})
+            .get("fifth_generation", {})
+            .get("heat_source_parameters", [])
+        )
+
+        if not sys_param_heat_params:
+            # no loads found
+            logger.warning(
+                f"No heat source parameters found in the system parameters; "
+                f"Setting loads to 0 for waste heat source {wsh_data['name']}."
+            )
+        else:
+            # find heat_source_rate in sys_params_heat_params for heat_source_id matching wsh_data['id']
+            for heat_param in sys_param_heat_params:
+                if heat_param.get("heat_source_id") == wsh_data["id"]:
+                    heat_source_rate = heat_param.get("heat_source_rate", None)
+                    break
+
+            if heat_source_rate is None:
+                logger.warning(
+                    f"No heat source parameters found in the system parameters "
+                    f"matching feature id {wsh_data['id']}. "
+                    f"Setting loads to 0 for waste heat source {wsh_data['name']}."
+                )
+            else:
+                logger.info(f"Found waste heat source rate: {heat_source_rate}")
+
+        # Add data to dict and send to WasteHeatSource object
+        wsh_data["heat_source_rate"] = heat_source_rate
+        wsh_data["system_parameter_path"] = self.system_parameter_path
+        whs = WasteHeatSource(wsh_data["name"], wsh_data)
+        self.network.append(whs)
 
     def size_area_proportional(self, output_path: Path) -> None:
         """
@@ -728,7 +789,9 @@ def run_sizer_from_cli_worker(
     ghe_design_data: dict = ghe_parameters_data["design"]
     logger.debug(f"{ghe_design_data=}")
     # instantiate a new Network object
-    network = Network(system_parameters_data, geojson_data, ghe_parameters_data, scenario_directory_path)
+    network = Network(
+        system_parameters_data, geojson_data, ghe_parameters_data, scenario_directory_path, system_parameter_path
+    )
 
     # get network list from geojson
     connected_features = network.get_connected_features()
@@ -792,7 +855,7 @@ def run_sizer_from_cli_worker(
     loop_order_filepath = system_parameter_path.parent.resolve() / "_loop_order.json"
     write_json(loop_order_filepath, loop_order_list)
 
-    # convert geojson type "Building","District System" to "ENERGYTRANSFERSTATION",
+    # convert geojson type "Building","District System" to "ENERGYTRANSFERSTATION", "GROUNDHEATEXCHANGER", etc.
     network_data: list[dict] = network.convert_features(connected_features)
 
     # begin populating structures in preparation for sizing
@@ -806,6 +869,8 @@ def run_sizer_from_cli_worker(
             network.add_ghe_to_network(component)
         elif comp_type_str == ComponentType.PUMP.name:
             network.add_pump_to_network(component)
+        elif comp_type_str == ComponentType.WASTEHEATSOURCE.name:
+            network.add_waste_heat_source_to_network(component)
         else:
             logger.error(f"Unsupported component type, {comp_type_str}")
 

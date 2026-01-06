@@ -87,6 +87,61 @@ class TestNetwork(BaseCase):
         # If any assertion fails, this will not run. Useful for debugging, as long as you don't get confused.
         self.reset_sys_param(self.sys_param_path_1_ghe_detailed_geometry)
 
+    def test_waste_heat(self):
+        # Check if waste heat demo files are available and log detailed error if not
+        if not self.waste_heat_demo_available:
+            missing_files = []
+            if not self.waste_heat_geojson_path or not self.waste_heat_geojson_path.exists():
+                missing_files.append(str(self.waste_heat_geojson_path))
+            if not self.waste_heat_sys_params_path or not self.waste_heat_sys_params_path.exists():
+                missing_files.append(str(self.waste_heat_sys_params_path))
+            if not self.waste_heat_scenario_path or not self.waste_heat_scenario_path.exists():
+                missing_files.append(str(self.waste_heat_scenario_path))
+
+            error_msg = "Waste heat test cannot run: Missing required demo files:\n" + "\n".join(
+                f"  - {file}" for file in missing_files
+            )
+            print(error_msg)
+            self.fail(error_msg)
+
+        output_path = self.test_outputs_path.resolve() / "waste_heat_test"
+
+        # -- Act
+        # run subprocess as if we're an end-user
+        res = self.runner.invoke(
+            run_sizer_from_cli,
+            [
+                "-y",
+                self.waste_heat_sys_params_path,
+                "-s",
+                self.waste_heat_scenario_path,
+                "-f",
+                self.waste_heat_geojson_path,
+                "-o",
+                output_path,
+            ],
+        )
+        print(res.output)
+        # -- Assert
+        assert res.exit_code == 0, f"CLI failed with exit code {res.exit_code}, output: {res.output}"
+
+        # assert there is a loop order file saved next to the sys-param file
+        loop_order_file = self.waste_heat_sys_params_path.parent / "_loop_order.json"
+        assert loop_order_file.exists()
+
+        # same path as the original path
+        updated_sys_param = load_json(self.waste_heat_sys_params_path)
+
+        expected_ghe_data = {"0b575a8f-97d1-47e6-b329-7ef7566d26f2": {"num_bh": 180, "length": 127.1}}
+        self.check_ghe_data(updated_sys_param, expected_ghe_data)
+
+        # -- Clean up
+        # If any assertion fails, this will not run. Useful for debugging, as long as you don't get confused.
+        self.reset_sys_param(self.waste_heat_sys_params_path)
+        # remove loop order file
+        if loop_order_file.exists():
+            loop_order_file.unlink()
+
     @pytest.mark.skip(reason="Skip until GHED improves ROWWISE autosizing technique")
     def test_network_one_ghe(self):
         # -- Set up

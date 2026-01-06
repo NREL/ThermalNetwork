@@ -8,6 +8,35 @@ from thermalnetwork.enums import GHEDesignType
 
 
 class BaseCase(TestCase):
+    def _resolve_case_insensitive_path(self, parent_path: Path, target_name: str) -> Path | None:
+        """
+        Resolve a path in a case-insensitive manner to handle filesystem differences.
+
+        :param parent_path: The parent directory to search in
+        :param target_name: The target file/directory name to find
+        :return: The actual path if found, None otherwise
+        """
+        if not parent_path.exists():
+            return None
+
+        try:
+            # First try exact case match (fastest)
+            candidate = parent_path / target_name
+            if candidate.exists():
+                return candidate
+
+            # If exact match fails, search case-insensitively
+            target_lower = target_name.lower()
+            for item in parent_path.iterdir():
+                if item.name.lower() == target_lower:
+                    return item
+
+        except (OSError, PermissionError):
+            # Handle potential permission issues
+            pass
+
+        return None
+
     def setUp(self) -> None:
         here = Path(__file__).parent.resolve()
 
@@ -15,6 +44,7 @@ class BaseCase(TestCase):
 
         # -- Input paths
         self.demos_path = here.parent.parent / "demos"
+        print(f"Demos path: {self.demos_path}")
 
         # 1 ghe
         self.geojson_path_1_ghe = self.demos_path / "sdk_output_skeleton_1_ghe" / "network.geojson"
@@ -44,6 +74,38 @@ class BaseCase(TestCase):
 
         self.sys_params_path_2_ghe_bizoned_and_near_square = (
             self.scenario_dir_2_ghe / "ghe_dir" / "sys_params_2_ghe_bizoned_and_near_square.json"
+        )
+
+        # Waste Heat
+        # Use case-insensitive path resolution to handle filesystem differences
+        waste_heat_demo_dir = self._resolve_case_insensitive_path(self.demos_path, "waste_heat_demo")
+        if waste_heat_demo_dir:
+            print(f"Waste heat demo dir: {waste_heat_demo_dir}")
+            self.waste_heat_geojson_path = self._resolve_case_insensitive_path(
+                waste_heat_demo_dir, "waste_heat_example.geojson"
+            )
+            self.waste_heat_sys_params_path = self._resolve_case_insensitive_path(
+                waste_heat_demo_dir, "sys_params_waste_heat.json"
+            )
+
+            run_dir = self._resolve_case_insensitive_path(waste_heat_demo_dir, "run")
+            if run_dir:
+                self.waste_heat_scenario_path = self._resolve_case_insensitive_path(run_dir, "baseline_scenario")
+            else:
+                self.waste_heat_scenario_path = None
+        else:
+            self.waste_heat_geojson_path = None
+            self.waste_heat_sys_params_path = None
+            self.waste_heat_scenario_path = None
+
+        # Check if waste heat demo files exist (may not be available in all environments)
+        self.waste_heat_demo_available = (
+            self.waste_heat_geojson_path
+            and self.waste_heat_geojson_path.exists()
+            and self.waste_heat_sys_params_path
+            and self.waste_heat_sys_params_path.exists()
+            and self.waste_heat_scenario_path
+            and self.waste_heat_scenario_path.exists()
         )
 
         # 13 buildings upstream
