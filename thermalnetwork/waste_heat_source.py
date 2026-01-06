@@ -22,8 +22,6 @@ class WasteHeatSource(BaseComponent):
         # there are 2 ways of specifying waste heat. One is constant value, the other is a Modelica Schedule file.
         # handle both cases. All values assumed to be in Watts
 
-        # TODO: review how the waste heat gets subtracted...
-
         # determine if rate is a number or a file.
         # the path is expected to be related to the system parameter file location
         if self.heat_source_rate.endswith is not None and self.heat_source_rate.endswith(".mos"):

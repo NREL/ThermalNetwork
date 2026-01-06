@@ -603,7 +603,7 @@ class Network:
             ghe_load = np.zeros(HOURS_IN_YEAR)
             for device in devices_before_ghe:
                 ghe_load += device.get_loads()
-            # TODO: do we need to add the waste heat source impacts on loads for this method?
+
             self.network[ghe_index].json_data["loads"]["ground_loads"] = ghe_load
 
             # call size() with total load
